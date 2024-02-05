@@ -1,3 +1,13 @@
+#Import needed to connect to the database
+import mysql.connector
+
+#Import regular expressions --> needed to seperate number from a word (posts, followers, following)
+import re
+
+#Time module - to always get current timestamp
+import time
+
+#Imports needed for web scrapping
 from time import sleep
 from dotenv import load_dotenv
 import os
@@ -7,13 +17,26 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 
+load_dotenv() #--> this will load env variables
 
-load_dotenv()
+#Connecting to the database
+mydb = mysql.connector.connect(
+  host="localhost",
+  user="root",
+  password="a1b2c3d4e5",
+  database="sdp_project"
+)
 
-USERNAME = os.environ['IGUSERNAME']
-PASSWORD = os.environ['PASSWORD']
+mycursor = mydb.cursor()
 
-print(USERNAME, PASSWORD)
+#Kad budem radila frontend, onda preko frontenda uzimati tacne podatke za username ovdje
+#Prvo spasiti username u varijablu u bazu podataka pa onda odatle vuci podatke
+mycursor.execute("SELECT username FROM instagram_accounts LIMIT 1")
+myresult = mycursor.fetchone()
+
+for data in myresult:
+  print(data)
+#this will print me just one outcome, because I only have one user with this name
 
 service = Service(executable_path="C:\\Users\\User\\Downloads\\chromedriver-win64\\chromedriver-win64\\chromedriver.exe")
 options = webdriver.ChromeOptions()
@@ -25,11 +48,17 @@ driver.get(insta_url)
 
 sleep(1)
 
+USERNAME = os.environ['IGUSERNAME']
+PASSWORD = os.environ['PASSWORD']
+
+#this username is the name of the HTML element, there was no id
+#I accessed it through the CSS Selector then
 username_field = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME, 'username')))
 username_field.send_keys(USERNAME)
 
 sleep(1)
 
+#this password is the name of the HTML element, there was no id
 password_field = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME, 'password')))
 password_field.send_keys(PASSWORD)
 
@@ -38,20 +67,36 @@ sleep(1)
 login_button = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '//*[@id="loginForm"]/div/div[3]/button')))
 login_button.click()
 
-sleep(15) 
-#to ensure that page has loaded properly
+sleep(10) # --> to ensure that page has loaded properly
 
-driver.get(insta_url + 'cristiano')
+driver.get(insta_url + data) # --> accessing specific user
 sleep(5)
 
 #ul - unordered list
 #li - list item
 ul = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "ul")))
-#items = ul.find_elements_by_tag_name("li")
 items = ul.find_elements(By.TAG_NAME, "li")
+statistics = []
 
 for li in items:
-    print(li.text)
+    text = li.text
+    numbers = re.findall(r'\d+', text)
+    
+    for number in numbers:
+       statistics.append(number) #I have three different numbers, and I need to save all of them
+       #print(number)
+
+sql = "UPDATE instagram_accounts SET post_number = %s, followers_number = %s, followings_number = %s, date_and_time = %s, stats = %s WHERE username = %s"
+current_timestamp = time.time()
+         
+#posts, followers, following, time of web scrapping, and number 1 to indicate that this username is written like this, and connects to this data
+values = (statistics[0], statistics[1], statistics[2], current_timestamp, 1, "korman_ajla") 
+#I had to put username here in the values, because in the insert into sql stmt I had problem with ' " (triple unintended quotes) at the end
+mycursor.execute(sql, values)
+
+mydb.commit() #needed to save the change, without it, is like we never changed anything
+
+print("Record updated")
 
 
 

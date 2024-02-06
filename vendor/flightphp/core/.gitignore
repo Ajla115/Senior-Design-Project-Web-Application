@@ -1,0 +1,10 @@
+.idea
+vendor/
+composer.phar
+composer.lock
+.phpunit.result.cache
+coverage/
+.vscode/settings.json
+*.sublime-workspace
+.vscode/
+clover.xml

@@ -15,13 +15,15 @@ Flight::route('POST /login', function(){
       if($user['password'] == md5($login['password'])){
         unset($user['password']); //remove password from array not be included in JWT Token bc of security issues
         //$user['is_admin'] = false;
-        $jwt = JWT::encode($user, Config::JWT_SECRET(), 'HS256'); //ovako se zapravo stavara JWT Token
+        $jwt = JWT::encode($user, Config::JWT_SECRET(), 'HS256'); 
+        //ovako se zapravo stavara JWT Token
         Flight::json(['token' => $jwt]);
       }else{
         Flight::json(["message" => "Wrong password"], 404);
       }
     }else{
-      Flight::json(["message" => "User doesn't exist"], 404); //ovo je u slucaju da email nije valid, mada je ovo generalized message, ali mogu se i specificne poruke stavljati da user zna u cmeu je greska
+      Flight::json(["message" => "User doesn't exist"], 404); 
+      //ovo je u slucaju da email nije valid, mada je ovo generalized message, ali mogu se i specificne poruke stavljati da user zna u cmeu je greska
   }
 });
 

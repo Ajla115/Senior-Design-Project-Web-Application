@@ -31,9 +31,9 @@ class Config
         return Config::get_env("DB_PORT", "3306");
     }
     //This I don't need at the moment, but will be needed with deployment to DO
-    /*public static function JWT_SECRET(){
+    public static function JWT_SECRET(){
         return Config::get_env("JWT_SECRET", "web");
-    }*/
+    }
 
     public static function get_env($name, $default){
         return isset($_ENV[$name]) && trim($_ENV[$name]) != ' ' ? $_ENV[$name] : $default;

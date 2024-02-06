@@ -30,4 +30,20 @@ Flight::route('POST /login', function(){
 /*ovdje ide login bez autentifikacije na swaggeru*/
 
 
+/*This route is for registration of users*/ 
+Flight::route('POST /register', function () {
+    $data = Flight::request()->data->getData();
+
+    // Add the userto the database
+    $user = Flight::userService()->add($data);
+    unset($user['password']);
+
+    // Generate the JWT token
+    $jwt = JWT::encode($user, Config::JWT_SECRET(), 'HS256');
+
+    // Return the JWT token in the response
+    Flight::json(['token' => $jwt, 'new user' => $user]);
+});
+
+
 ?>

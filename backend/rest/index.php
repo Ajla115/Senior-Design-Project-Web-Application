@@ -3,14 +3,20 @@ ini_set('display_errors', '1');
 ini_set('display_startup_errors', '1');
 error_reporting(E_ALL);
 
-require '../../../vendor/autoload.php';
+require '../../vendor/autoload.php';
+require "./services/BaseService.php";
 
 
-// it is still possible to add custom routes after the imports
-/*Flight::route('GET /', function () {
-    //$base = new BaseDao("customers"); ovo je mali hack da se pozove base dao samo na jednu tabelu
-});*/
+Flight::route('GET /connection-check', function(){
+    /*
+    * This endpoint prints  whether connection is successfully established or not
+    */
+
+    new BaseService();
+});
 
 
 Flight::start();
+
+
 ?>

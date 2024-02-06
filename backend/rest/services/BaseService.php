@@ -3,8 +3,8 @@ require __DIR__ . '/../dao/BaseDao.class.php';
 
 class BaseService{
     protected $dao;
-    public function __construct(){
-        $this->dao = new BaseDao('instagram_accounts');
+    public function __construct($dao){
+        $this->dao = $dao;
     
     }
 

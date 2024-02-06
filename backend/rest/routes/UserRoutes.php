@@ -3,6 +3,12 @@
 use Firebase\JWT\JWT; //ovo creates JWT Token
 use Firebase\JWT\Key;
 
+Flight::route('GET /connection-check', function(){
+    /*Coonection check to see if deployed database works*/
+      new UserService();
+  });
+  
+
 
 Flight::route('POST /login', function(){
     $login = Flight::request()->data->getData();

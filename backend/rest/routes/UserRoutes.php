@@ -4,12 +4,21 @@ use Firebase\JWT\JWT; //ovo creates JWT Token
 use Firebase\JWT\Key;
 
 /**
- * @OA\Get(path="/connection-check", tags={"connection"}, security={{"ApiKeyAuth": {}}},
- *         summary="Returns status of connection with the server ",
- *         @OA\Response( response=200, description="Successful connection")
+ * @SWG\Get(
+ *     path="/example",
+ *     summary="Get example resource",
+ *     tags={"Example"},
+ *     @SWG\Response(
+ *         response=200,
+ *         description="Successful operation",
+ *         @SWG\Schema(
+ *             type="object",
+ *             @SWG\Property(property="id", type="integer"),
+ *             @SWG\Property(property="name", type="string")
+ *         )
+ *     )
  * )
  */
-
 
 Flight::route('GET /connection-check', function(){
     /*Coonection check to see if deployed database works*/
@@ -44,33 +53,6 @@ Flight::route('POST /login', function(){
 
 /*ovdje ide login bez autentifikacije na swaggeru*/
 
- /**
-* @OA\Post(
-*     path="/register", security={{"ApiKeyAuth": {}}},
-*     description="Add a user - registration",
-*     tags={"users"},
-*     @OA\RequestBody(description="Add new booking", required=true,
-*       @OA\MediaType(mediaType="application/json",
-*    			@OA\Schema(
-*    				@OA\Property(property="username", type="int", example="",	description="Customer ID"),
-*    				@OA\Property(property="vehicle_id", type="int", example="1",	description="Vehicle ID" ),
-*                   @OA\Property(property="date_of_booking", type="date", example="2020-07-20",	description="Date of booking" ),
-*                   @OA\Property(property="location_id", type="int", example="1",	description="Location ID" ),
-*                   @OA\Property(property="employee_id", type="int", example="1",	description="Employee ID" ),
-*                   @OA\Property(property="paid", type="tinyint", example="1",	description="Paid or not" ),
-*                   @OA\Property(property="date_of_payment", type="date", example="2020-01-19",	description="Date of payment" ),
-*        )
-*     )),
-*     @OA\Response(
-*         response=200,
-*         description="Booking has been added"
-*     ),
-*     @OA\Response(
-*         response=500,
-*         description="Error"
-*     )
-* )
-*/
 
 
 /*This route is for registration of users*/ 

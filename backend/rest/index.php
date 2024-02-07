@@ -6,7 +6,6 @@ error_reporting(E_ALL);
 require '../../vendor/autoload.php';
 require "./services/BaseService.php";
 
-
 // import and register all business logic files (services) to FlightPHP
 require_once __DIR__ . '/services/UserService.php';
 
@@ -31,12 +30,18 @@ Flight::route('GET /connection-check', function(){
 });
   
 
+
 /* This is needed for swagger - REST API documentation endpoint */
-Flight::route('GET /docs.json', function(){
-    $openapi = \OpenApi\scan('routes');
-    header('Content-Type: application/json');
-    echo $openapi->toJson();
-  });
+/* REST API documentation endpoint */
+Flight::route('GET /swagger.json', function(){
+  $openapi = \OpenApi\Generator::scan(['routes']);
+  header('Content-Type: application/json');
+  file_put_contents(__DIR__ . '/swagger.json', $openapi->toJson());
+  readfile(__DIR__ . '/swagger.json');
+ // echo $openapi->toJson();
+});
+
+
   
 
 Flight::start();

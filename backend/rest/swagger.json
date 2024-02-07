@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-      "description": "This is a sample server Petstore server.  You can find out more about Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).  For this sample, you can use the api key `special-key` to test the authorization filters.",
+      "description": "Swagger documentation for Senior Design Project. For this sample, you can use the api key `special-key` to test the authorization filters.",
       "version": "1.0.0",
       "title": "Senior Design Project",
       "termsOfService": "http://swagger.io/terms/",
@@ -13,28 +13,22 @@
         "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
       }
     },
-    "host": "petstore.swagger.io",
-    "basePath": "/v2",
+    "host": "http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/dist/",
+    "basePath": "",
     "tags": [
       {
-        "name": "pet",
-        "description": "Everything about your Pets",
-        "externalDocs": {
-          "description": "Find out more",
-          "url": "http://swagger.io"
-        }
+        "name": "Users",
+        "description": "All operations with users"
+  
       },
       {
-        "name": "store",
+        "name": "store", 
         "description": "Access to Petstore orders"
       },
       {
         "name": "user",
-        "description": "Operations about user",
-        "externalDocs": {
-          "description": "Find out more about our store",
-          "url": "http://swagger.io"
-        }
+        "description": "Operations about user"
+        
       }
     ],
     "schemes": [

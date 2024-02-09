@@ -18,16 +18,16 @@
     "tags": [
       {
         "name": "Users",
-        "description": "All operations with users"
+        "description": "All operations with all users"
   
       },
       {
-        "name": "store", 
+        "name": "store123", 
         "description": "Access to Petstore orders"
       },
       {
         "name": "user",
-        "description": "Operations about user"
+        "description": "Operations about every user"
         
       }
     ],

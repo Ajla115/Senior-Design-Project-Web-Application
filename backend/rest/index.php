@@ -33,14 +33,14 @@ Flight::route('GET /connection-check', function(){
 
 /* This is needed for swagger - REST API documentation endpoint */
 /* REST API documentation endpoint */
-/*Flight::route('GET /swagger.json', function(){
+Flight::route('GET /swagger.json', function(){
   $openapi = \OpenApi\Generator::scan(['routes']);
   header('Content-Type: application/json');
   file_put_contents(__DIR__ . '/swagger.json', $openapi->toJson());
   readfile(__DIR__ . '/swagger.json');
- // echo $openapi->toJson();
+ //echo $openapi->toJson();
 });
-*/
+
 
   
 

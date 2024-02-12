@@ -71,7 +71,7 @@ const Page = () => {
     <>
       <Head>
         <title>
-          Login | Devias Kit
+          Login | InstaMetrics
         </title>
       </Head>
       <Box
@@ -124,10 +124,11 @@ const Page = () => {
                 label="Email"
                 value="email"
               />
-              <Tab
+              
+              {/* <Tab
                 label="Phone Number"
                 value="phoneNumber"
-              />
+              /> */}
             </Tabs>
             {method === 'email' && (
               <form
@@ -198,7 +199,7 @@ const Page = () => {
                 </Alert>
               </form>
             )}
-            {method === 'phoneNumber' && (
+            {/* {method === 'phoneNumber' && (
               <div>
                 <Typography
                   sx={{ mb: 1 }}
@@ -210,7 +211,7 @@ const Page = () => {
                   To prevent unnecessary costs we disabled this feature in the demo.
                 </Typography>
               </div>
-            )}
+            )} */}
           </div>
         </Box>
       </Box>

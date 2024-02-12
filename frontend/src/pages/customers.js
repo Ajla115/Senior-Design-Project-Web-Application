@@ -10,6 +10,7 @@ import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
 import { CustomersTable } from 'src/sections/customer/customers-table';
 import { CustomersSearch } from 'src/sections/customer/customers-search';
 import { applyPagination } from 'src/utils/apply-pagination';
+import { openPromptToAddNewAccount } from 'src/sections/customer/add-ig-account-prompt';
 
 const now = new Date();
 
@@ -199,7 +200,7 @@ const Page = () => {
     <>
       <Head>
         <title>
-          Customers | Devias Kit
+          Instagram Accounts | InstaMetrics
         </title>
       </Head>
       <Box
@@ -216,11 +217,11 @@ const Page = () => {
               justifyContent="space-between"
               spacing={4}
             >
-              <Stack spacing={1}>
+               <Stack spacing={1}>
                 <Typography variant="h4">
-                  Customers
+                  Instagram Accounts
                 </Typography>
-                <Stack
+                {/*<Stack
                   alignItems="center"
                   direction="row"
                   spacing={1}
@@ -245,15 +246,15 @@ const Page = () => {
                   >
                     Export
                   </Button>
-                </Stack>
-              </Stack>
+                </Stack>*/}
+              </Stack> 
               <div>
                 <Button
                   startIcon={(
                     <SvgIcon fontSize="small">
                       <PlusIcon />
                     </SvgIcon>
-                  )}
+                  )} onClick={() => openPromptToAddNewAccount()}
                   variant="contained"
                 >
                   Add

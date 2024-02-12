@@ -2,13 +2,14 @@ import Head from 'next/head';
 import { Box, Container, Stack, Typography } from '@mui/material';
 import { SettingsNotifications } from 'src/sections/settings/settings-notifications';
 import { SettingsPassword } from 'src/sections/settings/settings-password';
+import { CustomerHelpService} from 'src/sections/settings/customer-help-service';
 import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
 
 const Page = () => (
   <>
     <Head>
       <title>
-        Settings | Devias Kit
+        Help | InstaMetrics
       </title>
     </Head>
     <Box
@@ -21,10 +22,11 @@ const Page = () => (
       <Container maxWidth="lg">
         <Stack spacing={3}>
           <Typography variant="h4">
-            Settings
+            Customer Help Service
           </Typography>
-          <SettingsNotifications />
-          <SettingsPassword />
+          {/* <SettingsNotifications /> */}
+          {/* <SettingsPassword />  */}
+          < CustomerHelpService />
         </Stack>
       </Container>
     </Box>

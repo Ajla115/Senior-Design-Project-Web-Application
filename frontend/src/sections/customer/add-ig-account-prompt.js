@@ -2,8 +2,6 @@ import { FormControl } from '@mui/base/FormControl';
 import { Label, StyledInput } from '@mui/material';
 import { Button } from '@mui/base/Button';
 
-
-
 export const openPromptToAddNewAccount = () => (
     <div>
     <FormControl defaultValue="" required>
@@ -16,5 +14,4 @@ export const openPromptToAddNewAccount = () => (
         </div>
     </FormControl> 
     </div>
-
 );

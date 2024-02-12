@@ -254,7 +254,9 @@ const Page = () => {
                     <SvgIcon fontSize="small">
                       <PlusIcon />
                     </SvgIcon>
-                  )} onClick={() => openPromptToAddNewAccount()}
+                  )} onClick={() => {
+                    openPromptToAddNewAccount();
+                  }}
                   variant="contained"
                 >
                   Add

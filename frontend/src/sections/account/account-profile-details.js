@@ -32,12 +32,12 @@ const states = [
 
 export const AccountProfileDetails = () => {
   const [values, setValues] = useState({
-    firstName: 'Anika',
-    lastName: 'Visser',
+    first_name: 'Anika',
+    last_name: 'Visser',
     email: 'demo@devias.io',
-    phone: '',
-    state: 'los-angeles',
-    country: 'USA'
+    // phone: '',
+    // state: 'los-angeles',
+    // country: 'USA'
   });
 
   const handleChange = useCallback(
@@ -82,10 +82,10 @@ export const AccountProfileDetails = () => {
                   fullWidth
                   helperText="Please specify the first name"
                   label="First name"
-                  name="firstName"
+                  name="first_name"
                   onChange={handleChange}
                   required
-                  value={values.firstName}
+                  value={values.first_name}
                 />
               </Grid>
               <Grid
@@ -95,10 +95,10 @@ export const AccountProfileDetails = () => {
                 <TextField
                   fullWidth
                   label="Last name"
-                  name="lastName"
+                  name="last_name"
                   onChange={handleChange}
                   required
-                  value={values.lastName}
+                  value={values.last_name}
                 />
               </Grid>
               <Grid
@@ -118,33 +118,33 @@ export const AccountProfileDetails = () => {
                 xs={12}
                 md={6}
               >
-                <TextField
+                {/* <TextField
                   fullWidth
                   label="Phone Number"
                   name="phone"
                   onChange={handleChange}
                   type="number"
                   value={values.phone}
-                />
+                /> */}
               </Grid>
               <Grid
                 xs={12}
                 md={6}
               >
-                <TextField
+                {/* <TextField
                   fullWidth
                   label="Country"
                   name="country"
                   onChange={handleChange}
                   required
                   value={values.country}
-                />
+                /> */}
               </Grid>
               <Grid
                 xs={12}
                 md={6}
               >
-                <TextField
+                {/* <TextField
                   fullWidth
                   label="Select State"
                   name="state"
@@ -162,7 +162,7 @@ export const AccountProfileDetails = () => {
                       {option.label}
                     </option>
                   ))}
-                </TextField>
+                </TextField> */}
               </Grid>
             </Grid>
           </Box>

@@ -71,7 +71,7 @@ const Page = () => (
   <>
     <Head>
       <title>
-        Companies | Devias Kit
+        Automatic DMs | InstaMetrics
       </title>
     </Head>
     <Box
@@ -90,14 +90,14 @@ const Page = () => (
           >
             <Stack spacing={1}>
               <Typography variant="h4">
-                Companies
+                Automatic DMs
               </Typography>
               <Stack
                 alignItems="center"
                 direction="row"
                 spacing={1}
               >
-                <Button
+                {/* <Button
                   color="inherit"
                   startIcon={(
                     <SvgIcon fontSize="small">
@@ -116,7 +116,7 @@ const Page = () => (
                   )}
                 >
                   Export
-                </Button>
+                </Button> */}
               </Stack>
             </Stack>
             <div>

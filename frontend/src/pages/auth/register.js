@@ -116,7 +116,7 @@ const Page = () => {
                   fullWidth
                   helperText={formik.touched.last_name && formik.errors.last_name}
                   label="Last name" //label is what the user sees
-                  name="last_name" //name is what gets sent to formik for validation
+                  name="last_name" //name is what gets sent to formik for
                   onBlur={formik.handleBlur}
                   onChange={formik.handleChange}
                   value={formik.values.last_name}

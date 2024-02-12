@@ -1,17 +1,29 @@
-import { FormControl } from '@mui/base/FormControl';
-import { Label, StyledInput } from '@mui/material';
-import { Button } from '@mui/base/Button';
+import React, { useState } from 'react';
+import { FormControl, FormLabel , Input, Button } from '@mui/material'; // Fixed imports
+import styles from './addacc.module.css';
 
-export const openPromptToAddNewAccount = () => (
-    <div>
-    <FormControl defaultValue="" required>
-        <Label>Name</Label>
-        <StyledInput placeholder="Write Instagram username here" />
-        {/* <HelperText /> */}
+const OpenPromptToAddNewAccount = () => {
+    const [username, setUsername] = useState("");
+
+    const onChange = (event) => {
+        const newUsername = event.target.value;
+        setUsername(newUsername);
+    };
+
+    return ( 
         <div>
-        <Button>Confirm</Button>
-        <Button>Close</Button> 
+            <FormControl defaultValue="" required className={styles.containerr}>
+                <FormLabel >Hi</FormLabel >
+                <Input placeholder="Write Instagram username here" onChange={onChange} /> 
+                {username}
+                {/* <HelperText /> */}
+                <div>
+                    <Button>Confirm</Button>
+                    <Button>Close</Button> 
+                </div>
+            </FormControl> 
         </div>
-    </FormControl> 
-    </div>
-);
+    );
+};
+
+export default OpenPromptToAddNewAccount;

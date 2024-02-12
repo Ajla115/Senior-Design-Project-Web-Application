@@ -10,7 +10,7 @@ import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
 import { CustomersTable } from 'src/sections/customer/customers-table';
 import { CustomersSearch } from 'src/sections/customer/customers-search';
 import { applyPagination } from 'src/utils/apply-pagination';
-import { openPromptToAddNewAccount } from 'src/sections/customer/add-ig-account-prompt';
+import  OpenPromptToAddNewAccount  from 'src/sections/customer/add-ig-account-prompt';
 
 const now = new Date();
 
@@ -176,7 +176,9 @@ const useCustomerIds = (customers) => {
 };
 
 const Page = () => {
+  
   const [page, setPage] = useState(0);
+  const [test, setTest] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const customers = useCustomers(page, rowsPerPage);
   const customersIds = useCustomerIds(customers);
@@ -255,14 +257,17 @@ const Page = () => {
                       <PlusIcon />
                     </SvgIcon>
                   )} onClick={() => {
-                    openPromptToAddNewAccount();
+                    setTest(true)
                   }}
                   variant="contained"
                 >
                   Add
                 </Button>
+                
               </div>
+              
             </Stack>
+            {test && <OpenPromptToAddNewAccount />}
             <CustomersSearch />
             <CustomersTable
               count={data.length}

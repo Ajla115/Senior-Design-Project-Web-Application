@@ -10,6 +10,8 @@ import {
   TextField
 } from '@mui/material';
 
+import {CustomTextField} from 'src/sections/settings/customTextField';
+
 export const CustomerHelpService = () => {
   const [values, setValues] = useState({
     title: '',
@@ -53,14 +55,13 @@ export const CustomerHelpService = () => {
               type="title"
               value={values.title}
             />
-            <TextField
-              fullWidth
+            {/* <CustomTextField /> */}
+              <TextField fullWidth
               label="Describe in detail"
               name="description"
               onChange={handleChange}
               type="description"
-              value={values.description}
-            />
+              value={values.description}/> 
           </Stack>
         </CardContent>
         <Divider />

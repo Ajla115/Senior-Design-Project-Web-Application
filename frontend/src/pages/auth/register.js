@@ -13,7 +13,8 @@ const Page = () => {
   const formik = useFormik({
     initialValues: {
       email: '',
-      name: '',
+      first_name: '',
+      last_name: '',
       password: '',
       submit: null
     },
@@ -23,10 +24,14 @@ const Page = () => {
         .email('Must be a valid email')
         .max(255)
         .required('Email is required'),
-      name: Yup
+      first_name: Yup
         .string()
         .max(255)
-        .required('Name is required'),
+        .required('First name is required'),
+        last_name: Yup
+        .string()
+        .max(255)
+        .required('Last name is required'),
       password: Yup
         .string()
         .max(255)
@@ -34,7 +39,7 @@ const Page = () => {
     }),
     onSubmit: async (values, helpers) => {
       try {
-        await auth.signUp(values.email, values.name, values.password);
+        await auth.signUp(values.email, values.first_name, values.last_name, values.password);
         router.push('/');
       } catch (err) {
         helpers.setStatus({ success: false });
@@ -48,7 +53,7 @@ const Page = () => {
     <>
       <Head>
         <title>
-          Register | Devias Kit
+          Register | InstaMetrics
         </title>
       </Head>
       <Box
@@ -97,14 +102,24 @@ const Page = () => {
             >
               <Stack spacing={3}>
                 <TextField
-                  error={!!(formik.touched.name && formik.errors.name)}
+                  error={!!(formik.touched.first_name && formik.errors.first_name)}
                   fullWidth
-                  helperText={formik.touched.name && formik.errors.name}
-                  label="Name"
-                  name="name"
+                  helperText={formik.touched.first_name && formik.errors.first_name}
+                  label="First name"
+                  name="first_name"
                   onBlur={formik.handleBlur}
                   onChange={formik.handleChange}
-                  value={formik.values.name}
+                  value={formik.values.first_name}
+                />
+                <TextField
+                  error={!!(formik.touched.last_name && formik.errors.last_name)}
+                  fullWidth
+                  helperText={formik.touched.last_name && formik.errors.last_name}
+                  label="Last name" //label is what the user sees
+                  name="last_name" //name is what gets sent to formik for validation
+                  onBlur={formik.handleBlur}
+                  onChange={formik.handleChange}
+                  value={formik.values.last_name}
                 />
                 <TextField
                   error={!!(formik.touched.email && formik.errors.email)}
@@ -145,7 +160,7 @@ const Page = () => {
                 type="submit"
                 variant="contained"
               >
-                Continue
+                Register
               </Button>
             </form>
           </div>

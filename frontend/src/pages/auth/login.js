@@ -178,7 +178,7 @@ const Page = () => {
                   type="submit"
                   variant="contained"
                 >
-                  Continue
+                  Login
                 </Button>
                 <Button
                   fullWidth

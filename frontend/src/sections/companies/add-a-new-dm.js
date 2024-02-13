@@ -79,7 +79,7 @@ export default function WriteDMForm({closeButton})   {
               <Button color="success" variant="contained"> 
                 Update
               </Button>
-              <Button color="warning" variant="contained" onClick={() => { closeButton(false)}}>
+              <Button color="error" variant="contained" onClick={() => { closeButton(false)}}>
                 Close
               </Button>
             </CardActions>

@@ -42,8 +42,8 @@ export default function ResponsiveDateTimePickers({closeButton}) {
         // justifyContent="center"
         // alignItems="center"
         >
-      <Button variant = 'contained'>Confirm</Button>
-      <Button variant = 'contained' onClick={() => { closeButton(false)} }>Cancel</Button>
+      <Button variant = 'contained' color = "success">Confirm</Button>
+      <Button variant = 'contained' color = "error" onClick={() => { closeButton(false)} }>Cancel</Button>
       </Stack>
       </div>
   );

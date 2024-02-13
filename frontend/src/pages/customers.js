@@ -178,7 +178,7 @@ const useCustomerIds = (customers) => {
 const Page = () => {
   
   const [page, setPage] = useState(0);
-  const [test, setTest] = useState(false);
+  const [show, setShow] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const customers = useCustomers(page, rowsPerPage);
   const customersIds = useCustomerIds(customers);
@@ -257,7 +257,7 @@ const Page = () => {
                       <PlusIcon />
                     </SvgIcon>
                   )} onClick={() => {
-                    setTest(true)
+                    setShow(true)
                   }}
                   variant="contained"
                 >
@@ -267,7 +267,7 @@ const Page = () => {
               </div>
               
             </Stack>
-            {test && <OpenPromptToAddNewAccount />}
+            {show && <OpenPromptToAddNewAccount closeButton={setShow} />}
             <CustomersSearch />
             <CustomersTable
               count={data.length}

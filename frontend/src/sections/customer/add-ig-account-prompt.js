@@ -32,7 +32,7 @@ const OpenPromptToAddNewAccount = ({closeButton}) => {
             <CardContent>
               <Stack
                 spacing={3}
-                sx={{ maxWidth: 950 }}
+                sx={{ maxWidth: 1200 }}
               >
                 <TextField required
                   fullWidth
@@ -50,16 +50,18 @@ const OpenPromptToAddNewAccount = ({closeButton}) => {
                 <Input placeholder="Write Instagram username here" onChange={onChange} /> 
 
                 {/* <HelperText /> */}
-                <Stack spacing={3}
-                sx={{maxWidth: 300, marginTop: 3}}
+                <CardActions sx={{ justifyContent: 'flex-end', marginRight:0}}>
+                <Stack spacing={1}
+                sx={{maxWidth: 300, marginTop: 2}}
                 direction='row' 
-                    justifyContent="left"
+                    //justifyContent="left"
                     // alignItems="center"
                     >
                     <Button variant = 'contained' color = "success">Submit</Button>
                     <Button variant = 'contained' color = "error" onClick={() => {
                     closeButton(false)}}>Close</Button> 
                 </Stack>
+                </CardActions>
                 </CardContent>
                 </Card>
                 {/* {!show} */}

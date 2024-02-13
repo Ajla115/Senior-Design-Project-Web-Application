@@ -4,10 +4,9 @@ import { DemoContainer, DemoItem } from '@mui/x-date-pickers/internals/demo';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import { Button, Stack } from '@mui/material';
-import { MobileDateTimePicker } from '@mui/x-date-pickers/MobileDateTimePicker';
-import { DesktopDateTimePicker } from '@mui/x-date-pickers/DesktopDateTimePicker';
-import { StaticDateTimePicker } from '@mui/x-date-pickers/StaticDateTimePicker';
+import { Button,  CardActions } from '@mui/material';
+
+
 
 export default function ResponsiveDateTimePickers({closeButton}) {
   return (
@@ -15,36 +14,22 @@ export default function ResponsiveDateTimePickers({closeButton}) {
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <DemoContainer
         components={[
-          // 'DateTimePicker',
-          // 'MobileDateTimePicker',
-          // 'StaticDateTimePicker',
           'DesktopDateTimePicker'
           
         ]}
       >
-        {/* <DemoItem label="Desktop variant">
-          <DesktopDateTimePicker defaultValue={dayjs('2022-04-17T15:30')} />
-        </DemoItem>
-        <DemoItem label="Mobile variant">
-          <MobileDateTimePicker defaultValue={dayjs('2022-04-17T15:30')} />
-        </DemoItem> */}
         <DemoItem label="Schedule DM by choosing date and time">
           <DateTimePicker defaultValue={dayjs('2022-04-17T15:30')} />
         </DemoItem>
-        {/* <DemoItem label="Static variant">
-          <StaticDateTimePicker defaultValue={dayjs('2022-04-17T15:30')} />
-        </DemoItem> */}
+
       </DemoContainer>
     </LocalizationProvider>
-      <Stack spacing={4}
-        sx={{ marginTop: 3, maxWidth: 300}}
-        direction='row' 
-        // justifyContent="center"
-        // alignItems="center"
-        >
+    <CardActions sx={{ justifyContent: 'flex-end', marginRight:0}}>
+      
       <Button variant = 'contained' color = "success">Confirm</Button>
       <Button variant = 'contained' color = "error" onClick={() => { closeButton(false)} }>Cancel</Button>
-      </Stack>
+      
+      </CardActions>
       </div>
   );
 }

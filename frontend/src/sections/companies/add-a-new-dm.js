@@ -26,7 +26,7 @@ export default function WriteDMForm({closeButton})   {
             <CardContent>
               <Stack
                 spacing={3}
-                sx={{ maxWidth: 950 }}
+                sx={{ maxWidth: 1200 }}
               >
                 <TextField required
                   fullWidth
@@ -65,7 +65,7 @@ export default function WriteDMForm({closeButton})   {
                 <Stack //this small stack is for two buttons
                 //and this small stack is found to be partb of the bigger stack as well
                 //which is this whole card stack
-                spacing={4}
+                spacing={3}
                 sx={{ maxWidth: 300}}
                 direction='row'
                 >
@@ -75,7 +75,7 @@ export default function WriteDMForm({closeButton})   {
               </Stack>
             </CardContent>
             <Divider />
-            <CardActions sx={{ justifyContent: 'flex-end' }}>
+            <CardActions sx={{ justifyContent: 'flex-end', marginRight:0}}>
               <Button color="success" variant="contained"> 
                 Update
               </Button>

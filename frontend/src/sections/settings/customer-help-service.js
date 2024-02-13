@@ -46,7 +46,7 @@ export const CustomerHelpService = () => {
         <CardContent>
           <Stack
             spacing={3}
-            sx={{ maxWidth: 950 }}
+            sx={{ maxWidth: 1200 }}
           >
             <TextField
               fullWidth
@@ -58,18 +58,21 @@ export const CustomerHelpService = () => {
             />
             {/* <CustomTextField /> */}
               <TextField fullWidth
-              label="Describe in detail"
+              label="Description"
               name="description"
               onChange={handleChange}
               type="description"
               value={values.description}
-              multiline/> 
+              multiline/>
           </Stack>
         </CardContent>
         <Divider />
-        <CardActions sx={{ justifyContent: 'flex-end' }}>
-          <Button variant="contained">
+        <CardActions sx={{ justifyContent: 'flex-end', marginRight:0 }}>
+          <Button color = "success" variant="contained">
             Send
+          </Button>
+          <Button color = "error" variant="contained"> 
+            Cancel
           </Button>
         </CardActions>
       </Card>

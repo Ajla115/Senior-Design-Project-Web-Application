@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState } from 'react';
-import BasicDateCalendar from './calendar-prompt';
+import ResponsiveDateTimePickers from './calendar-prompt';
 import {
     Button,
     Card,
@@ -69,10 +69,9 @@ export default function WriteDMForm({closeButton})   {
                 sx={{ maxWidth: 300}}
                 direction='row'
                 >
-                <Button variant="outlined" onClick = {() => {setCalendar(true)}}>Calendar</Button>
-                <Button variant="outlined">Time</Button>
+                <Button variant="contained" onClick = {() => {setCalendar(true)}}>Date & Time</Button>
                 </Stack>
-                {calendar&& <BasicDateCalendar closeButton={setCalendar}/>}
+                {calendar && <ResponsiveDateTimePickers closeButton={setCalendar}/>}
               </Stack>
             </CardContent>
             <Divider />

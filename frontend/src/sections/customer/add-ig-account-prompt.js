@@ -23,7 +23,7 @@ const OpenPromptToAddNewAccount = ({closeButton}) => {
                     <Button onClick={() => {
                     closeButton(false)}}>Close</Button> 
                 </div>
-                {!show}
+                {/* {!show} */}
             </FormControl> 
         </div>
     );

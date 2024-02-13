@@ -19,7 +19,7 @@ const OpenPromptToAddNewAccount = ({closeButton}) => {
 
                 {/* <HelperText /> */}
                 <div>
-                    <Button>Confirm</Button>
+                    <Button>Submit</Button>
                     <Button onClick={() => {
                     closeButton(false)}}>Close</Button> 
                 </div>

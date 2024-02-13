@@ -9,10 +9,9 @@ import {
     Stack,
     TextField
   } from '@mui/material';
-import MultilineTextFields from './multiline-input-field';
 
-
-export default function BasicFormControl() {
+export default function WriteDMForm({closeButton})   {  
+    //ovdje je drugacija sintaksa, pa ne treba => prije ove {  zagrade
     return (
         // <form onSubmit={handleSubmit}>
           <Card>
@@ -46,17 +45,19 @@ export default function BasicFormControl() {
                   fullWidth
                   label="Recipients"
                   name="recipients"
+                  multiline
                   //onChange={handleChange}
                   //type="string"
                   //value={values.recipients}
                 />
-                <MultilineTextFields required
+                <TextField required
                   fullWidth
                   label="Write message"
                   name="message"
                   //onChange={handleChange}
                   //type="string"
                   //value={values.message}
+                  multiline
                 />
 
               </Stack>
@@ -66,7 +67,7 @@ export default function BasicFormControl() {
               <Button color="success" variant="contained"> 
                 Update
               </Button>
-              <Button color="warning" variant="contained" >
+              <Button color="warning" variant="contained" onClick={() => { closeButton(false)}}>
                 Close
               </Button>
             </CardActions>

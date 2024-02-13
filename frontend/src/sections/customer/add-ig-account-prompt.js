@@ -57,7 +57,7 @@ const OpenPromptToAddNewAccount = ({closeButton}) => {
                     //justifyContent="left"
                     // alignItems="center"
                     >
-                    <Button variant = 'contained' color = "success">Submit</Button>
+                    <Button variant = 'contained' color = "success">Search</Button>
                     <Button variant = 'contained' color = "error" onClick={() => {
                     closeButton(false)}}>Close</Button> 
                 </Stack>

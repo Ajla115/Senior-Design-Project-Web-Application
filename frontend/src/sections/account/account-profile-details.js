@@ -80,7 +80,7 @@ export const AccountProfileDetails = () => {
               >
                 <TextField
                   fullWidth
-                  helperText="Please specify the first name"
+                  // helperText="Please specify the first name"
                   label="First name"
                   name="first_name"
                   onChange={handleChange}

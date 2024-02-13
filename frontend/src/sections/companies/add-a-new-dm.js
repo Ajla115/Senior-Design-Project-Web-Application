@@ -77,7 +77,7 @@ export default function WriteDMForm({closeButton})   {
             <Divider />
             <CardActions sx={{ justifyContent: 'flex-end', marginRight:0}}>
               <Button color="success" variant="contained"> 
-                Update
+                Send
               </Button>
               <Button color="error" variant="contained" onClick={() => { closeButton(false)}}>
                 Close

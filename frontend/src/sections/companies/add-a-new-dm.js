@@ -1,4 +1,6 @@
 import * as React from 'react';
+import { useState } from 'react';
+import BasicDateCalendar from './calendar-prompt';
 import {
     Button,
     Card,
@@ -11,6 +13,7 @@ import {
   } from '@mui/material';
 
 export default function WriteDMForm({closeButton})   {  
+    const [calendar, setCalendar] = useState(false); //dm prompt is not seen at the beginning
     //ovdje je drugacija sintaksa, pa ne treba => prije ove {  zagrade
     return (
         // <form onSubmit={handleSubmit}>
@@ -59,7 +62,17 @@ export default function WriteDMForm({closeButton})   {
                   //value={values.message}
                   multiline
                 />
-
+                <Stack //this small stack is for two buttons
+                //and this small stack is found to be partb of the bigger stack as well
+                //which is this whole card stack
+                spacing={4}
+                sx={{ maxWidth: 300}}
+                direction='row'
+                >
+                <Button variant="outlined" onClick = {() => {setCalendar(true)}}>Calendar</Button>
+                <Button variant="outlined">Time</Button>
+                </Stack>
+                {calendar&& <BasicDateCalendar closeButton={setCalendar}/>}
               </Stack>
             </CardContent>
             <Divider />

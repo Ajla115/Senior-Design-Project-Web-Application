@@ -39,13 +39,14 @@ export const CustomerHelpService = () => {
     <form onSubmit={handleSubmit}>
       <Card>
         <CardHeader
-          title="Send us an email describing your problem"
+          title="Describe your problem"
+          subheader = "Detailed explanations help us provide a quicker and better solution"
         />
         <Divider />
         <CardContent>
           <Stack
             spacing={3}
-            sx={{ maxWidth: 400 }}
+            sx={{ maxWidth: 950 }}
           >
             <TextField
               fullWidth
@@ -61,7 +62,8 @@ export const CustomerHelpService = () => {
               name="description"
               onChange={handleChange}
               type="description"
-              value={values.description}/> 
+              value={values.description}
+              multiline/> 
           </Stack>
         </CardContent>
         <Divider />

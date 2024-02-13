@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import Head from 'next/head';
 import ArrowUpOnSquareIcon from '@heroicons/react/24/solid/ArrowUpOnSquareIcon';
 import ArrowDownOnSquareIcon from '@heroicons/react/24/solid/ArrowDownOnSquareIcon';
 import PlusIcon from '@heroicons/react/24/solid/PlusIcon';
+import  BasicFormControl  from 'src/sections/companies/add-a-new-dm';
 import {
   Box,
   Button,
@@ -15,6 +17,7 @@ import {
 import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
 import { CompanyCard } from 'src/sections/companies/company-card';
 import { CompaniesSearch } from 'src/sections/companies/companies-search';
+
 
 const companies = [
   {
@@ -67,8 +70,10 @@ const companies = [
   }
 ];
 
-const Page = () => (
-  <>
+const Page = () => {
+  const [showDMPrompt, setDMPrompt] = useState(false); //dm prompt is not seen at the beginning
+
+  return (<>
     <Head>
       <title>
         Automatic DMs | InstaMetrics
@@ -90,7 +95,7 @@ const Page = () => (
           >
             <Stack spacing={1}>
               <Typography variant="h4">
-                Automatic DMs
+                Automated Direct Messages
               </Typography>
               <Stack
                 alignItems="center"
@@ -125,13 +130,14 @@ const Page = () => (
                   <SvgIcon fontSize="small">
                     <PlusIcon />
                   </SvgIcon>
-                )}
+                )} onClick = {() => {setDMPrompt(true)}} //changing state of the DMPrompt
                 variant="contained"
               >
                 Add
               </Button>
             </div>
           </Stack>
+          {showDMPrompt && <BasicFormControl/>}
           <CompaniesSearch />
           <Grid
             container
@@ -163,7 +169,7 @@ const Page = () => (
       </Container>
     </Box>
   </>
-);
+)};
 
 Page.getLayout = (page) => (
   <DashboardLayout>

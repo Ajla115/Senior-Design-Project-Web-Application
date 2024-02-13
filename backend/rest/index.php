@@ -8,14 +8,16 @@ require "./services/BaseService.php";
 
 // import and register all business logic files (services) to FlightPHP
 require_once __DIR__ . '/services/UserService.php';
-
+require_once __DIR__ . '/services/InstaAccService.php';
 
 //register names that will be used for services and daos
 Flight::register('userService', "UserService");
+Flight::register("instaAccService", "InstaAccService");
 Flight::register('userDao', "UserDao");
 
 //import all routes
 require_once __DIR__ . '/routes/UserRoutes.php';
+require_once __DIR__ . '/routes/InstaAccRoutes.php';
 
 Flight::route('GET /', function(){
     //This is the most basic route to just check connection

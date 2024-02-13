@@ -1,6 +1,6 @@
 <?php
 
-use Firebase\JWT\JWT; //ovo creates JWT Token
+use Firebase\JWT\JWT; //this creates JWT Token
 use Firebase\JWT\Key;
 
 /**
@@ -27,7 +27,9 @@ Flight::route('GET /connection-check', function(){
   
 
 
-
+//login route for users
+//registration and login are both needed on the swagger
+//you first succesfully connect using one of this two, and then use the token to authorize
 Flight::route('POST /login', function(){
     $login = Flight::request()->data->getData();
     $user = Flight::userDao()->get_user_by_email($login['email']);
@@ -51,17 +53,14 @@ Flight::route('POST /login', function(){
   }
 });
 
-/*ovdje ide login bez autentifikacije na swaggeru*/
-
-
-
-/*This route is for registration of users*/ 
+//Registration route for users 
 Flight::route('POST /register', function () {
     $data = Flight::request()->data->getData();
 
-    // Add the userto the database
+    // Add the user to the database
     $user = Flight::userService()->add($data);
-    unset($user['password']);
+    //unset($user['password']);
+    //unset is used when you don't want to send something to the database
 
     // Generate the JWT token
     $jwt = JWT::encode($user, Config::JWT_SECRET(), 'HS256');
@@ -69,6 +68,29 @@ Flight::route('POST /register', function () {
     // Return the JWT token in the response
     Flight::json(['token' => $jwt, 'new user' => $user]);
 });
+
+//PUT route to edit or update user's data
+//In the body, it will send the whole object, and then it will update then changed values
+//This is better than having to do PUT for every database column/attribute differently
+Flight::route("PUT /users/@id", function($id){
+  $data = Flight::request()->data->getData();
+  Flight::json(['message' => 'User was edited succesfully', 'data' => Flight::userService()->update($data, $id)]); 
+  //-> converts the results to the JSON form
+  //This array we could have created above, store it in a variable, and then call that variable or do it directly like this
+});
+
+//Get route to get a user based on their id from database
+Flight::route('GET /users/@id', function ($id) {
+  Flight::json(Flight::userService()->get_by_id($id));
+});
+
+
+//Delete route for users to deactivate their account completely and
+//be deleted from the database
+Flight::route('DELETE /users/@id', function ($id) {
+  Flight::userService()->delete($id);
+});
+
 
 
 ?>

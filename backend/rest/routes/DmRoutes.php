@@ -42,10 +42,8 @@ Flight::route('DELETE /dm/@id', function ($id) {
 //route to update DM per id, however only scheduled and not sent DMs can be edited
 Flight::route("PUT /dm/@id", function($id){
     $data = Flight::request()->data->getData();
-    Flight::json(['message' => 'Direct message was updated succesfully', 'data' => Flight::dmService()->updateScheduled($data, $id)]); 
+    Flight::json(['message' => Flight::dmService()->updateScheduled($data, $id)]);
 });
-  
-
 
 
 

@@ -12,7 +12,7 @@ class DmService extends BaseService
     }
     
     function deleteScheduled($id)
-{
+    {
     try {
         $count = $this->dao->deleteScheduled($id);
         if($count == 0){
@@ -23,12 +23,20 @@ class DmService extends BaseService
     } catch (Exception $e) {
         return ['message' => "An error occurred: " . $e->getMessage()];
     }
-}
+    }
 
     function updateScheduled($entity, $id, $id_column = "id")
     {
-        return $this->dao->updateScheduled($entity, $id, $id_column);
+    try {
+        $result = $this->dao->updateScheduled($entity, $id, $id_column);
+        if ($result == 0) {
+            return "Update of direct message failed.";
+        } else if ($result == 1) {
+            return "One direct message was successfully updated";
+    }} catch (Exception $e) {
+        return ['message' => "An error occurred: " . $e->getMessage()];
     }
+}
 
 
 

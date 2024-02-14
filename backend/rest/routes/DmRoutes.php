@@ -34,8 +34,9 @@ Flight::route('POST /dm', function () {
 
 //route to delete DM per id, however only scheduled and not sent DMs can be deleted
 Flight::route('DELETE /dm/@id', function ($id) {
-    Flight::dmService()->deleteScheduled($id);
+    Flight::json(['data' => Flight::dmService()->deleteScheduled($id)]);
 });
+
 
 
 //route to update DM per id, however only scheduled and not sent DMs can be edited

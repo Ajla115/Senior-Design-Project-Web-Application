@@ -10,11 +10,20 @@ class DmService extends BaseService
     {
         parent::__construct(new DmDao);
     }
-
+    
     function deleteScheduled($id)
-    {
-        return $this->dao->deleteScheduled($id);
+{
+    try {
+        $count = $this->dao->deleteScheduled($id);
+        if($count == 0){
+            return ['message' => "Deletion failed"]; 
+        } else if ($count == 1) {
+            return ['message' => "Deletion was successful"];
+        }
+    } catch (Exception $e) {
+        return ['message' => "An error occurred: " . $e->getMessage()];
     }
+}
 
     function updateScheduled($entity, $id, $id_column = "id")
     {

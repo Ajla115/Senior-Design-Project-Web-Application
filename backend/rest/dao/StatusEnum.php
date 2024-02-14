@@ -7,7 +7,3 @@ class StatusEnum {
     const DELETED = 'Deleted';
 
 }
-?>
-
-
-?>

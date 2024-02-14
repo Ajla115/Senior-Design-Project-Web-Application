@@ -3,7 +3,6 @@
 //route to add DM to the database
 //however, we are sending an array of recipients ids and they have to be split in the database 
 //one row --> one recipient
-
 Flight::route('POST /dm', function () {
     $data = Flight::request()->data->getData();
     
@@ -31,6 +30,20 @@ Flight::route('POST /dm', function () {
     Flight::json($results);
 });
 
+
+
+//route to delete DM per id, however only scheduled and not sent DMs can be deleted
+Flight::route('DELETE /dm/@id', function ($id) {
+    Flight::dmService()->deleteScheduled($id);
+});
+
+
+//route to update DM per id, however only scheduled and not sent DMs can be edited
+Flight::route("PUT /dm/@id", function($id){
+    $data = Flight::request()->data->getData();
+    Flight::json(['message' => 'Direct message was updated succesfully', 'data' => Flight::dmService()->updateScheduled($data, $id)]); 
+});
+  
 
 
 

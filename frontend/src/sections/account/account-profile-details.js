@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import {
   Box,
   Button,
+  Stack,
   Card,
   CardActions,
   CardContent,
@@ -10,6 +11,7 @@ import {
   TextField,
   Unstable_Grid2 as Grid
 } from '@mui/material';
+import TransitionsModal from './deactive-account-modal';
 
 const states = [
   {
@@ -64,10 +66,17 @@ export const AccountProfileDetails = () => {
       onSubmit={handleSubmit}
     >
       <Card>
+      <Stack spacing={37}
+                // sx={{maxWidth: 300, marginTop: 2}}
+                direction='row' >
         <CardHeader
           subheader="The information can be edited"
           title="Profile"
         />
+        <CardActions sx={{ justifyContent: 'flex-end', marginRight:0}}>
+        {/* <Button variant = 'outlined' color = 'error'>Deactive your account</Button> */}
+        <TransitionsModal />
+        </CardActions></Stack>
         <CardContent sx={{ pt: 0 }}>
           <Box sx={{ m: -1.5 }}>
             <Grid

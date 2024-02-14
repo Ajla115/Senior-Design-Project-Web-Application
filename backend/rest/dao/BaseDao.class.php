@@ -67,6 +67,8 @@ class BaseDao
         }
     }
 
+    
+
     //Method used to add a column in the database
     public function add($entity){
         $query = "INSERT INTO " . $this->table_name . " (";

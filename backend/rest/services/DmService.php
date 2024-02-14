@@ -11,6 +11,16 @@ class DmService extends BaseService
         parent::__construct(new DmDao);
     }
 
+    function deleteScheduled($id)
+    {
+        return $this->dao->deleteScheduled($id);
+    }
+
+    function updateScheduled($entity, $id, $id_column = "id")
+    {
+        return $this->dao->updateScheduled($entity, $id, $id_column);
+    }
+
 
 
  

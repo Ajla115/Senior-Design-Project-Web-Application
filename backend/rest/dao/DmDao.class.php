@@ -20,6 +20,13 @@ public function deleteScheduled($id){
     return $count;
 }
 
+public function checkExistence($recipients_id){
+  $stmt = $this->conn->prepare("SELECT *  FROM " . $this->table_name . " WHERE recipients_id = :recipients_id ");
+  $stmt->bindParam(':recipients_id', $recipients_id);
+  $count = $stmt -> rowCount();
+  return $count;
+}
+
 
 public function updateScheduled($entity, $id, $id_column = "id")
 {

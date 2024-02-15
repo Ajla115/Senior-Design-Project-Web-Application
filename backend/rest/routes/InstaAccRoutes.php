@@ -1,5 +1,10 @@
 <?php 
 
+//get all instagram account
+Flight::route('GET /accounts', function () {
+    Flight::json(Flight::instaAccService()->get_all());
+});
+
 //get instagram account data by id
 Flight::route('GET /accounts/id/@id', function ($id) {
     Flight::json(Flight::instaAccService()->get_by_id($id));

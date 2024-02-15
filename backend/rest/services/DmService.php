@@ -25,18 +25,20 @@ class DmService extends BaseService
     }
     }
 
-    function updateScheduled($entity, $id, $id_column = "id")
+    /*function checkExistence($recipients_id)
     {
     try {
-        $result = $this->dao->updateScheduled($entity, $id, $id_column);
-        if ($result == 0) {
-            return "Update of direct message failed.";
-        } else if ($result == 1) {
-            return "One direct message was successfully updated";
-    }} catch (Exception $e) {
+        $count = $this->dao>checkExistence($recipients_id);
+        if($count == 0){
+            return $this->dao->add($recipients_id); //kako zna u koju tabelu
+        }
+        else if ($count == 1) {
+            return $this->dao->updateScheduled($entity, $id, $id_column);
+        } 
+    } catch (Exception $e) {
         return ['message' => "An error occurred: " . $e->getMessage()];
     }
-}
+}*/
 
 
 

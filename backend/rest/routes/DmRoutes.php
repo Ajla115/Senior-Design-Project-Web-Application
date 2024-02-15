@@ -41,9 +41,29 @@ Flight::route('DELETE /dm/@id', function ($id) {
 
 //route to update DM per id, however only scheduled and not sent DMs can be edited
 Flight::route("PUT /dm/@id", function($id){
+   /*$data = Flight::request()->data->getData();
+    Flight::json(['message' => Flight::dmService()->updateScheduled($data, $id)]);*/
+
     $data = Flight::request()->data->getData();
-    Flight::json(['message' => Flight::dmService()->updateScheduled($data, $id)]);
+
+    $recipients = $data['recipients_id'];
+
+    //I am not sending this to the database as an array
+    unset($data['recipients_id']);
+
+    // I have iterated over the whole array, and extracted one by one
+    foreach ($recipients as $recipient) {
+
+        // each recipient id will be stored in the recipient variable
+        $data['recipients_id'] = $recipient; 
+
+        // And it will be added to the databse
+        $result = Flight::dmService()->checkExistence($data);
+
+    }
+
 });
+
 
 
 

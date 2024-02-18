@@ -137,7 +137,7 @@ const Page = () => {
                     InputProps={{
                       endAdornment: (
                         <InputAdornment position="end">
-                          <IconButton onClick={handleTogglePassword} edge="end">
+                          <IconButton color = "primary" onClick={handleTogglePassword} edge="end">
                             {showPassword ? <VisibilityOff /> : <Visibility />}
                           </IconButton>
                         </InputAdornment>

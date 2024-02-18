@@ -144,7 +144,7 @@ const Page = () => {
                     // edge="end" it is a good practice to have, because this ensures that no matter the number of line of code, the icon will always be located on the left
                     endAdornment: (
                       <InputAdornment position="end">
-                        <IconButton onClick={handleTogglePassword} edge="end">
+                        <IconButton color = "primary" onClick={handleTogglePassword} edge="end">
                           {showPassword ? <VisibilityOff /> : <Visibility />}
                         </IconButton>
                       </InputAdornment>

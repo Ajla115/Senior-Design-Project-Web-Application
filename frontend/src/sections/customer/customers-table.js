@@ -1,5 +1,5 @@
-import PropTypes from 'prop-types';
-import { format } from 'date-fns';
+import PropTypes from "prop-types";
+import { format } from "date-fns";
 import {
   Avatar,
   Box,
@@ -12,10 +12,12 @@ import {
   TableHead,
   TablePagination,
   TableRow,
-  Typography
-} from '@mui/material';
-import { Scrollbar } from 'src/components/scrollbar';
-import { getInitials } from 'src/utils/get-initials';
+  Typography,
+} from "@mui/material";
+import { Scrollbar } from "src/components/scrollbar";
+import { getInitials } from "src/utils/get-initials";
+import { InstagramService, UserService } from "services";
+import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 
 export const CustomersTable = (props) => {
   const {
@@ -29,11 +31,22 @@ export const CustomersTable = (props) => {
     onSelectOne,
     page = 0,
     rowsPerPage = 0,
-    selected = []
+    selected = [],
   } = props;
 
-  const selectedSome = (selected.length > 0) && (selected.length < items.length);
-  const selectedAll = (items.length > 0) && (selected.length === items.length);
+  const selectedSome = selected.length > 0 && selected.length < items.length;
+  const selectedAll = items.length > 0 && selected.length === items.length;
+
+  const client = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+      mutations: {
+        onError: () => {},
+      },
+    },
+  });
 
   return (
     <Card>
@@ -42,8 +55,10 @@ export const CustomersTable = (props) => {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell padding="checkbox">
-                  <Checkbox
+                <TableCell>
+                  {" "}
+                  ID
+                  {/* <Checkbox
                     checked={selectedAll}
                     indeterminate={selectedSome}
                     onChange={(event) => {
@@ -53,77 +68,25 @@ export const CustomersTable = (props) => {
                         onDeselectAll?.();
                       }
                     }}
-                  />
+                  /> */}
                 </TableCell>
-                <TableCell>
-                  Username
-                </TableCell>
-                <TableCell>
-                  Number of Posts
-                </TableCell>
-                <TableCell>
-                  No. of Followers
-                </TableCell>
-                <TableCell>
-                  No. of Following
-                </TableCell>
-                <TableCell>
-                  Stats
-                </TableCell>
+                <TableCell>Username</TableCell>
+                <TableCell>Number of Posts</TableCell>
+                <TableCell>No. of Followers</TableCell>
+                <TableCell>No. of Following</TableCell>
+                <TableCell>Date & Time</TableCell>
+                <TableCell>Stats</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {items.map((customer) => {
+              {/* {items.map((customer) => {
                 const isSelected = selected.includes(customer.id);
-                const createdAt = format(customer.createdAt, 'dd/MM/yyyy');
+                const createdAt = format(customer.createdAt, "dd/MM/yyyy"); */}
 
-                return (
-                  <TableRow
-                    hover
-                    key={customer.id}
-                    selected={isSelected}
-                  >
-                    <TableCell padding="checkbox">
-                      <Checkbox
-                        checked={isSelected}
-                        onChange={(event) => {
-                          if (event.target.checked) {
-                            onSelectOne?.(customer.id);
-                          } else {
-                            onDeselectOne?.(customer.id);
-                          }
-                        }}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Stack
-                        alignItems="center"
-                        direction="row"
-                        spacing={2}
-                      >
-                        <Avatar src={customer.avatar}>
-                          {getInitials(customer.name)}
-                        </Avatar>
-                        <Typography variant="subtitle2">
-                          {customer.name}
-                        </Typography>
-                      </Stack>
-                    </TableCell>
-                    <TableCell>
-                      {customer.email}
-                    </TableCell>
-                    <TableCell>
-                      {customer.address.city}, {customer.address.state}, {customer.address.country}
-                    </TableCell>
-                    <TableCell>
-                      {customer.phone}
-                    </TableCell>
-                    <TableCell>
-                      {createdAt}
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+              <QueryClientProvider client={client}>
+                <InstagramAccountsData />
+              </QueryClientProvider>
+              {/* })} */}
             </TableBody>
           </Table>
         </Box>
@@ -152,5 +115,58 @@ CustomersTable.propTypes = {
   onSelectOne: PropTypes.func,
   page: PropTypes.number,
   rowsPerPage: PropTypes.number,
-  selected: PropTypes.array
+  selected: PropTypes.array,
 };
+
+function InstagramAccountsData() {
+  //const posts = useSampleData();
+  // console.log(posts);
+
+  const { isLoading, error, data, isFetching } = useQuery({
+    queryKey: ["instagram-data"],
+    queryFn: InstagramService.getAccountData,
+  });
+
+  //const { isLoading, error, data, isFetching } = useSampleData();
+
+  if (isLoading) return "Loading...";
+
+  if (error) return "An error has occurred: " + error.message;
+
+  return (
+    <>
+      {data.map((customer) => {
+        // const createdAt = format(customer.createdAt, "dd/MM/yyyy");
+
+        return (
+          <TableRow hover key={customer.id}>
+            <TableCell>
+              {/* <Checkbox
+                checked={isSelected}
+                onChange={(event) => {
+                  if (event.target.checked) {
+                    onSelectOne?.(customer.id);
+                  } else {
+                    onDeselectOne?.(customer.id);
+                  }
+                }}
+              /> */}
+              {customer.id}
+            </TableCell>
+
+            <TableCell>
+              <Stack alignItems="center" direction="row" spacing={1}>
+                <Typography variant="subtitle2">{customer.username}</Typography>
+              </Stack>
+            </TableCell>
+            <TableCell>{customer.post_number}</TableCell>
+            <TableCell>{customer.followers_number}</TableCell>
+            <TableCell>{customer.followings_number}</TableCell>
+            <TableCell>{customer.date_and_time}</TableCell>
+            <TableCell>{customer.stats}</TableCell>
+          </TableRow>
+        );
+      })}
+    </>
+  );
+}

@@ -6,6 +6,8 @@ import re
 
 #Time module - to always get current timestamp
 import time
+#get actual date
+from datetime import date
 
 #Imports needed for web scrapping
 from time import sleep
@@ -87,10 +89,11 @@ for li in items:
        #print(number)
 
 sql = "UPDATE instagram_accounts SET post_number = %s, followers_number = %s, followings_number = %s, date_and_time = %s, stats = %s WHERE username = %s"
-current_timestamp = time.time()
+#current_timestamp = time.time()
+current_date = date.today()
          
 #posts, followers, following, time of web scrapping, and number 1 to indicate that this username is written like this, and connects to this data
-values = (statistics[0], statistics[1], statistics[2], current_timestamp, 1, "korman_ajla") 
+values = (statistics[0], statistics[1], statistics[2], current_date, 1, "korman_ajla") 
 #I had to put username here in the values, because in the insert into sql stmt I had problem with ' " (triple unintended quotes) at the end
 mycursor.execute(sql, values)
 

@@ -17,6 +17,12 @@ class InstaAccDao extends BaseDao{
       WHERE username = :username", ["username" => $username]);
   }
 
+  function addIndividually($username){
+
+    return $this->query("
+    INSERT INTO " . $this->table_name . " (username, stats) VALUES (:value1, :value2)", ["value1" => $username, "value2" => 0]);
+  }
+
  
 
 }

@@ -16,6 +16,10 @@ class InstaAccService extends BaseService
         return $this->dao->get_by_username($username);
     }
 
+    function addIndividually($username){
+      return $this->dao->addIndividually($username);
+    }
+
 
  
 }

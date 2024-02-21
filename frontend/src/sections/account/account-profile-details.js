@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import {
   Box,
   Button,
@@ -33,7 +33,7 @@ const states = [
 ];
 
 export const AccountProfileDetails = () => {
-  const [values, setValues] = useState({
+  const [initialValues, setInitialValues] = useState({
     first_name: 'Anika',
     last_name: 'Visser',
     email: 'demo@devias.io',
@@ -42,8 +42,16 @@ export const AccountProfileDetails = () => {
     // country: 'USA'
   });
 
+  const [isChanged, setIsChanged] = useState(false) //this will track if input in any three fields changes
+  const [values, setValues] = useState(initialValues) //this will keep track, if there are no changes, disable Save button again
+
+  useEffect(() => {
+    setInitialValues(values); //this I need to keep track of the first values in the fields
+  }, []); 
+
   const handleChange = useCallback(
     (event) => {
+      setIsChanged(true); //if we are triggering this function, it means something has changes
       setValues((prevState) => ({
         ...prevState,
         [event.target.name]: event.target.value
@@ -58,6 +66,21 @@ export const AccountProfileDetails = () => {
     },
     []
   );
+
+    useEffect(() => {
+      //this will compare current values with the initial values
+      //and it will set the state of setIsChanged
+      setIsChanged(!compareValues(values, initialValues));
+    }, [values, initialValues]);
+
+    const compareValues = (value1, value2) => {
+      for(let i in value1){
+        if (value1[i] !== value2[i]){
+          return false
+        }
+      }
+      return true;
+    };
 
   return (
     <form
@@ -178,7 +201,7 @@ export const AccountProfileDetails = () => {
         </CardContent>
         <Divider />
         <CardActions sx={{ justifyContent: 'flex-end' }}>
-          <Button variant="contained">
+          <Button variant="contained" disabled = {!isChanged}>
             Save details
           </Button>
         </CardActions>

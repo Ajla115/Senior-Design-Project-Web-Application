@@ -23,26 +23,30 @@ require_once __DIR__ . '/routes/UserRoutes.php';
 require_once __DIR__ . '/routes/InstaAccRoutes.php';
 require_once __DIR__ . '/routes/DmRoutes.php';
 
-Flight::route('GET /', function(){
-    //This is the most basic route to just check connection
-    new UserService();
-  
+Flight::route('GET /', function () {
+  //This is the most basic route to just check connection
+  new UserService();
+
 });
 
 
-Flight::route('GET /connection-check', function(){
-    /*Coonection check to see if deployed database works*/
-      new UserService();
+Flight::route('GET /connection-check', function () {
+  /*Coonection check to see if deployed database works*/
+  new UserService();
 });
-  
+
 /* This is needed for swagger - REST API documentation endpoint */
 /* REST API documentation endpoint */
-Flight::route('GET /swagger.json', function(){
-  $openapi = \OpenApi\Generator::scan(['routes']);
+// Flight::route('GET /docs.json', function () {
+//   $openapi = \OpenApi\Generator::scan(['routes']);
+//   header('Content-Type: application/json');
+//   echo $openapi->toJson();
+// });
+
+Flight::route('GET /docs.json', function(){
+  $openapi = \OpenApi\scan('routes');
   header('Content-Type: application/json');
-  file_put_contents(__DIR__ . '/swagger.json', $openapi->toJson());
-  readfile(__DIR__ . '/swagger.json');
- //echo $openapi->toJson();
+  echo $openapi->toJson();
 });
 
 Flight::start();

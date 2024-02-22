@@ -1,37 +1,37 @@
 <?php
 
- /**
-* @OA\Post(
-*     path="/accounts",
-*     security={{"ApiKeyAuth": {}}},
-*     summary="Add a new account without IG data",
-*     description="Add a new account",
-*     tags={"accounts"},
-*     @OA\RequestBody(
-*         description="Add new account",
-*         required=true,
-*         @OA\MediaType(
-*             mediaType="application/json",
-*             @OA\Schema(
-*                 @OA\Property(
-*                     property="username",
-*                     type="string",
-*                     example="firstname_lastname",
-*                     description="Username"
-*                 )
-*             )
-*         )
-*     ),
-*     @OA\Response(
-*         response=200,
-*         description="Username has been added"
-*     ),
-*     @OA\Response(
-*         response=400,
-*         description="Invalid API request"
-*     )
-* )
-*/
+/**
+ * @OA\Post(
+ *     path="/accounts",
+ *     security={{"ApiKeyAuth": {}}},
+ *     summary="Add a new account without IG data",
+ *     description="Add a new account",
+ *     tags={"accounts"},
+ *     @OA\RequestBody(
+ *         description="Add new account",
+ *         required=true,
+ *         @OA\MediaType(
+ *             mediaType="application/json",
+ *             @OA\Schema(
+ *                 @OA\Property(
+ *                     property="username",
+ *                     type="string",
+ *                     example="firstname_lastname",
+ *                     description="Username"
+ *                 )
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Username has been added"
+ *     ),
+ *     @OA\Response(
+ *         response=400,
+ *         description="Invalid API request"
+ *     )
+ * )
+ */
 
 
 //works
@@ -39,7 +39,7 @@
 Flight::route('POST /accounts', function () {
     //I added this because I had a problem with string array conversion
     //I hope this line wont be a problem for DM Routes
-    $username = Flight::request()->data['username']; 
+    $username = Flight::request()->data['username'];
     Flight::json(Flight::instaAccService()->addIndividually($username));
 });
 

@@ -65,7 +65,7 @@ Flight::route('POST /login', function () {
  *     path="/register",
  *     summary = "Register to auth all other routes",
  *     description="Add a new user",
- *     tags={"customers"},
+ *     tags={"register"},
  *     @OA\RequestBody(description="Add new user", required=true,
  *       @OA\MediaType(mediaType="application/json",
  *    			@OA\Schema(

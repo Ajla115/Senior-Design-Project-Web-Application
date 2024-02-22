@@ -22,7 +22,9 @@ class UserService extends BaseService
 
     public function update($entity, $id, $id_column = "id")
     {
-        $entity['password'] = md5($entity['password']);
+        unset($entity['password']);
+        //I turned off updating of password here because I will do that on seperate page
+        //$entity['password'] = md5($entity['password']);
         if (isset($entity['id_column']) && !is_null($entity['id_column'])) {
             return parent::update($entity, $id, $entity['id_column']);
         }

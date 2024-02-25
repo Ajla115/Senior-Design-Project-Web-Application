@@ -1,4 +1,4 @@
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -9,107 +9,100 @@ import {
   CardHeader,
   Divider,
   TextField,
-  Unstable_Grid2 as Grid
-} from '@mui/material';
-import TransitionsModal from './deactive-account-modal';
+  Unstable_Grid2 as Grid,
+  IconButton,
+  InputAdornment,
+} from "@mui/material";
+import TransitionsModal from "./deactive-account-modal";
+import { Visibility, VisibilityOff } from "@mui/icons-material"; //needed for password toggling
 
 const states = [
   {
-    value: 'alabama',
-    label: 'Alabama'
+    value: "alabama",
+    label: "Alabama",
   },
   {
-    value: 'new-york',
-    label: 'New York'
+    value: "new-york",
+    label: "New York",
   },
   {
-    value: 'san-francisco',
-    label: 'San Francisco'
+    value: "san-francisco",
+    label: "San Francisco",
   },
   {
-    value: 'los-angeles',
-    label: 'Los Angeles'
-  }
+    value: "los-angeles",
+    label: "Los Angeles",
+  },
 ];
 
 export const AccountProfileDetails = () => {
   const [initialValues, setInitialValues] = useState({
-    first_name: 'Anika',
-    last_name: 'Visser',
-    email: 'demo@devias.io',
-    // phone: '',
+    first_name: "Anika",
+    last_name: "Visser",
+    email: "demo@devias.io",
+    password: "anika123",
     // state: 'los-angeles',
     // country: 'USA'
   });
 
-  const [isChanged, setIsChanged] = useState(false) //this will track if input in any three fields changes
-  const [values, setValues] = useState(initialValues) //this will keep track, if there are no changes, disable Save button again
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleTogglePassword = () => {
+    setShowPassword(!showPassword); //setting the state of visibility
+  };
+
+  const [isChanged, setIsChanged] = useState(false); //this will track if input in any three fields changes
+  const [values, setValues] = useState(initialValues); //this will keep track, if there are no changes, disable Save button again
 
   useEffect(() => {
     setInitialValues(values); //this I need to keep track of the first values in the fields
-  }, []); 
+  }, []);
 
-  const handleChange = useCallback(
-    (event) => {
-      setIsChanged(true); //if we are triggering this function, it means something has changes
-      setValues((prevState) => ({
-        ...prevState,
-        [event.target.name]: event.target.value
-      }));
-    },
-    []
-  );
+  const handleChange = useCallback((event) => {
+    setIsChanged(true); //if we are triggering this function, it means something has changes
+    setValues((prevState) => ({
+      ...prevState,
+      [event.target.name]: event.target.value,
+    }));
+  }, []);
 
-  const handleSubmit = useCallback(
-    (event) => {
-      event.preventDefault();
-    },
-    []
-  );
+  const handleSubmit = useCallback((event) => {
+    event.preventDefault();
+  }, []);
 
-    useEffect(() => {
-      //this will compare current values with the initial values
-      //and it will set the state of setIsChanged
-      setIsChanged(!compareValues(values, initialValues));
-    }, [values, initialValues]);
+  useEffect(() => {
+    //this will compare current values with the initial values
+    //and it will set the state of setIsChanged
+    setIsChanged(!compareValues(values, initialValues));
+  }, [values, initialValues]);
 
-    const compareValues = (value1, value2) => {
-      for(let i in value1){
-        if (value1[i] !== value2[i]){
-          return false
-        }
+  const compareValues = (value1, value2) => {
+    for (let i in value1) {
+      if (value1[i] !== value2[i]) {
+        return false;
       }
-      return true;
-    };
+    }
+    return true;
+  };
 
   return (
-    <form
-      autoComplete="off"
-      noValidate
-      onSubmit={handleSubmit}
-    >
+    <form autoComplete="off" noValidate onSubmit={handleSubmit}>
       <Card>
-      <Stack spacing={37}
-                // sx={{maxWidth: 300, marginTop: 2}}
-                direction='row' >
-        <CardHeader
-          subheader="The information can be edited"
-          title="Profile"
-        />
-        <CardActions sx={{ justifyContent: 'flex-end', marginRight:0}}>
-        {/* <Button variant = 'outlined' color = 'error'>Deactive your account</Button> */}
-        <TransitionsModal />
-        </CardActions></Stack>
+        <Stack
+          spacing={37}
+          // sx={{maxWidth: 300, marginTop: 2}}
+          direction="row"
+        >
+          <CardHeader subheader="The information can be edited" title="Profile" />
+          <CardActions sx={{ justifyContent: "flex-end", marginRight: 0 }}>
+            {/* <Button variant = 'outlined' color = 'error'>Deactive your account</Button> */}
+            <TransitionsModal />
+          </CardActions>
+        </Stack>
         <CardContent sx={{ pt: 0 }}>
           <Box sx={{ m: -1.5 }}>
-            <Grid
-              container
-              spacing={3}
-            >
-              <Grid
-                xs={12}
-                md={6}
-              >
+            <Grid container spacing={3}>
+              <Grid xs={12} md={6}>
                 <TextField
                   fullWidth
                   // helperText="Please specify the first name"
@@ -120,10 +113,7 @@ export const AccountProfileDetails = () => {
                   value={values.first_name}
                 />
               </Grid>
-              <Grid
-                xs={12}
-                md={6}
-              >
+              <Grid xs={12} md={6}>
                 <TextField
                   fullWidth
                   label="Last name"
@@ -133,10 +123,7 @@ export const AccountProfileDetails = () => {
                   value={values.last_name}
                 />
               </Grid>
-              <Grid
-                xs={12}
-                md={12}
-              >
+              <Grid xs={12} md={6}>
                 <TextField
                   fullWidth
                   label="Email Address"
@@ -146,23 +133,26 @@ export const AccountProfileDetails = () => {
                   value={values.email}
                 />
               </Grid>
-              <Grid
-                xs={12}
-                md={6}
-              >
-                {/* <TextField
+              <Grid xs={12} md={6}>
+                <TextField
                   fullWidth
-                  label="Phone Number"
-                  name="phone"
+                  label="Password"
+                  name="password"
                   onChange={handleChange}
-                  type="number"
-                  value={values.phone}
-                /> */}
+                  type={showPassword ? "text" : "password"}
+                  value={values.password}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton color="primary" onClick={handleTogglePassword} edge="end">
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
               </Grid>
-              <Grid
-                xs={12}
-                md={6}
-              >
+              <Grid xs={12} md={6}>
                 {/* <TextField
                   fullWidth
                   label="Country"
@@ -172,10 +162,7 @@ export const AccountProfileDetails = () => {
                   value={values.country}
                 /> */}
               </Grid>
-              <Grid
-                xs={12}
-                md={6}
-              >
+              <Grid xs={12} md={6}>
                 {/* <TextField
                   fullWidth
                   label="Select State"
@@ -200,8 +187,8 @@ export const AccountProfileDetails = () => {
           </Box>
         </CardContent>
         <Divider />
-        <CardActions sx={{ justifyContent: 'flex-end' }}>
-          <Button variant="contained" disabled = {!isChanged}>
+        <CardActions sx={{ justifyContent: "flex-end" }}>
+          <Button variant="contained" disabled={!isChanged}>
             Save details
           </Button>
         </CardActions>

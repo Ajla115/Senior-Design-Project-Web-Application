@@ -1,5 +1,6 @@
 import PropTypes from "prop-types";
 import { format } from "date-fns";
+import React from "react";
 import {
   Avatar,
   Box,
@@ -18,6 +19,8 @@ import { Scrollbar } from "src/components/scrollbar";
 import { getInitials } from "src/utils/get-initials";
 import { InstagramService, UserService } from "services";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import DeleteModal from "./delete-instagram-account";
 
 export const CustomersTable = (props) => {
   const {
@@ -76,6 +79,7 @@ export const CustomersTable = (props) => {
                 <TableCell>No. of Following</TableCell>
                 <TableCell>Date & Time</TableCell>
                 <TableCell>Stats</TableCell>
+                <TableCell>Other</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -122,6 +126,20 @@ function InstagramAccountsData() {
   //const posts = useSampleData();
   // console.log(posts);
 
+  //This is all for deleting a modal
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [selectedCustomerId, setSelectedCustomerId] = React.useState(null); 
+
+  const handleOpen = (customerId) => {
+    setSelectedCustomerId(customerId)
+    setIsModalOpen(true);
+  };
+
+  const handleClose = () => {
+    setIsModalOpen(false);
+  };
+
+  //fetching data from database
   const { isLoading, error, data, isFetching } = useQuery({
     queryKey: ["instagram-data"],
     queryFn: InstagramService.getAccountData,
@@ -164,9 +182,14 @@ function InstagramAccountsData() {
             <TableCell>{customer.followings_number}</TableCell>
             <TableCell>{customer.date_and_time}</TableCell>
             <TableCell>{customer.stats}</TableCell>
+            <TableCell>
+              <DeleteOutlineIcon onClick={() => handleOpen(customer.id)} />
+            </TableCell>
           </TableRow>
         );
       })}
+
+      <DeleteModal  isOpen={isModalOpen} onClose={handleClose} customerId={selectedCustomerId} />
     </>
   );
 }

@@ -9,20 +9,14 @@ namespace OpenApi\Annotations;
 use OpenApi\Generator;
 
 /**
- * @see [OAI XML Object](https://github.com/OAI/OpenAPI-Specification/blob/OpenAPI.next/versions/3.0.md#xmlObject).
- *
  * @Annotation
+ *
+ * A "XML Object": https://github.com/OAI/OpenAPI-Specification/blob/OpenAPI.next/versions/3.0.md#xmlObject
  */
 class Xml extends AbstractAnnotation
 {
     /**
-     * Replaces the name of the element/attribute used for the described schema property.
-     *
-     * When defined within the Items Object (items), it will affect the name of the individual XML elements within the list.
-     * When defined alongside type being array (outside the items), it will affect the wrapping element
-     * and only if wrapped is <code>true</code>.
-     *
-     * If wrapped is <code>false</code>, it will be ignored.
+     * Replaces the name of the element/attribute used for the described schema property. When defined within the Items Object (items), it will affect the name of the individual XML elements within the list. When defined alongside type being array (outside the items), it will affect the wrapping element and only if wrapped is true. If wrapped is false, it will be ignored.
      *
      * @var string
      */
@@ -43,21 +37,14 @@ class Xml extends AbstractAnnotation
     public $prefix = Generator::UNDEFINED;
 
     /**
-     * Declares whether the property definition translates to an attribute instead of an element.
-     *
-     * Default value is <code>false</code>.
+     * Declares whether the property definition translates to an attribute instead of an element. Default value is false.
      *
      * @var bool
      */
     public $attribute = Generator::UNDEFINED;
 
     /**
-     * MAY be used only for an array definition.
-     *
-     * Signifies whether the array is wrapped (for example  <code>&lt;books>&lt;book/>&lt;book/>&lt;/books></code>)
-     * or unwrapped (<code>&lt;book/>&lt;book/></code>).
-     *
-     * Default value is false. The definition takes effect only when defined alongside type being array (outside the items).
+     * MAY be used only for an array definition. Signifies whether the array is wrapped (for example, <books><book/><book/></books>) or unwrapped (<book/><book/>). Default value is false. The definition takes effect only when defined alongside type being array (outside the items).
      *
      * @var bool
      */

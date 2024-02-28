@@ -7,7 +7,7 @@
 namespace OpenApi\Processors;
 
 use OpenApi\Analysis;
-use OpenApi\Annotations as OA;
+use OpenApi\Annotations\Schema;
 use OpenApi\Generator;
 
 /**
@@ -17,35 +17,24 @@ use OpenApi\Generator;
  */
 class ExpandInterfaces
 {
-    use Concerns\MergePropertiesTrait;
+    use MergeTrait;
 
     public function __invoke(Analysis $analysis)
     {
-        /** @var OA\Schema[] $schemas */
-        $schemas = $analysis->getAnnotationsOfType(OA\Schema::class, true);
+        /** @var Schema[] $schemas */
+        $schemas = $analysis->getAnnotationsOfType(Schema::class, true);
 
         foreach ($schemas as $schema) {
             if ($schema->_context->is('class')) {
-                $className = $schema->_context->fullyQualifiedName($schema->_context->class);
-                $interfaces = $analysis->getInterfacesOfClass($className, true);
-
-                if (class_exists($className) && ($parent = get_parent_class($className)) && ($inherited = array_keys(class_implements($parent)))) {
-                    // strip interfaces we inherit from ancestor
-                    foreach (array_keys($interfaces) as $interface) {
-                        if (in_array(ltrim($interface, '\\'), $inherited)) {
-                            unset($interfaces[$interface]);
-                        }
-                    }
-                }
-
+                $interfaces = $analysis->getInterfacesOfClass($schema->_context->fullyQualifiedName($schema->_context->class), true);
                 $existing = [];
                 foreach ($interfaces as $interface) {
-                    $interfaceName = $interface['context']->fullyQualifiedName($interface['interface']);
-                    $interfaceSchema = $analysis->getSchemaForSource($interfaceName);
+                    $interfaceSchema = $analysis->getSchemaForSource($interface['context']->fullyQualifiedName($interface['interface']));
                     if ($interfaceSchema) {
-                        $refPath = !Generator::isDefault($interfaceSchema->schema) ? $interfaceSchema->schema : $interface['interface'];
-                        $this->inheritFrom($analysis, $schema, $interfaceSchema, $refPath, $interface['context']);
+                        $refPath = $interfaceSchema->schema !== Generator::UNDEFINED ? $interfaceSchema->schema : $interface['interface'];
+                        $this->inheritFrom($schema, $interfaceSchema, $refPath, $interface['context']);
                     } else {
+                        $this->mergeAnnotations($schema, $interface, $existing);
                         $this->mergeMethods($schema, $interface, $existing);
                     }
                 }

@@ -7,23 +7,27 @@
 namespace OpenApi\Processors;
 
 use OpenApi\Analysis;
-use OpenApi\Annotations as OA;
+use OpenApi\Annotations\MediaType;
+use OpenApi\Annotations\Parameter;
+use OpenApi\Annotations\RequestBody;
+use OpenApi\Annotations\Response;
+use OpenApi\Annotations\XmlContent;
 use OpenApi\Context;
 use OpenApi\Generator;
 
 /**
  * Split XmlContent into Schema and MediaType.
  */
-class MergeXmlContent implements ProcessorInterface
+class MergeXmlContent
 {
     public function __invoke(Analysis $analysis)
     {
-        /** @var OA\XmlContent[] $annotations */
-        $annotations = $analysis->getAnnotationsOfType(OA\XmlContent::class);
+        /** @var XmlContent[] $annotations */
+        $annotations = $analysis->getAnnotationsOfType(XmlContent::class);
 
         foreach ($annotations as $xmlContent) {
             $parent = $xmlContent->_context->nested;
-            if (!($parent instanceof OA\Response) && !($parent instanceof OA\RequestBody) && !($parent instanceof OA\Parameter)) {
+            if (!($parent instanceof Response) && !($parent instanceof RequestBody) && !($parent instanceof Parameter)) {
                 if ($parent) {
                     $xmlContent->_context->logger->warning('Unexpected ' . $xmlContent->identity() . ' in ' . $parent->identity() . ' in ' . $parent->_context);
                 } else {
@@ -31,17 +35,16 @@ class MergeXmlContent implements ProcessorInterface
                 }
                 continue;
             }
-            if (Generator::isDefault($parent->content)) {
+            if ($parent->content === Generator::UNDEFINED) {
                 $parent->content = [];
             }
-            $parent->content['application/xml'] = $mediaType = new OA\MediaType([
+            $parent->content['application/xml'] = new MediaType([
                 'schema' => $xmlContent,
                 'example' => $xmlContent->example,
                 'examples' => $xmlContent->examples,
                 '_context' => new Context(['generated' => true], $xmlContent->_context),
             ]);
-            $analysis->addAnnotation($mediaType, $mediaType->_context);
-            if (!$parent instanceof OA\Parameter) {
+            if (!$parent instanceof Parameter) {
                 $parent->content['application/xml']->mediaType = 'application/xml';
             }
             $xmlContent->example = Generator::UNDEFINED;

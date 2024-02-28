@@ -7,40 +7,39 @@
 namespace OpenApi\Processors;
 
 use OpenApi\Analysis;
-use OpenApi\Annotations as OA;
+use OpenApi\Annotations\Schema;
 use OpenApi\Generator;
 
 /**
- * Iterate over the chain of ancestors of a schema and:
- * - if the ancestor has a schema
- *   => inherit from the ancestor if it has a schema (allOf) and stop.
- * - else
- *   => merge ancestor properties into the schema.
+ * Iterate over the chain of anchestors of a schema and:
+ * - merge anchestor annotations/methods/properties into the schema if the anchestor doesn't have a schema itself
+ * - inherit from the anchestor if it has a schema (allOf) and stop.
  */
-class ExpandClasses implements ProcessorInterface
+class ExpandClasses
 {
-    use Concerns\MergePropertiesTrait;
+    use MergeTrait;
 
     public function __invoke(Analysis $analysis)
     {
-        /** @var OA\Schema[] $schemas */
-        $schemas = $analysis->getAnnotationsOfType(OA\Schema::class, true);
+        /** @var Schema[] $schemas */
+        $schemas = $analysis->getAnnotationsOfType(Schema::class, true);
 
         foreach ($schemas as $schema) {
             if ($schema->_context->is('class')) {
-                $ancestors = $analysis->getSuperClasses($schema->_context->fullyQualifiedName($schema->_context->class));
+                $anchestors = $analysis->getSuperClasses($schema->_context->fullyQualifiedName($schema->_context->class));
                 $existing = [];
-                foreach ($ancestors as $ancestor) {
-                    $ancestorSchema = $analysis->getSchemaForSource($ancestor['context']->fullyQualifiedName($ancestor['class']));
-                    if ($ancestorSchema) {
-                        $refPath = !Generator::isDefault($ancestorSchema->schema) ? $ancestorSchema->schema : $ancestor['class'];
-                        $this->inheritFrom($analysis, $schema, $ancestorSchema, $refPath, $ancestor['context']);
+                foreach ($anchestors as $anchestor) {
+                    $anchestorSchema = $analysis->getSchemaForSource($anchestor['context']->fullyQualifiedName($anchestor['class']));
+                    if ($anchestorSchema) {
+                        $refPath = $anchestorSchema->schema !== Generator::UNDEFINED ? $anchestorSchema->schema : $anchestor['class'];
+                        $this->inheritFrom($schema, $anchestorSchema, $refPath, $anchestor['context']);
 
-                        // one ancestor is enough
+                        // one anchestor is enough
                         break;
                     } else {
-                        $this->mergeMethods($schema, $ancestor, $existing);
-                        $this->mergeProperties($schema, $ancestor, $existing);
+                        $this->mergeAnnotations($schema, $anchestor, $existing);
+                        $this->mergeMethods($schema, $anchestor, $existing);
+                        $this->mergeProperties($schema, $anchestor, $existing);
                     }
                 }
             }

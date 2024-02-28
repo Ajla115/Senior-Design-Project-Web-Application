@@ -7,9 +7,9 @@
 namespace OpenApi\Processors;
 
 use OpenApi\Analysis;
-use OpenApi\Annotations as OA;
+use OpenApi\Annotations\AbstractAnnotation;
 
-class CleanUnmerged implements ProcessorInterface
+class CleanUnmerged
 {
     public function __invoke(Analysis $analysis)
     {
@@ -17,7 +17,7 @@ class CleanUnmerged implements ProcessorInterface
         $merged = $split->merged->annotations;
         $unmerged = $split->unmerged->annotations;
 
-        /** @var OA\AbstractAnnotation $annotation */
+        /** @var AbstractAnnotation $annotation */
         foreach ($analysis->annotations as $annotation) {
             if (property_exists($annotation, '_unmerged')) {
                 foreach ($annotation->_unmerged as $i => $item) {

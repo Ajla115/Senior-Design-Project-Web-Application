@@ -9,11 +9,10 @@ namespace OpenApi\Annotations;
 use OpenApi\Generator;
 
 /**
- * Contact information for the exposed API.
- *
- * @see [OAI Contact Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#contact-object)
- *
  * @Annotation
+ * A "Contact Object": https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#contact-object
+ *
+ * Contact information for the exposed API.
  */
 class Contact extends AbstractAnnotation
 {

@@ -18,12 +18,15 @@ import { useAuth } from "src/hooks/use-auth";
 import { Layout as AuthLayout } from "src/layouts/auth/layout";
 import { UserService } from "services";
 import { useQuery } from "@tanstack/react-query";
+import React from "react";
+import axios from "axios";
 
 import { Visibility, VisibilityOff } from "@mui/icons-material"; //needed for password toggling
 
 const Page = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [registerUser, registerUserInfo] = useRegisterUser();
 
   const handleTogglePassword = () => {
     setShowPassword(!showPassword); //setting the state of visibility
@@ -45,12 +48,17 @@ const Page = () => {
       last_name: Yup.string().max(255).required("Last name is required"),
       password: Yup.string().max(255).required("Password is required"),
     }),
+
+    //  onSubmit:  async (values) => {
+    //   await registerUser(values);
+    // }
+
     onSubmit: async (values, helpers) => {
       try {
-        console.log(values);
-        registerUser;
+        console.log("TEST123");
+        //useRegisterUser(values);
         //await auth.signUp(values.email, values.first_name, values.last_name, values.password);
-        router.push("/");
+        //router.push("/");
       } catch (err) {
         helpers.setStatus({ success: false });
         helpers.setErrors({ submit: err.message });
@@ -144,7 +152,7 @@ const Page = () => {
                     // edge="end" it is a good practice to have, because this ensures that no matter the number of line of code, the icon will always be located on the left
                     endAdornment: (
                       <InputAdornment position="end">
-                        <IconButton color = "primary" onClick={handleTogglePassword} edge="end">
+                        <IconButton color="primary" onClick={handleTogglePassword} edge="end">
                           {showPassword ? <VisibilityOff /> : <Visibility />}
                         </IconButton>
                       </InputAdornment>
@@ -158,13 +166,7 @@ const Page = () => {
                   {formik.errors.submit}
                 </Typography>
               )}
-              <Button
-                fullWidth
-                size="large"
-                sx={{ mt: 3 }}
-                // type="submit"
-                variant="contained"
-              >
+              <Button fullWidth size="large" sx={{ mt: 3 }} type="submit" variant="contained">
                 Register
               </Button>
             </form>
@@ -173,20 +175,44 @@ const Page = () => {
       </Box>
     </>
   );
+
+  function useRegisterUser() {
+    const [state, setState] = React.useReducer((_, action) => action, {
+      isIdle: true,
+    });
+
+    const mutate = React.useCallback(async (values) => {
+      setState({ isLoading: true });
+      try {
+        const data = axios
+          .post(
+            "http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/register/",
+            values
+          )
+          .then((res) => res.data);
+        setState({ isSuccess: true, data });
+        router.push("/");
+      } catch (error) {
+        setState({ isError: true, error });
+      }
+    }, []);
+
+    return [mutate, state];
+  }
 };
 
 Page.getLayout = (page) => <AuthLayout>{page}</AuthLayout>;
 
 export default Page;
 
-function registerUser() {
-  console.log("test");
-  const { isLoading, error, data, isFetching } = useQuery({
-    queryKey: ["users", "register"],
-    queryFn: UserService.register,
-  });
+// function registerUser() {
+//   console.log("test");
+//   const { isLoading, error, data, isFetching } = useQuery({
+//     queryKey: ["users", "register"],
+//     queryFn: UserService.register,
+//   });
 
-  if (isLoading) return "Loading...";
+//   if (isLoading) return "Loading...";
 
-  if (error) return "An error has occurred: " + error.message;
-}
+//   if (error) return "An error has occurred: " + error.message;
+// }

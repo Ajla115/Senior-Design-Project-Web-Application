@@ -150,7 +150,7 @@ Flight::route('DELETE /dm/@id', function ($id) {
  *                     property="dm_ids",
  *                     type="int",
  *                     example="[1,2,3]",
- *                     description="DM IDs"
+ *                     description="DM"
  *                 ),
  *                  @OA\Property(
  *                     property="users_id",

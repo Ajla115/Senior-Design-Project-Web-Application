@@ -67,41 +67,47 @@ login_button.click()
 sleep(10) # --> to ensure that page has loaded properly
 
 hashtags_url = 'https://www.instagram.com/explore/tags/'
-# hashtag = 'fitness'
 driver.get(hashtags_url + hashtag) # --> accessing specific hashtag page
 sleep(5)
 
-#open first post
-first_post = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH,  "//*[@id='mount_0_0_VY']/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/main/article/div/div/div/div[1]/div[1]/a")))
-first_post.click()
+#access first three rows of posts under hashtag
+##posts = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "x1i10hfl")))
 
-sleep(5)
-# #ul - unordered list
-# #li - list item
-# ul = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "ul")))
-# items = ul.find_elements(By.TAG_NAME, "li")
-# statistics = []
+picture1 = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '//*[@id="mount_0_0_dx"]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/main/article/div/div/div/div[1]/div[1]/a/div[1]/div[1]/img')))
 
-# for li in items:
-#     text = li.text
-#     numbers = re.findall(r'\d+', text)
-    
-#     for number in numbers:
-#        statistics.append(number) #I have three different numbers, and I need to save all of them
-#        #print(number)
+# links = []
+# for post in posts:
+#     # Retrieve the href attribute value
+#       href = post.get_attribute("href")
+#       # Process each href as needed
+#       links.append(href)
 
-# sql = "UPDATE instagram_accounts SET post_number = %s, followers_number = %s, followings_number = %s, date_and_time = %s, stats = %s WHERE username = %s"
-# #current_timestamp = time.time()
-# current_date = date.today()
-         
-# #posts, followers, following, time of web scrapping, and number 1 to indicate that this username is written like this, and connects to this data
-# values = (statistics[0], statistics[1], statistics[2], current_date, 1, "korman_ajla") 
-# #I had to put username here in the values, because in the insert into sql stmt I had problem with ' " (triple unintended quotes) at the end
-# mycursor.execute(sql, values)
+# print(links)
 
-# mydb.commit() #needed to save the change, without it, is like we never changed anything
+# urls = []
 
-#print("Came to the end")
+
+
+
+# elements = WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'x1i10hfl')))
+
+# # Print the hrefs of the first ten elements
+# for element in elements[:10]:
+#     href = element.get_attribute('href')
+#     if href:
+#         print(href)
+
+# r_link1 = row1.find_elements(By.TAG_NAME, 'a')
+# urls = []
+
+# for i in r_link1:
+#     if i.get_attribute('href') != None :
+#         urls.append(i.get_attribute('href'))
+
+# print(urls)
+
+
+
 
 
 

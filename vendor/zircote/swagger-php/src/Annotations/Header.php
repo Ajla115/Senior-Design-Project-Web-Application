@@ -8,18 +8,16 @@ namespace OpenApi\Annotations;
 use OpenApi\Generator;
 
 /**
- * @see [OAI Header Object](https://github.com/OAI/OpenAPI-Specification/blob/OpenAPI.next/versions/3.0.md#headerObject).
- *
  * @Annotation
+ *
+ * A "Header Object" https://github.com/OAI/OpenAPI-Specification/blob/OpenAPI.next/versions/3.0.md#headerObject
  */
 class Header extends AbstractAnnotation
 {
     /**
-     * The relative or absolute path to the endpoint.
+     * $ref See https://swagger.io/docs/specification/using-ref/.
      *
-     * @see [Using refs](https://swagger.io/docs/specification/using-ref/)
-     *
-     * @var string|class-string|object
+     * @var string
      */
     public $ref = Generator::UNDEFINED;
 
@@ -29,16 +27,13 @@ class Header extends AbstractAnnotation
     public $header = Generator::UNDEFINED;
 
     /**
-     * A brief description of the parameter.
-     *
-     * This could contain examples of use.
-     * CommonMark syntax MAY be used for rich text representation.
-     *
      * @var string
      */
     public $description = Generator::UNDEFINED;
 
     /**
+     * A brief description of the parameter. This could contain examples of use. CommonMark syntax MAY be used for rich text representation.
+     *
      * @var bool
      */
     public $required = Generator::UNDEFINED;
@@ -46,7 +41,7 @@ class Header extends AbstractAnnotation
     /**
      * Schema object.
      *
-     * @var Schema
+     * @var \OpenApi\Annotations\Schema
      */
     public $schema = Generator::UNDEFINED;
 
@@ -59,12 +54,9 @@ class Header extends AbstractAnnotation
 
     /**
      * Sets the ability to pass empty-valued parameters.
-     *
      * This is valid only for query parameters and allows sending a parameter with an empty value.
-     *
-     * Default value is false.
-     *
-     * If style is used, and if behavior is n/a (cannot be serialized), the value of allowEmptyValue SHALL be ignored.
+     * Default value is false. If style is used, and if behavior is n/a
+     * (cannot be serialized), the value of allowEmptyValue SHALL be ignored.
      *
      * @var bool
      */

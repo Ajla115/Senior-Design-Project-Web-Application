@@ -38,7 +38,7 @@ def insertUsername(username):
         mydb.commit()
         print("Username has been inserted successfully.")
     else :
-        print("Username already exists in the database, so just perform updating.")
+        print("Username already exists in the database, so data will just be updated.")
 
 
 def updateExistingUser(posts, followers, following, username):

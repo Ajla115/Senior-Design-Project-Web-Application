@@ -140,7 +140,7 @@ Flight::route("PUT /accounts/@id", function ($id) {
  */
 
 //delete instagram account
-Flight::route('DELETE /accounts/@id', function ($id) {
+Flight::route("DELETE /accounts/@id", function ($id) {
     Flight::instaAccService()->delete($id);
 });
 

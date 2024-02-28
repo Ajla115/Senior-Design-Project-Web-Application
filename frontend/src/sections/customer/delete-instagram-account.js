@@ -1,12 +1,54 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Typography from "@mui/material/Typography";
-import PropTypes from 'prop-types';
-import { styled, css } from '@mui/system';
-import { Modal as BaseModal } from '@mui/base/Modal';
-import Fade from '@mui/material/Fade';
-import { Button, Stack, CardActions } from '@mui/material';
+import PropTypes from "prop-types";
+import { styled, css } from "@mui/system";
+import { Modal as BaseModal } from "@mui/base/Modal";
+import Fade from "@mui/material/Fade";
+import { Button, Stack, CardActions } from "@mui/material";
+import axios from "axios";
+import { useMutation } from "react-query";
+import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
+import { InstagramService } from "services";
 
 const DeleteModal = ({ isOpen, onClose, customerId }) => {
+  const [triggerDelete, setTriggerDelete] = useState(false);
+
+  const handleDelete = async () => {
+    setTriggerDelete(true);
+    // try {
+    //   const { isLoading, error, data, isFetching } = useMutation({
+    //     queryKey: ["instagram-data"],
+    //     queryFn: InstagramService.deleteAccount(customerId),
+    //   });
+    // } catch (error) {
+    //   // Handle error
+    //   console.error(error);
+    // }
+  };
+
+  useEffect(() => {
+    try {
+      console.log("triggerovan");
+      const { isLoading, error, data, isFetching } = useMutation({
+        queryKey: ["instagram-data"],
+        queryFn: InstagramService.deleteAccount(customerId),
+      });
+    } catch (error) {
+      // Handle error
+      console.error(error);
+    }
+  }, [triggerDelete]);
+
+  const client = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+      mutations: {
+        onError: () => {},
+      },
+    },
+  });
 
   return (
     <Modal
@@ -28,16 +70,14 @@ const DeleteModal = ({ isOpen, onClose, customerId }) => {
           <Stack spacing={5} sx={{ maxWidth: 300, marginLeft: 22 }} direction="row">
             {/* <CardActions sx={{ justifyContent: 'flex-end', marginLeft: 185}}> */}
             <CardActions>
-              <Button
-                variant="contained"
-                color="error"
-                onClick={onClose}
-              >
+              <Button variant="contained" color="error" onClick={onClose}>
                 No
               </Button>
-              <Button variant="contained" color="success" onClick = {handleDelete} >
-                Yes
-              </Button>
+              <QueryClientProvider client={client}>
+                <Button variant="contained" color="success" onClick={handleDelete}>
+                  Yes
+                </Button>
+              </QueryClientProvider>
             </CardActions>
           </Stack>
         </ModalContent>
@@ -45,8 +85,6 @@ const DeleteModal = ({ isOpen, onClose, customerId }) => {
     </Modal>
   );
 };
-
-
 
 const Backdrop = React.forwardRef((props, ref) => {
   const { open, ...other } = props;

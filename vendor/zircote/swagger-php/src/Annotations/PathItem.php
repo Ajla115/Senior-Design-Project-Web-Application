@@ -9,23 +9,27 @@ namespace OpenApi\Annotations;
 use OpenApi\Generator;
 
 /**
- * Describes the operations available on a single path.
- *
- * A Path Item may be empty, due to ACL constraints.
- * The path itself is still exposed to the documentation viewer, but they will not know which operations and parameters are available.
- *
- * @see [OAI Path Item Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#path-item-object)
- *
  * @Annotation
+ * A "Path Item Object": https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#path-item-object
+ * Describes the operations available on a single path.
+ * A Path Item may be empty, due to ACL constraints.
+ * The path itself is still exposed to the documentation viewer but they will not know which operations and parameters are available.
  */
 class PathItem extends AbstractAnnotation
 {
     /**
-     * @see [Using refs](https://swagger.io/docs/specification/using-ref/)
+     * $ref See https://swagger.io/docs/specification/using-ref/.
      *
-     * @var string|class-string|object
+     * @var string
      */
     public $ref = Generator::UNDEFINED;
+
+    /**
+     * key for the Path Object (OpenApi->paths array).
+     *
+     * @var string
+     */
+    public $path = Generator::UNDEFINED;
 
     /**
      * An optional, string summary, intended to apply to all operations in this path.
@@ -33,20 +37,6 @@ class PathItem extends AbstractAnnotation
      * @var string
      */
     public $summary = Generator::UNDEFINED;
-
-    /**
-     * An optional, string description, intended to apply to all operations in this path.
-     *
-     * @var string
-     */
-    public $description = Generator::UNDEFINED;
-
-    /**
-     * Key for the Path Object (OpenApi->paths array).
-     *
-     * @var string
-     */
-    public $path = Generator::UNDEFINED;
 
     /**
      * A definition of a GET operation on this path.
@@ -113,7 +103,6 @@ class PathItem extends AbstractAnnotation
 
     /**
      * A list of parameters that are applicable for all the operations described under this path.
-     *
      * These parameters can be overridden at the operation level, but cannot be removed there.
      * The list must not include duplicated parameters.
      * A unique parameter is defined by a combination of a name and location.
@@ -128,7 +117,6 @@ class PathItem extends AbstractAnnotation
      */
     public static $_types = [
         'path' => 'string',
-        'summary' => 'string',
     ];
 
     /**
@@ -144,7 +132,6 @@ class PathItem extends AbstractAnnotation
         Head::class => 'head',
         Options::class => 'options',
         Parameter::class => ['parameters'],
-        PathParameter::class => ['parameters'],
         Server::class => ['servers'],
         Attachable::class => ['attachables'],
     ];

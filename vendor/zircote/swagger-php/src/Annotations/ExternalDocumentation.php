@@ -9,11 +9,10 @@ namespace OpenApi\Annotations;
 use OpenApi\Generator;
 
 /**
+ * @Annotation
  * Allows referencing an external resource for extended documentation.
  *
- * @see [OAI External Documentation Object](https://github.com/OAI/OpenAPI-Specification/blob/OpenAPI.next/versions/3.0.md#external-documentation-object)
- *
- * @Annotation
+ * A "External Documentation Object": https://github.com/OAI/OpenAPI-Specification/blob/OpenAPI.next/versions/3.0.md#external-documentation-object
  */
 class ExternalDocumentation extends AbstractAnnotation
 {

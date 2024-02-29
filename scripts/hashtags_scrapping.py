@@ -73,7 +73,9 @@ sleep(5)
 #access first three rows of posts under hashtag
 ##posts = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "x1i10hfl")))
 
-picture1 = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '//*[@id="mount_0_0_dx"]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/main/article/div/div/div/div[1]/div[1]/a/div[1]/div[1]/img')))
+sleep(100)
+
+picture1 = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/main/article/div/div/div/div[1]/div[1]/a')))
 
 # links = []
 # for post in posts:

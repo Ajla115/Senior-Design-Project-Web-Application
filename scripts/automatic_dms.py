@@ -96,11 +96,9 @@ cancel_notifications.click()
 
 sleep(15)
 
-send_dm_button = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/div/div/div/div[1]/div/div[2]/div/div/div/div[4]/div')))
-send_dm_button.click()
-
-sleep(15)
 for single_username in existing_usernames:
+  send_dm_button = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/div/div/div/div[1]/div/div[1]/div/div[1]/div[2]/div/div')))
+  send_dm_button.click()
   input_recipient = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME, 'queryBox')))
   input_recipient.click()
   input_recipient.send_keys(single_username)
@@ -113,6 +111,12 @@ for single_username in existing_usernames:
   sleep(15)
   send_message = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/div/div/div/div[1]/div/div[2]/div/div/div/div/div/div/div[2]/div/div/div[2]/div/div/div[2]/div/div[1]")))
   send_message.send_keys("This is a automated message. Please don't respond.")
+  sleep(15)
+  send_button = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/div/div/div/div[1]/div/div[2]/div/div/div/div/div/div/div[2]/div/div/div[2]/div/div/div[3]')))
+  send_button.click()
+  sleep(5)
+  
+
 
 
 

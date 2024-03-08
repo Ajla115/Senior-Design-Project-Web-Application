@@ -21,4 +21,5 @@ const deleteAccount = async (customerId) => {
       console.error("Error deleting resource:", error);
     });
 };
+
 export default { getAccountData, deleteAccount };

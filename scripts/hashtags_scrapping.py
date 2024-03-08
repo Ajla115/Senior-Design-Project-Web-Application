@@ -68,14 +68,41 @@ sleep(10) # --> to ensure that page has loaded properly
 
 hashtags_url = 'https://www.instagram.com/explore/tags/'
 driver.get(hashtags_url + hashtag) # --> accessing specific hashtag page
-sleep(5)
+
 
 #access first three rows of posts under hashtag
 ##posts = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "x1i10hfl")))
 
-sleep(100)
+extracted_usernames = []
+sleep(5)
 
 picture1 = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/main/article/div/div/div/div[1]/div[1]/a')))
+picture1.click()
+
+sleep(10)
+
+username_prompt = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '/html/body/div[7]/div[1]/div/div[3]/div/div/div/div/div[2]/div/article/div/div[2]/div/div/div[2]/div[1]/ul/div[1]/li/div/div/div[2]/h2/div/span/div/a')))
+
+link_to_username = username_prompt.get_attribute('href') 
+#here, it prints it in the form of https://www.instagram.com/team_falchetta_/
+#the first 25 characters are the ig url, and I will just slice or slip that so I will use just the actual name
+
+actual_username = link_to_username.split('/')
+
+#print(actual_username[3])
+
+extracted_usernames.append(actual_username[3])
+#this just gives me the actual username 
+
+
+sleep(10)
+
+next_arrow_button = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '/html/body/div[7]/div[1]/div/div[3]/div/div/div/div/div[1]/div/div/div/button')))
+next_arrow_button.click()
+
+sleep(10)
+
+
 
 # links = []
 # for post in posts:

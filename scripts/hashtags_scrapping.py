@@ -80,60 +80,31 @@ picture1 = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XP
 picture1.click()
 
 sleep(5)
-for i in range(10):
+for i in range(2):
   #repeat the whole process 10 times, so that we ge ten most recent usernames under each hashtag
-  username_prompt = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '/html/body/div[8]/div[1]/div/div[3]/div/div/div/div/div[2]/div/article/div/div[2]/div/div/div[2]/div[1]/ul/div[1]/li/div/div/div[2]/h2/div/span/div/a')))
+  #username_prompt = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '/html/body/div[7]/div[1]/div/div[3]/div/div/div/div/div[2]/div/article/div/div[2]/div/div/div[1]/div/header/div[2]/div[1]/div[1]/div/div/span/span/div/a')))
 
-  link_to_username = username_prompt.get_attribute('href') 
+  #link_to_username = username_prompt.get_attribute('href') 
   #here, it prints it in the form of https://www.instagram.com/team_falchetta_/
   #the first 25 characters are the ig url, and I will just slice or slip that so I will use just the actual name
 
-  actual_username = link_to_username.split('/')
+  #actual_username = link_to_username.split('/')
 
-  extracted_usernames.append(actual_username[3])
+  #extracted_usernames.append(actual_username[1])
   #this just gives me the actual username 
 
-  sleep(25)
+  sleep(2)
+  
   next_arrow_button = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '/html/body/div[7]/div[1]/div/div[3]/div/div/div/div/div[1]/div/div/div/button')))
   next_arrow_button.click()
 
   sleep(2)
 
 
+#print(extracted_usernames)
 
 
 
-
-# links = []
-# for post in posts:
-#     # Retrieve the href attribute value
-#       href = post.get_attribute("href")
-#       # Process each href as needed
-#       links.append(href)
-
-# print(links)
-
-# urls = []
-
-
-
-
-# elements = WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'x1i10hfl')))
-
-# # Print the hrefs of the first ten elements
-# for element in elements[:10]:
-#     href = element.get_attribute('href')
-#     if href:
-#         print(href)
-
-# r_link1 = row1.find_elements(By.TAG_NAME, 'a')
-# urls = []
-
-# for i in r_link1:
-#     if i.get_attribute('href') != None :
-#         urls.append(i.get_attribute('href'))
-
-# print(urls)
 
 
 

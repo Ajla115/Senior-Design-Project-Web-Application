@@ -7,7 +7,6 @@ def get_usernames_under_hashtag(hashtag):
     # Get all posts under the given hashtag
     posts = L.get_hashtag_posts(hashtag)
 
-
     # Set to store unique usernames
     usernames = set()
 

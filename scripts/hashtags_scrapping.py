@@ -10,6 +10,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.action_chains import ActionChains
 
 load_dotenv() #--> this will load env variables
 
@@ -24,6 +26,14 @@ mydb = mysql.connector.connect(
 mycursor = mydb.cursor()
 
 hashtag = input("Enter desired hashtag you want to search for: ") 
+
+# Insert hashtag into the database
+sql = "INSERT INTO instagram_hashtags (hashtag_name) VALUES (%s)"
+val = (hashtag,)
+mycursor.execute(sql, val)
+mydb.commit()  # Commit changes to the database
+
+
 
 #Kad budem radila frontend, onda preko frontenda uzimati tacne podatke za hashtags ovdje
 #Prvo spasiti hashtags u varijablu u bazu podataka pa onda odatle vuci podatke
@@ -80,35 +90,48 @@ picture1 = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XP
 picture1.click()
 
 sleep(5)
-for i in range(2):
+for i in range(11):
+  sleep(5)
   #repeat the whole process 10 times, so that we ge ten most recent usernames under each hashtag
-  #username_prompt = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '/html/body/div[7]/div[1]/div/div[3]/div/div/div/div/div[2]/div/article/div/div[2]/div/div/div[1]/div/header/div[2]/div[1]/div[1]/div/div/span/span/div/a')))
+  username_prompt = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, "body > div.x1n2onr6.xzkaem6 > div.x9f619.x1n2onr6.x1ja2u2z > div > div.x1uvtmcs.x4k7w5x.x1h91t0o.x1beo9mf.xaigb6o.x12ejxvf.x3igimt.xarpa2k.xedcshv.x1lytzrv.x1t2pt76.x7ja8zs.x1n2onr6.x1qrby5j.x1jfb8zj > div > div > div > div > div.xb88tzc.xw2csxc.x1odjw0f.x5fp0pe.x1qjc9v5.xjbqb8w.x1lcm9me.x1yr5g0i.xrt01vj.x10y3i5r.xr1yuqi.xkrivgy.x4ii5y1.x1gryazu.x15h9jz8.x47corl.xh8yej3.xir0mxb.x1juhsu6 > div > article > div > div._ae65 > div > div > div._ae2s._ae3v._ae3w > div._ae5q._akdn._ae5r._ae5s > ul > div.x1qjc9v5.x972fbf.xcfux6l.x1qhh985.xm0m39n.x9f619.x78zum5.xdt5ytf.x2lah0s.xk390pu.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x1n2onr6.xggy1nq.x11njtxf > li > div > div > div._a9zr > h2 > div > span > div > a")))
 
-  #link_to_username = username_prompt.get_attribute('href') 
+
+  link_to_username = username_prompt.get_attribute('href') 
   #here, it prints it in the form of https://www.instagram.com/team_falchetta_/
   #the first 25 characters are the ig url, and I will just slice or slip that so I will use just the actual name
 
-  #actual_username = link_to_username.split('/')
+  actual_username = link_to_username.split('/')
 
-  #extracted_usernames.append(actual_username[1])
+
+  extracted_usernames.append(actual_username[3])
   #this just gives me the actual username 
 
-  sleep(2)
-  
-  next_arrow_button = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '/html/body/div[7]/div[1]/div/div[3]/div/div/div/div/div[1]/div/div/div/button')))
-  next_arrow_button.click()
+  sleep(5)
+  # next_arrow_button =  WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, "body > div.x1n2onr6.xzkaem6 > div.x9f619.x1n2onr6.x1ja2u2z > div > div.x1uvtmcs.x4k7w5x.x1h91t0o.x1beo9mf.xaigb6o.x12ejxvf.x3igimt.xarpa2k.xedcshv.x1lytzrv.x1t2pt76.x7ja8zs.x1n2onr6.x1qrby5j.x1jfb8zj > div > div > div > div > div:nth-child(1) > div > div > div > button")))
+  # next_arrow_button.click()
+  actions = ActionChains(driver)
+  actions.send_keys(Keys.RIGHT).perform()
+  sleep(5)
 
-  sleep(2)
+print(extracted_usernames)
+
+for username in extracted_usernames:
+    # Insert each username into the database
+    sql = "INSERT INTO instagram_accounts (username, stats) VALUES (%s, 0)"
+    val = (username,)
+    mycursor.execute(sql, val)
+
+mydb.commit() 
 
 
-#print(extracted_usernames)
 
 
 
 
 
-
-
+# Close database connection
+mycursor.close()
+mydb.close()
 
 
 

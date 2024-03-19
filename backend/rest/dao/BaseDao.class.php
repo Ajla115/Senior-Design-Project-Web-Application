@@ -118,7 +118,7 @@ class BaseDao
 
         $stmt->execute($entity);
         print_r($stmt->debugDumpParams());
-        die();
+       // die();
         return $entity;
     }
 

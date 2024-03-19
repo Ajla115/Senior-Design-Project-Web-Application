@@ -28,7 +28,7 @@ const DeleteModal = ({ isOpen, onClose, customerId }) => {
 
   useEffect(() => {
     try {
-      console.log("triggerovan");
+      //console.log("triggerovan");
       const { isLoading, error, data, isFetching } = useMutation({
         queryKey: ["instagram-data"],
         queryFn: InstagramService.deleteAccount(customerId),

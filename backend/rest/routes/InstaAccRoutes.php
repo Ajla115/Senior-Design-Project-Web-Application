@@ -40,13 +40,13 @@ Flight::route('POST /accounts', function () {
     //I added this because I had a problem with string array conversion
     //I hope this line wont be a problem for DM Routes
     $username = Flight::request()->data['username'];
-    Flight::json(Flight::instaAccService()->addIndividually($username));
+    Flight::json(["message" => Flight::instaAccService()->addIndividually($username)]);
 });
 
 /**
  * @OA\Get(path="/accounts", tags={"accounts"}, security={{"ApiKeyAuth": {}}},
  *          summary="Return all IG accounts from the API. ",
- *          @OA\Response( response=200, description="List of accounts."),
+ *          @OA\Response( response=200, description="List of active accounts."),
  *           @OA\Response( response=400, description="Invalid API request"),
  *           @OA\Response( response=404, description="Accounts not found" )
  *     )
@@ -55,8 +55,13 @@ Flight::route('POST /accounts', function () {
 
 //get all instagram account
 Flight::route('GET /accounts', function () {
+    Flight::json(["message" => Flight::instaAccService()->getActiveAccounts()]);
+});
+
+Flight::route('GET /allAccounts', function () {
     Flight::json(Flight::instaAccService()->get_all());
 });
+
 
 /**
  * @OA\Get(path="/accounts/{id}", tags={"accounts"}, security={{"ApiKeyAuth": {}}},
@@ -141,7 +146,7 @@ Flight::route("PUT /accounts/@id", function ($id) {
 
 //delete instagram account
 Flight::route("DELETE /accounts/@id", function ($id) {
-    Flight::instaAccService()->delete($id);
+    Flight::instaAccService()->customDelete($id);
 });
 
 

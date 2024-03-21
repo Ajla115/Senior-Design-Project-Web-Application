@@ -20,6 +20,17 @@ class InstaAccService extends BaseService
       return $this->dao->addIndividually($username);
     }
 
+    function customDelete($id){
+        return $this->dao->customDelete($id);
+    }
+
+    function getActiveAccounts(){
+        return $this->dao->getActiveAccounts();
+    }
+
+    
+  
+
 
 
  

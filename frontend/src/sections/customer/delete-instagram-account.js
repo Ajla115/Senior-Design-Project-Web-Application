@@ -32,7 +32,13 @@ const DeleteModal = ({ isOpen, onClose, customerId }) => {
       const { isLoading, error, data, isFetching } = useMutation({
         queryKey: ["instagram-data"],
         queryFn: InstagramService.deleteAccount(customerId),
+        mutations: {
+          onSuccess: (data) => {
+            console.log(data);
+          },
+        },
       });
+      console.log(data);
     } catch (error) {
       // Handle error
       console.error(error);

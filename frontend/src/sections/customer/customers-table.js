@@ -128,10 +128,10 @@ function InstagramAccountsData() {
 
   //This is all for deleting a modal
   const [isModalOpen, setIsModalOpen] = React.useState(false);
-  const [selectedCustomerId, setSelectedCustomerId] = React.useState(null); 
+  const [selectedCustomerId, setSelectedCustomerId] = React.useState(null);
 
   const handleOpen = (customerId) => {
-    setSelectedCustomerId(customerId)
+    setSelectedCustomerId(customerId);
     setIsModalOpen(true);
   };
 
@@ -153,7 +153,7 @@ function InstagramAccountsData() {
 
   return (
     <>
-      {data.map((customer) => {
+      {data.message.map((customer) => {
         // const createdAt = format(customer.createdAt, "dd/MM/yyyy");
 
         return (
@@ -189,7 +189,7 @@ function InstagramAccountsData() {
         );
       })}
 
-      <DeleteModal  isOpen={isModalOpen} onClose={handleClose} customerId={selectedCustomerId} />
+      <DeleteModal isOpen={isModalOpen} onClose={handleClose} customerId={selectedCustomerId} />
     </>
   );
 }

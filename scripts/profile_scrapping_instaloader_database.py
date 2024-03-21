@@ -23,7 +23,7 @@ def checkExistence(username):
 
 def updateUser(username, stats):
     if not checkExistence(username):
-        sql_query2 = "INSERT INTO instagram_accounts (username, stats) VALUES (%s, %s)"
+        sql_query2 = "INSERT INTO instagram_accounts (username, stats, activity) VALUES (%s, %s, 'active')"
         values = (username, stats)
     else:
         sql_query2 = "UPDATE instagram_accounts SET stats = %s WHERE username = %s"
@@ -34,13 +34,25 @@ def updateUser(username, stats):
     mydb.commit()
 
 def scrapeData(username):
-    profile = instaloader.Profile.from_username(bot.context, username)
-    posts = profile.mediacount
-    followers = profile.followers
-    followings = profile.followees
-    current_date = date.today()
+        current_date = date.today()
+        try:
+            profile = instaloader.Profile.from_username(bot.context, username)
+            posts = profile.mediacount
+            followers = profile.followers
+            followings = profile.followees
+            updateExistingUser(posts, followers, followings, username, current_date)
+        except:
+            setInvalidUser(username, current_date)
+            #in case the profile does not exist any more, or username has changed
+            #set the profile to be invalid
 
-    updateExistingUser(posts, followers, followings, username, current_date)
+def setInvalidUser(username, current_date):
+    sql_query3 = "UPDATE instagram_accounts SET post_number = 0, followers_number = 0, followings_number = 0, date_and_time = %s, stats = 1, activity = %s WHERE username = %s"
+    values = ( current_date,"invalid username", username)
+    mycursor = mydb.cursor()
+    mycursor.execute(sql_query3, values)
+    mydb.commit()    
+
 
 def updateExistingUser(posts, followers, following, username, current_date):
     sql_query3 = "UPDATE instagram_accounts SET post_number = %s, followers_number = %s, followings_number = %s, date_and_time = %s, stats = 1 WHERE username = %s"
@@ -57,8 +69,9 @@ def fetchUsernamesStatsFromDB():
 
 def main():
     usernames_stats = fetchUsernamesStatsFromDB()
-    
+  
     for username, stats in usernames_stats:
+        
         if stats == 1:
             # Update the user stats
             updateUser(username, stats)

@@ -73,7 +73,7 @@
 //one row --> one recipient
 Flight::route('POST /dm', function () {
     $data = Flight::request()->data->getData();
-    Flight::json(['message' => Flight::dmService()->splitAndAdd($data)]);
+    Flight::json(Flight::dmService()->splitAndAdd($data));
 });
 
 
@@ -112,7 +112,7 @@ Flight::route('POST /dm', function () {
 //bulk delete to delete multiple dms at the same time
 Flight::route('DELETE /dm/bulkDelete', function () {
     $data = Flight::request()->data->getData();
-    Flight::json(['data' => Flight::dmService()->bulkDelete($data)]);
+    Flight::json(Flight::dmService()->bulkDelete($data));
 });
 
 
@@ -134,7 +134,7 @@ Flight::route('DELETE /dm/bulkDelete', function () {
 
 //route to delete DM per id, however only scheduled and not sent DMs can be deleted
 Flight::route('DELETE /dm/@id', function ($id) {
-    Flight::json(['message' => Flight::dmService()->deleteScheduled($id)]);
+    Flight::json(Flight::dmService()->deleteScheduled($id));
 });
 
 /**
@@ -211,7 +211,7 @@ Flight::route('DELETE /dm/@id', function ($id) {
 //if it exists, take its ID, if it does not exist, add it to the instagram accounts table first and then to user_dms
 Flight::route("PUT /dm/bulkUpdate", function () {
     $data = Flight::request()->data->getData();
-    Flight::json(['message' => Flight::dmService()->checkRecipientsAndUpdateDM($data)]);
+    Flight::json(Flight::dmService()->checkRecipientsAndUpdateDM($data));
 });
 
 
@@ -283,7 +283,7 @@ Flight::route("PUT /dm/bulkUpdate", function () {
 //Update a single DM that has only one message
 Flight::route("PUT /dm/@id", function ($id) {
     $data = Flight::request()->data->getData();
-    Flight::json(['message' => Flight::dmService()->checkRecipientsAndUpdateDMIndividually($data, $id)]);
+    Flight::json(Flight::dmService()->checkRecipientsAndUpdateDMIndividually($data, $id));
 });
 
 

@@ -40,7 +40,7 @@ Flight::route('POST /accounts', function () {
     //I added this because I had a problem with string array conversion
     //I hope this line wont be a problem for DM Routes
     $username = Flight::request()->data['username'];
-    Flight::json(["message" => Flight::instaAccService()->addIndividually($username)]);
+    Flight::json(Flight::instaAccService()->addIndividually($username));
 });
 
 /**
@@ -55,11 +55,7 @@ Flight::route('POST /accounts', function () {
 
 //get all instagram account
 Flight::route('GET /accounts', function () {
-    Flight::json(["message" => Flight::instaAccService()->getActiveAccounts()]);
-});
-
-Flight::route('GET /allAccounts', function () {
-    Flight::json(Flight::instaAccService()->get_all());
+    Flight::json(Flight::instaAccService()->getActiveAccounts());
 });
 
 
@@ -124,7 +120,7 @@ Flight::route('GET /accounts/username/@username', function ($username) {
 //update instagram accounts
 Flight::route("PUT /accounts/@id", function ($id) {
     $data = Flight::request()->data->getData();
-    Flight::json(['message' => 'Instagram account was updated succesfully', 'data' => Flight::instaAccService()->update($data, $id)]);
+    Flight::json(Flight::instaAccService()->update($data, $id));
 });
 
 

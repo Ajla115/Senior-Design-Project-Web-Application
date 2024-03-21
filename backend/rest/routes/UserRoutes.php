@@ -131,7 +131,7 @@ Flight::route('POST /register', function () {
 //This is better than having to do PUT for every database column/attribute differently
 Flight::route("PUT /users/@id", function ($id) {
   $data = Flight::request()->data->getData();
-  Flight::json(['message' => 'User was edited succesfully', 'data' => Flight::userService()->update($data, $id)]);
+  Flight::json(Flight::userService()->update($data, $id));
   //-> converts the results to the JSON form
   //This array we could have created above, store it in a variable, and then call that variable or do it directly like this
 });

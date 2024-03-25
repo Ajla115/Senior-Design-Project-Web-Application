@@ -6,55 +6,35 @@ import { Modal as BaseModal } from "@mui/base/Modal";
 import Fade from "@mui/material/Fade";
 import { Button, Stack, CardActions } from "@mui/material";
 import axios from "axios";
-import { useMutation } from "react-query";
-import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
+import { useMutation, QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { InstagramService } from "services";
 
 const DeleteModal = ({ isOpen, onClose, customerId }) => {
-  const [triggerDelete, setTriggerDelete] = useState(false);
+  const client = new QueryClient();
+  const [isDeleted, setIsDeleted] = useState(false);
 
-  const handleDelete = async () => {
-    setTriggerDelete(true);
-    // try {
-    //   const { isLoading, error, data, isFetching } = useMutation({
-    //     queryKey: ["instagram-data"],
-    //     queryFn: InstagramService.deleteAccount(customerId),
-    //   });
-    // } catch (error) {
-    //   // Handle error
-    //   console.error(error);
-    // }
-  };
-
-  useEffect(() => {
-    try {
-      //console.log("triggerovan");
-      const { isLoading, error, data, isFetching } = useMutation({
-        queryKey: ["instagram-data"],
-        queryFn: InstagramService.deleteAccount(customerId),
-        mutations: {
-          onSuccess: (data) => {
-            console.log(data);
-          },
-        },
-      });
-      console.log(data);
-    } catch (error) {
-      // Handle error
-      console.error(error);
-    }
-  }, [triggerDelete]);
-
-  const client = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-      },
-      mutations: {
-        onError: () => {},
-      },
+  const mutation = useMutation({
+    mutationFn: async () => {
+      await InstagramService.deleteAccount(customerId);
+    },
+    onSuccess: () => {
+      setIsDeleted(true);
+      console.log("bravo");
+      onClose();
+    },
+    onError: (error) => {
+      console.error("Error deleting Instagram account:", error);
     },
   });
+
+  const handleDelete = async () => {
+    console.log("Deleting...");
+    try {
+      await mutation.mutateAsync();
+    } catch (error) {
+      console.error("Error deleting Instagram account:", error);
+    }
+  };
 
   return (
     <Modal
@@ -80,7 +60,12 @@ const DeleteModal = ({ isOpen, onClose, customerId }) => {
                 No
               </Button>
               <QueryClientProvider client={client}>
-                <Button variant="contained" color="success" onClick={handleDelete}>
+                <Button
+                  variant="contained"
+                  color="success"
+                  onClick={handleDelete}
+                  disabled={mutation.isLoading}
+                >
                   Yes
                 </Button>
               </QueryClientProvider>

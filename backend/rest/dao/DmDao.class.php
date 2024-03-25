@@ -84,6 +84,9 @@ class DmDao extends BaseDao
       $row = $stmt->fetch(PDO::FETCH_ASSOC);
       return array("status" => 200, "message" => $row['id']);//return $row['id'];
     }
+    catch (PDOException $e) {
+      return array("status" => 500, "message" => $e->getMessage());
+    }
   }
 
   //this will create a new dm if we add a new username while already updating an existing DM

@@ -43,6 +43,49 @@ Flight::route('POST /accounts', function () {
     Flight::json(Flight::instaAccService()->addIndividually($username));
 });
 
+//The route above is related to the DMs, and the one below is for the Instagram Accounts site,
+//To just add a new username to the database
+/**
+ * @OA\Post(
+ *     path="/accounts/{username}",
+ *     security={{"ApiKeyAuth": {}}},
+ *     summary="Add a new account without IG data",
+ *     description="Add a new account",
+ *     tags={"accounts"},
+ *     @OA\RequestBody(
+ *         description="Add new account",
+ *         required=true,
+ *         @OA\MediaType(
+ *             mediaType="application/json",
+ *             @OA\Schema(
+ *                 @OA\Property(
+ *                     property="username",
+ *                     type="string",
+ *                     example="firstname_lastname",
+ *                     description="Username"
+ *                 )
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Username has been added"
+ *     ),
+ *     @OA\Response(
+ *         response=400,
+ *         description="Invalid API request"
+ *     )
+ * )
+ */
+
+
+//works
+//add a new account
+Flight::route('POST /accounts/@username', function ($username) {
+    Flight::json(Flight::instaAccService()->addIndividually($username));
+});
+
+
 /**
  * @OA\Get(path="/accounts", tags={"accounts"}, security={{"ApiKeyAuth": {}}},
  *          summary="Return all IG accounts from the API. ",

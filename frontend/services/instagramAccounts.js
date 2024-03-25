@@ -22,4 +22,18 @@ const deleteAccount = async (customerId) => {
     });
 };
 
-export default { getAccountData, deleteAccount };
+const addAccount = async (username) => {
+  return axios
+    .post(
+      `http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/accounts/${username}`
+    )
+    .then((response) => {
+      return response.data;
+    })
+    .catch((error) => {
+      console.error("Error adding an username to the database:", error);
+    });
+};
+
+
+export default { getAccountData, deleteAccount, addAccount };

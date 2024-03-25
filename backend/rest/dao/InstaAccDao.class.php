@@ -32,7 +32,7 @@ class InstaAccDao extends BaseDao
     // return $this->query("
     // INSERT INTO " . $this->table_name . " (username, stats) VALUES (:value1, :value2)", ["value1" => $username, "value2" => 0]);
     try {
-      $stmt = $this->conn->prepare("INSERT INTO " . $this->table_name . " (username, stats) VALUES (:username, 0)");
+      $stmt = $this->conn->prepare("INSERT INTO " . $this->table_name . " (username, stats, activity) VALUES (:username, 0, 'active')");
       $stmt->bindParam(':username', $username);
       $stmt->execute();
       return array("status" => 200, "message" => "Inserted successfully");

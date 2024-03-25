@@ -3,6 +3,7 @@ import NextLink from "next/link";
 import { useRouter } from "next/navigation";
 import { useFormik } from "formik";
 import { useState } from "react";
+import { useMutation, QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import * as Yup from "yup";
 import {
   Box,
@@ -25,8 +26,9 @@ import { Visibility, VisibilityOff } from "@mui/icons-material"; //needed for pa
 
 const Page = () => {
   const [password, setPassword] = useState("");
+  const [backendResult, setBackendResult] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [registerUser, registerUserInfo] = useRegisterUser();
+  //const [registerUser, registerUserInfo] = useRegisterUser();
 
   const handleTogglePassword = () => {
     setShowPassword(!showPassword); //setting the state of visibility
@@ -48,24 +50,56 @@ const Page = () => {
       last_name: Yup.string().max(255).required("Last name is required"),
       password: Yup.string().max(255).required("Password is required"),
     }),
-
-    //  onSubmit:  async (values) => {
-    //   await registerUser(values);
-    // }
-
     onSubmit: async (values, helpers) => {
       try {
-        console.log("TEST123");
-        //useRegisterUser(values);
-        //await auth.signUp(values.email, values.first_name, values.last_name, values.password);
-        //router.push("/");
+        const result = await UserService.register(formik.values.first_name,
+          formik.values.last_name,
+          formik.values.email,
+          formik.values.password);
+        setBackendResult(result);
+        //console.log(JSON.stringify(backendResult));
+        if (result.status === 200) {
+          router.push("/");
+        } else {
+          //console.log(backendResult.message);
+          helpers.setErrors({ submit: result.message });
+        }
       } catch (err) {
         helpers.setStatus({ success: false });
-        helpers.setErrors({ submit: err.message });
+        helpers.setErrors({ submit: err.message || "An unexpected error happened." });
+        helpers.setSubmitting(false);
         helpers.setSubmitting(false);
       }
     },
   });
+
+  const mutation = useMutation({
+    mutationFn: async () => {
+      await UserService.register(
+        formik.values.first_name,
+        formik.values.last_name,
+        formik.values.email,
+        formik.values.password
+      );
+      //closeButton(false); //to close the modal
+    },
+    onSuccess: () => {
+      router.push("/");
+      //this redirects to dashboard after successful registration
+    },
+    onError: (error) => {
+      console.error(" Error adding a new user:", error);
+    },
+  });
+
+  const handleRegistration = async () => {
+    console.log("Registering");
+    try {
+      await mutation.mutateAsync();
+    } catch (error) {
+      console.error("Error adding a new user:", error);
+    }
+  };
 
   return (
     <>
@@ -166,7 +200,13 @@ const Page = () => {
                   {formik.errors.submit}
                 </Typography>
               )}
-              <Button fullWidth size="large" sx={{ mt: 3 }} type="submit" variant="contained">
+              <Button
+                fullWidth
+                size="large"
+                sx={{ mt: 3 }}
+                type="submit"
+                variant="contained"
+              >
                 Register
               </Button>
             </form>
@@ -175,44 +215,8 @@ const Page = () => {
       </Box>
     </>
   );
-
-  function useRegisterUser() {
-    const [state, setState] = React.useReducer((_, action) => action, {
-      isIdle: true,
-    });
-
-    const mutate = React.useCallback(async (values) => {
-      setState({ isLoading: true });
-      try {
-        const data = axios
-          .post(
-            "http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/register/",
-            values
-          )
-          .then((res) => res.data);
-        setState({ isSuccess: true, data });
-        router.push("/");
-      } catch (error) {
-        setState({ isError: true, error });
-      }
-    }, []);
-
-    return [mutate, state];
-  }
 };
 
 Page.getLayout = (page) => <AuthLayout>{page}</AuthLayout>;
 
 export default Page;
-
-// function registerUser() {
-//   console.log("test");
-//   const { isLoading, error, data, isFetching } = useQuery({
-//     queryKey: ["users", "register"],
-//     queryFn: UserService.register,
-//   });
-
-//   if (isLoading) return "Loading...";
-
-//   if (error) return "An error has occurred: " + error.message;
-// }

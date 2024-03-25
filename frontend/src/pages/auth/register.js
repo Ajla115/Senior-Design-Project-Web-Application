@@ -2,7 +2,7 @@ import Head from "next/head";
 import NextLink from "next/link";
 import { useRouter } from "next/navigation";
 import { useFormik } from "formik";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import * as Yup from "yup";
 import {
@@ -28,7 +28,7 @@ const Page = () => {
   const [password, setPassword] = useState("");
   const [backendResult, setBackendResult] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  //const [registerUser, registerUserInfo] = useRegisterUser();
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleTogglePassword = () => {
     setShowPassword(!showPassword); //setting the state of visibility
@@ -52,18 +52,19 @@ const Page = () => {
     }),
     onSubmit: async (values, helpers) => {
       try {
-        const result = await UserService.register(formik.values.first_name,
-          formik.values.last_name,
-          formik.values.email,
-          formik.values.password);
-        setBackendResult(result);
+        await mutation.mutateAsync();
+        // const result = await UserService.register(formik.values.first_name,
+        //   formik.values.last_name,
+        //   formik.values.email,
+        //   formik.values.password);
+        // setBackendResult(result);
         //console.log(JSON.stringify(backendResult));
-        if (result.status === 200) {
-          router.push("/");
-        } else {
-          //console.log(backendResult.message);
-          helpers.setErrors({ submit: result.message });
-        }
+        // if (result.status === 200) {
+        //   router.push("/");
+        // } else {
+        //   //console.log(backendResult.message);
+        //   helpers.setErrors({ submit: result.message });
+        // }
       } catch (err) {
         helpers.setStatus({ success: false });
         helpers.setErrors({ submit: err.message || "An unexpected error happened." });
@@ -75,31 +76,38 @@ const Page = () => {
 
   const mutation = useMutation({
     mutationFn: async () => {
-      await UserService.register(
+      const userResponse = await UserService.register(
         formik.values.first_name,
         formik.values.last_name,
         formik.values.email,
         formik.values.password
       );
+      setBackendResult(userResponse);
       //closeButton(false); //to close the modal
-    },
-    onSuccess: () => {
-      router.push("/");
-      //this redirects to dashboard after successful registration
     },
     onError: (error) => {
       console.error(" Error adding a new user:", error);
     },
   });
 
-  const handleRegistration = async () => {
-    console.log("Registering");
-    try {
-      await mutation.mutateAsync();
-    } catch (error) {
-      console.error("Error adding a new user:", error);
+  useEffect(() => {
+    if (backendResult !== "") {
+      if (backendResult.status === 200) {
+        router.push("/");
+      } else if (backendResult.status === 500) {
+        setErrorMessage(backendResult.message);
+      }
     }
-  };
+  }, [backendResult, router]);
+
+  // const handleRegistration = async () => {
+  //   console.log("Registering");
+  //   try {
+  //     await mutation.mutateAsync();
+  //   } catch (error) {
+  //     console.error("Error adding a new user:", error);
+  //   }
+  // };
 
   return (
     <>
@@ -200,13 +208,8 @@ const Page = () => {
                   {formik.errors.submit}
                 </Typography>
               )}
-              <Button
-                fullWidth
-                size="large"
-                sx={{ mt: 3 }}
-                type="submit"
-                variant="contained"
-              >
+              {errorMessage && <p style={{ color: "red" }}>Error: {errorMessage}</p>}
+              <Button fullWidth size="large" sx={{ mt: 3 }} type="submit" variant="contained">
                 Register
               </Button>
             </form>

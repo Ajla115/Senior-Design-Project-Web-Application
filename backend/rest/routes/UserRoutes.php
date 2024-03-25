@@ -97,12 +97,16 @@ Flight::route('POST /register', function () {
   // Add the user to the database
   $user = Flight::userService()->add($data);
 
-  // Generate the JWT token
-  $jwt = JWT::encode($user, Config::JWT_SECRET(), 'HS256');
+  if ($user["status"] === 500) {
+    Flight::json(["status" => 500, "message" => $user["message"]]);
+  } else if ($user["status"] === 200) {
 
-  // Return the JWT token in the response
-  Flight::json(["status" => 200, "token" => $jwt, "new user" => $user]);
-  
+    // Generate the JWT token
+    $jwt = JWT::encode($user, Config::JWT_SECRET(), 'HS256');
+
+    // Return the JWT token in the response
+    Flight::json(["status" => 200, "token" => $jwt, "new user" => $user]);
+  }
 
 });
 

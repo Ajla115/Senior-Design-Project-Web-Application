@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Head from "next/head";
 import NextLink from "next/link";
 import { useRouter } from "next/navigation";
@@ -27,6 +27,7 @@ import { useMutation } from "@tanstack/react-query";
 const Page = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [backendResult, setBackendResult] = useState("");
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleTogglePassword = () => {
     setShowPassword(!showPassword); //setting the state of visibility
@@ -47,15 +48,15 @@ const Page = () => {
     }),
     onSubmit: async (values, helpers) => {
       try {
-        const result = await UserService.login(values.email, values.password);
-        setBackendResult(result);
-        //console.log(JSON.stringify(backendResult));
-        if (result.status === 200) {
-          router.push("/");
-        } else {
-          //console.log(backendResult.message);
-          helpers.setErrors({ submit: result.message });
-        }
+        await mutation.mutateAsync();
+        // setBackendResult(result);
+        // //console.log(JSON.stringify(backendResult));
+        // if (result.status === 200) {
+        //   router.push("/");
+        // } else {
+        //   //console.log(backendResult.message);
+        //   helpers.setErrors({ submit: result.message });
+        // }
       } catch (err) {
         helpers.setStatus({ success: false });
         helpers.setErrors({ submit: err.message || "An unexpected error happened." });
@@ -71,11 +72,8 @@ const Page = () => {
 
   const mutation = useMutation({
     mutationFn: async () => {
-      await UserService.login(formik.values.email, formik.values.password);
-    },
-    onSuccess: () => {
-      router.push("/");
-      //this redirects to dashboard after successful registration
+      const userResponse = await UserService.login(formik.values.email, formik.values.password);
+      setBackendResult(userResponse);
     },
     onError: (error) => {
       //console.error("Error logging: ", error);
@@ -84,6 +82,18 @@ const Page = () => {
       helpers.setSubmitting(false);
     },
   });
+
+  useEffect(() => {
+    if (backendResult !== "") {
+
+      if (backendResult.status === 200){
+        router.push("/");
+      } else  if (backendResult.status === 500) {
+        //console.log( backendResult.message) ;
+        setErrorMessage(backendResult.message);
+      }
+    }
+  }, [backendResult, router]);
 
   return (
     <>
@@ -173,6 +183,7 @@ const Page = () => {
                     {formik.errors.submit}
                   </Typography>
                 )}
+                {errorMessage && <p style={{color: 'red' }}>Error: {errorMessage}</p>}
                 <Button
                   fullWidth
                   size="large"
@@ -184,14 +195,6 @@ const Page = () => {
                 >
                   Login
                 </Button>
-                {/* <Button fullWidth size="large" sx={{ mt: 3 }} onClick={handleSkip}>
-                  Skip authentication
-                </Button> */}
-                {/* <Alert color="primary" severity="info" sx={{ mt: 3 }}>
-                  <div>
-                    You can use <b>demo@devias.io</b> and password <b>Password123!</b>
-                  </div>
-                </Alert> */}
               </form>
             )}
             {/* {method === 'phoneNumber' && (

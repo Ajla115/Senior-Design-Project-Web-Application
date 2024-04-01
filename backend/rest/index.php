@@ -9,6 +9,7 @@ require '../../vendor/autoload.php';
 require "./services/BaseService.php";
 require_once __DIR__ . '/services/UserService.php';
 require_once __DIR__ . '/services/InstaAccService.php';
+require_once __DIR__ . '/services/InstaHashService.php';
 require_once __DIR__ . '/services/DmService.php';
 
 use Firebase\JWT\JWT;
@@ -17,6 +18,7 @@ use Firebase\JWT\Key;
 //register names that will be used for services and daos
 Flight::register('userService', "UserService");
 Flight::register("instaAccService", "InstaAccService");
+Flight::register("instaHashService", "InstaHashService");
 Flight::register("dmService", "DmService");
 Flight::register('userDao', "UserDao");
 Flight::register('dmDao', "DmDao");
@@ -25,6 +27,7 @@ Flight::register('dmDao', "DmDao");
 require_once __DIR__ . '/routes/UserRoutes.php';
 require_once __DIR__ . '/routes/InstaAccRoutes.php';
 require_once __DIR__ . '/routes/DmRoutes.php';
+require_once __DIR__ . '/routes/HashtagRoutes.php';
 
 function allow_preflight()
 {

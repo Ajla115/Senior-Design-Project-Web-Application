@@ -93,7 +93,7 @@ const Page = () => {
   useEffect(() => {
     if (backendResult !== "") {
       if (backendResult.status === 200) {
-        router.push("/");
+        router.push("/login");
       } else if (backendResult.status === 500) {
         setErrorMessage(backendResult.message);
       }

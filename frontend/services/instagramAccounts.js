@@ -8,6 +8,16 @@ const getAccountData = async () => {
     });
 };
 
+const getHashtagData = async () => {
+  return axios
+    .get("http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/hashtags/")
+    .then((response) => {
+      return response.data;
+    });
+};
+
+
+
 const deleteAccount = async (customerId) => {
   console.log(customerId);
   return axios
@@ -35,5 +45,19 @@ const addAccount = async (username) => {
     });
 };
 
+const addHashtag = async (hashtag) => {
+  return axios
+    .post(
+      `http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/hashtags/${hashtag}`
+    )
+    .then((response) => {
+      return response.data;
+    })
+    .catch((error) => {
+      console.error("Error adding an hashtag to the database:", error);
+    });
+};
 
-export default { getAccountData, deleteAccount, addAccount };
+
+
+export default { getAccountData, getHashtagData, deleteAccount, addAccount };

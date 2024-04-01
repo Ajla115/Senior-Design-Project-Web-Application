@@ -23,11 +23,14 @@ import { Layout as AuthLayout } from "src/layouts/auth/layout";
 import { Visibility, VisibilityOff } from "@mui/icons-material"; //needed for password toggling
 import { UserService } from "services";
 import { useMutation } from "@tanstack/react-query";
+import { AuthProvider, useAuthContext } from "src/contexts/auth-context";
 
 const Page = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [backendResult, setBackendResult] = useState("");
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const { signIn } = useAuthContext();
 
   const handleTogglePassword = () => {
     setShowPassword(!showPassword); //setting the state of visibility
@@ -48,7 +51,8 @@ const Page = () => {
     }),
     onSubmit: async (values, helpers) => {
       try {
-        await mutation.mutateAsync();
+        router.push("/");
+       // await mutation.mutateAsync();
         // setBackendResult(result);
         // //console.log(JSON.stringify(backendResult));
         // if (result.status === 200) {
@@ -83,17 +87,19 @@ const Page = () => {
     },
   });
 
-  useEffect(() => {
-    if (backendResult !== "") {
+  // useEffect(() => {
+  //   if (backendResult !== "") {
+  //     if (backendResult.status === 200) {
+  //       signIn(backendResult);
+  //       router.push("/");
+  //     }
 
-      if (backendResult.status === 200){
-        router.push("/");
-      } else  if (backendResult.status === 500) {
-        //console.log( backendResult.message) ;
-        setErrorMessage(backendResult.message);
-      }
-    }
-  }, [backendResult, router]);
+  //     if (backendResult.status === 500) {
+  //       //console.log( backendResult.message) ;
+  //       setErrorMessage(backendResult.message);
+  //     }
+  //   }
+  // }, [backendResult, router]);
 
   return (
     <>
@@ -183,7 +189,7 @@ const Page = () => {
                     {formik.errors.submit}
                   </Typography>
                 )}
-                {errorMessage && <p style={{color: 'red' }}>Error: {errorMessage}</p>}
+                {errorMessage && <p style={{ color: "red" }}>Error: {errorMessage}</p>}
                 <Button
                   fullWidth
                   size="large"

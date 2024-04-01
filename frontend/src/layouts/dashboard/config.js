@@ -28,6 +28,15 @@ export const items = [
     )
   },
   {
+    title: 'Instagram Hashtags',
+    path: '/hashtags',
+    icon: (
+      <SvgIcon fontSize="small">
+        <UsersIcon />
+      </SvgIcon>
+    )
+  },
+  {
     title: 'Automated DMs',
     path: '/companies',
     icon: (

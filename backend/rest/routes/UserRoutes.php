@@ -37,31 +37,9 @@ Flight::route('GET /connection-check', function () {
 //registration and login are both needed on the swagger
 //you first succesfully connect using one of this two, and then use the token to authorize
 Flight::route('POST /login', function () {
-  $login = Flight::request()->data->getData();
-  $user = Flight::userDao()->get_user_by_email($login['email']);
-  //Flight::json($user);
 
-  if (count($user['message']) > 0) {  //checks if the user array has more than 0 elements, if it is, go with the first user from the array
-    $user = $user['message'];
-    $user = $user[0];
-  }
-
-  if (isset ($user['id'])) {  //this checks if the user is valid, by checkig if an id was set
-    if ($user['password'] == md5($login['password'])) {
-
-      unset ($user['password']); //remove password from array not be included in JWT Token bc of security issues
-      //$user['is_admin'] = false;
-
-      $jwt = JWT::encode($user, Config::JWT_SECRET(), 'HS256');
-      //ovako se zapravo stavara JWT Token
-      Flight::json(["status" => 200, "token" => $jwt]);
-    } else {
-      Flight::json(["status" => 500, "message" => "Wrong password"]);
-    }
-  } else {
-    Flight::json(["status" => 500, "message" => "User doesn't exist"]);
-    //ovo je u slucaju da email nije valid, mada je ovo generalized message, ali mogu se i specificne poruke stavljati da user zna u cmeu je greska
-  }
+  $data = Flight::request()->data->getData();
+  Flight::json(Flight::userService()->login($data));
 });
 
 
@@ -92,21 +70,11 @@ Flight::route('POST /login', function () {
  */
 //Registration route for users 
 Flight::route('POST /register', function () {
+
   $data = Flight::request()->data->getData();
 
-  // Add the user to the database
-  $user = Flight::userService()->add($data);
+  Flight::json(Flight::userService()->register($data));
 
-  if ($user["status"] === 500) {
-    Flight::json(["status" => 500, "message" => $user["message"]]);
-  } else if ($user["status"] === 200) {
-
-    // Generate the JWT token
-    $jwt = JWT::encode($user, Config::JWT_SECRET(), 'HS256');
-
-    // Return the JWT token in the response
-    Flight::json(["status" => 200, "token" => $jwt, "new user" => $user]);
-  }
 
 });
 
@@ -185,6 +153,10 @@ Flight::route('DELETE /users/@id', function ($id) {
   Flight::userService()->delete($id);
 });
 
-
+//Get route to retrieve data based on their token
+//To decode JWT Token, you should not pass it as parameter rather it gets send through headers
+Flight::route('POST /userdata/', function () {
+  Flight::json(Flight::userService()->userData());
+});
 
 ?>

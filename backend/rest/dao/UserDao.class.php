@@ -16,7 +16,7 @@ class UserDao extends BaseDao
   {
     //return $this->query("SELECT * FROM users WHERE email = :email", ['email' => $email]);
     try {
-      $stmt = $this->conn->prepare("SELECT * FROM users WHERE email = :email");
+      $stmt = $this->conn->prepare("SELECT * FROM users WHERE email_address = :email");
       $stmt->bindParam(':email', $email);
       $stmt->execute();
       return array("status" => 200, "message" => $stmt->fetchAll(PDO::FETCH_ASSOC));
@@ -44,6 +44,39 @@ class UserDao extends BaseDao
 
 
   }
+
+  public function checkExistenceForEmail($email_address)
+  {
+    try {
+      $stmt = $this->conn->prepare("SELECT * FROM users WHERE email_address = :email_address");
+      $stmt->bindParam(':email_address', $email_address);
+      $stmt->execute();
+      $user = $stmt->fetch(PDO::FETCH_ASSOC);
+      if ($user) {
+        return 1; // Return 1 as symbol that user with this email exists
+      }
+    } catch (PDOException $e) {
+      return $e->getMessage();
+    }
+  }
+
+  public function getUserByEmail($email_address)
+  {
+    //return $this->query("SELECT * FROM users WHERE email = :email", ['email' => $email]);
+    try {
+      $stmt = $this->conn->prepare("SELECT * FROM users WHERE email_address = :email_address");
+      $stmt->bindParam(':email_address', $email_address);
+      $stmt->execute();
+      $user = $stmt->fetch(PDO::FETCH_ASSOC);
+      if ($user) {
+        return $user['password']; // Return just the password
+      }
+    } catch (PDOException $e) {
+      return $e->getMessage();
+    }
+  }
+
+
 }
 
 

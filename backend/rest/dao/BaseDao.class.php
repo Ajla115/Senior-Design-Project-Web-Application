@@ -113,7 +113,7 @@ class BaseDao
             $stmt = $this->conn->prepare($query);
             $stmt->execute($entity);
             $entity['id'] = $this->conn->lastInsertId(); //this is will return the ID of the last entry
-            return array("status" => 200, "message" => $entity);
+            return array("status" => 200, "message" => "Registration Successfull");
         } catch (PDOException $e) {
             return array("status" => 500, "message" => $e->getMessage());
         }
@@ -132,15 +132,14 @@ class BaseDao
             $query = substr($query, 0, -2);
             $query .= " WHERE $id_column = :id"; //previously {$id_column} was used, but it become deprecated
             $stmt = $this->conn->prepare($query);
-            $stmt->bindParam(':id', $id); 
+            $stmt->bindParam(':id', $id);
             //$entity['id'] = $id; //I replaced this with the line above
 
             $stmt->execute($entity);
             //print_r($stmt->debugDumpParams());
             // die();
             return array("status" => 200, "message" => $entity);
-        }
-        catch (PDOException $e){
+        } catch (PDOException $e) {
             return array("status" => 500, "message" => $e->getMessage());
         }
 

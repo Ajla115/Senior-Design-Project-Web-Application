@@ -9,6 +9,7 @@ import {
   Typography
 } from '@mui/material';
 
+
 const user = {
   avatar: '/assets/avatars/avatar-anika-visser.png',
   //city: 'Los Angeles',

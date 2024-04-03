@@ -11,8 +11,6 @@ class InstaHashService extends BaseService
         parent::__construct(new InstaHashDao);
     }
 
-
-
     function customDelete($id){
         return $this->dao->customDelete($id);
     }
@@ -23,6 +21,10 @@ class InstaHashService extends BaseService
 
     function getAccountsPerHashtag($id){
         return $this->dao->getAccountsPerHashtag($id);
+    }
+
+    function customAdd($hashtag){
+        return $this->dao->customAdd($hashtag);
     }
 
   

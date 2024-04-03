@@ -1,91 +1,4 @@
 <?php
-
-/**
- * @OA\Post(
- *     path="/accounts",
- *     security={{"ApiKeyAuth": {}}},
- *     summary="Add a new account without IG data",
- *     description="Add a new account",
- *     tags={"accounts"},
- *     @OA\RequestBody(
- *         description="Add new account",
- *         required=true,
- *         @OA\MediaType(
- *             mediaType="application/json",
- *             @OA\Schema(
- *                 @OA\Property(
- *                     property="username",
- *                     type="string",
- *                     example="firstname_lastname",
- *                     description="Username"
- *                 )
- *             )
- *         )
- *     ),
- *     @OA\Response(
- *         response=200,
- *         description="Username has been added"
- *     ),
- *     @OA\Response(
- *         response=400,
- *         description="Invalid API request"
- *     )
- * )
- */
-
-
-//works
-//add a new account
-Flight::route('POST /accounts', function () {
-    //I added this because I had a problem with string array conversion
-    //I hope this line wont be a problem for DM Routes
-    $username = Flight::request()->data['username'];
-    Flight::json(Flight::instaAccService()->addIndividually($username));
-});
-
-//The route above is related to the DMs, and the one below is for the Instagram Accounts site,
-//To just add a new username to the database
-/**
- * @OA\Post(
- *     path="/accounts/{username}",
- *     security={{"ApiKeyAuth": {}}},
- *     summary="Add a new account without IG data",
- *     description="Add a new account",
- *     tags={"accounts"},
- *     @OA\RequestBody(
- *         description="Add new account",
- *         required=true,
- *         @OA\MediaType(
- *             mediaType="application/json",
- *             @OA\Schema(
- *                 @OA\Property(
- *                     property="username",
- *                     type="string",
- *                     example="firstname_lastname",
- *                     description="Username"
- *                 )
- *             )
- *         )
- *     ),
- *     @OA\Response(
- *         response=200,
- *         description="Username has been added"
- *     ),
- *     @OA\Response(
- *         response=400,
- *         description="Invalid API request"
- *     )
- * )
- */
-
-
-//works
-//add a new account
-Flight::route('POST /accounts/@username', function ($username) {
-    Flight::json(Flight::instaAccService()->addIndividually($username));
-});
-
-
 /**
  * @OA\Get(path="/hashtags", tags={"hashtags"}, security={{"ApiKeyAuth": {}}},
  *          summary="Return all active hashtags from the API. ",
@@ -114,7 +27,7 @@ Flight::route('GET /hashtags', function () {
  */
 
 //get instagram account data by id
-Flight::route('GET /accountperhashtag/@id', function ($id) {
+Flight::route('GET /accountsperhashtag/@id', function ($id) {
     Flight::json(Flight::instaHashService()->getAccountsPerHashtag($id));
 });
 
@@ -137,8 +50,44 @@ Flight::route('GET /accountperhashtag/@id', function ($id) {
  */
 
 //delete instagram account
-Flight::route("DELETE /accounts/@id", function ($id) {
-    Flight::instaAccService()->customDelete($id);
+Flight::route("DELETE /hashtags/@id", function ($id) {
+    Flight::json(Flight::instaHashService()->customDelete($id));
 });
 
 
+/**
+ * @OA\Post(
+ *     path="/hashtags",
+ *     security={{"ApiKeyAuth": {}}},
+ *     summary="Add a new hashtag to the database",
+ *     description="Add a new hashtag",
+ *     tags={"hashtags"},
+ *     @OA\RequestBody(
+ *         description="Add new hashtag",
+ *         required=true,
+ *         @OA\MediaType(
+ *             mediaType="application/json",
+ *             @OA\Schema(
+ *                 @OA\Property(
+ *                     property="hashtag_name",
+ *                     type="string",
+ *                     example="summer",
+ *                     description="Hashtag's value"
+ *                 )
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Hashtag has been added"
+ *     ),
+ *     @OA\Response(
+ *         response=400,
+ *         description="Invalid API request"
+ *     )
+ * )
+ */
+Flight::route('POST /hashtags/@hashtag', function ($hashtag) {
+
+    Flight::json(Flight::instaHashService()->customAdd($hashtag));
+});

@@ -21,7 +21,7 @@ const OpenPromptToAddNewHashtag = ({ closeButton }) => {
 
   const onChange = (event) => {
     const newHashtag = event.target.value;
-    newHashtag(newHashtag);
+    setHashtag(newHashtag);
   };
 
   const mutation = useMutation({

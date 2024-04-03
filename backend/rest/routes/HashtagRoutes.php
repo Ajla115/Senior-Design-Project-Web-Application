@@ -26,11 +26,26 @@ Flight::route('GET /hashtags', function () {
  *   )
  */
 
-//get instagram account data by id
+//get number of instagram accounts connected to hashtag id
 Flight::route('GET /accountsperhashtag/@id', function ($id) {
     Flight::json(Flight::instaHashService()->getAccountsPerHashtag($id));
 });
 
+/**
+ * @OA\Get(path="/accountperhashtag/{id}", tags={"hashtags"}, security={{"ApiKeyAuth": {}}},
+ *     summary="Return number of accounts for specific hashtag  ID",
+ *     @OA\Parameter(in="path", name="id", example=1, description="Hashtag ID"),
+ *     @OA\Response( response=200, description="Number of accounts is successfully fetched."),
+ *      @OA\Response( response=400, description="Invalid ID"),
+ *      @OA\Response( response=404, description="Data is not found" )
+ *      )
+ *   )
+ */
+
+//get data of instagram accounts of hashtag id
+Flight::route('GET /accountsdataperhashtag/@id', function ($id) {
+    Flight::json(Flight::instaHashService()->getAccountsDataPerHashtag($id));
+});
 
 
 /**

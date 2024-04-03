@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import { format } from "date-fns";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Avatar,
   Box,
@@ -14,17 +14,14 @@ import {
   TablePagination,
   TableRow,
   Typography,
-  Button,
-  SvgIcon,
 } from "@mui/material";
 import { Scrollbar } from "src/components/scrollbar";
 import { getInitials } from "src/utils/get-initials";
 import { InstagramService, UserService } from "services";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import DeleteModal from "./delete-instagram-hashtag";
 
-export const HashtagsTable = (props) => {
+
+export const CustomersTable = (props) => {
   const {
     count = 0,
     items = [],
@@ -75,15 +72,22 @@ export const HashtagsTable = (props) => {
                     }}
                   /> */}
                 </TableCell>
-                <TableCell>Name </TableCell>
-                <TableCell>Number of Accounts</TableCell>
-                <TableCell>Show Accounts</TableCell>
+                <TableCell>Username</TableCell>
+                <TableCell>Number of Posts</TableCell>
+                <TableCell>No. of Followers</TableCell>
+                <TableCell>No. of Following</TableCell>
+                <TableCell>Date & Time</TableCell>
+                <TableCell>Stats</TableCell>
                 <TableCell>Other</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
+              {/* {items.map((customer) => {
+                const isSelected = selected.includes(customer.id);
+                const createdAt = format(customer.createdAt, "dd/MM/yyyy"); */}
+
               <QueryClientProvider client={client}>
-                <InstagramHashtagsData />
+                <InstagramAccountsData />
               </QueryClientProvider>
               {/* })} */}
             </TableBody>
@@ -103,7 +107,7 @@ export const HashtagsTable = (props) => {
   );
 };
 
-HashtagsTable.propTypes = {
+CustomersTable.propTypes = {
   count: PropTypes.number,
   items: PropTypes.array,
   onDeselectAll: PropTypes.func,
@@ -117,20 +121,15 @@ HashtagsTable.propTypes = {
   selected: PropTypes.array,
 };
 
-function InstagramHashtagsData() {
+function ShowAccountsData() {
   //const posts = useSampleData();
   // console.log(posts);
 
-  //This is all for deleting a modal
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
-  const [selectedHashtagId, setSelectedHashtagId] = React.useState(null);
-  const [accountsPerHashtag, setAccountsPerHashtag] = React.useState({});
-  
-  //I need this to open table with all accounts for one hashtag
-  const [show, setShow] = useState(false);
+  //const [selectedCustomerId, setSelectedCustomerId] = React.useState(null);
+  const [show, setShow] = useState(true);
 
-  const handleOpen = (hashtagId) => {
-    setSelectedHashtagId(hashtagId);
+  const handleOpen = (customerId) => {
+    setSelectedCustomerId(customerId);
     setIsModalOpen(true);
   };
 
@@ -139,30 +138,10 @@ function InstagramHashtagsData() {
   };
 
   //fetching data from database
-  //fetching data from database
   const { isLoading, error, data, isFetching } = useQuery({
     queryKey: ["instagram-data"],
-    queryFn: InstagramService.getHashtagData,
+    queryFn: InstagramService.getAccountDataPerHashtag,
   });
-
-  useEffect(() => {
-    if (data?.message) {
-      // Extracting hashtag IDs
-      const hashtagIds = data.message.map((hashtag) => hashtag.id);
-      // Fetch account counts for all hashtags in one go
-      for (let i = 0; i < hashtagIds.length; i++) {
-        try {
-          const data = InstagramService.getAccountsPerHashtag(hashtagIds[i]).then(
-            setAccountsPerHashtag
-          );
-          //console.log(`Data for hashtag ${hashtags[i]}: `, data);
-        } catch (error) {
-          console.error(`Error fetching data for hashtag ${hashtags[i]}: `, error);
-        }
-      }
-      //InstagramService.getAccountsPerHashtag(hashtagIds).then(setAccountsPerHashtag);
-    }
-  }, [data]);
 
   //const { isLoading, error, data, isFetching } = useSampleData();
 
@@ -172,42 +151,29 @@ function InstagramHashtagsData() {
 
   return (
     <>
-      {data.message.map((hashtag) => {
-        //izvucem gotov podatak
-        const numberOfAccounts = InstagramService.getAccountsPerHashtag(hashtag.id);
-        //{data.message.map((hashtag) => {
+      {data.message.map((customer) => {
+        // const createdAt = format(customer.createdAt, "dd/MM/yyyy");
 
         return (
-          <TableRow hover key={hashtag.id}>
-            <TableCell>{hashtag.id}</TableCell>
+          <TableRow hover key={customer.id}>
+            <TableCell>
+              {customer.id}
+            </TableCell>
 
             <TableCell>
               <Stack alignItems="center" direction="row" spacing={1}>
-                <Typography variant="subtitle2">{hashtag.hashtag_name}</Typography>
+                <Typography variant="subtitle2">{customer.username}</Typography>
               </Stack>
             </TableCell>
-            <TableCell> {accountsPerHashtag[hashtag.id] || "Loading..."}</TableCell>
-            <TableCell>
-              <Button
-                onClick={() => {
-                  setShow(true);
-                }}
-                variant="text"
-              >
-                See accounts
-              </Button>
-            </TableCell>
-
-            {show && <ShowAccountsData closeButton={setShow} />}
-
-            <TableCell>
-              <DeleteOutlineIcon onClick={() => handleOpen(hashtag.id)} />
-            </TableCell>
+            <TableCell>{customer.post_number}</TableCell>
+            <TableCell>{customer.followers_number}</TableCell>
+            <TableCell>{customer.followings_number}</TableCell>
           </TableRow>
         );
       })}
 
-      <DeleteModal isOpen={isModalOpen} onClose={handleClose} hashtagId={selectedHashtagId} />
     </>
   );
 }
+
+export default ShowAccountsData;

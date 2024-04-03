@@ -27,6 +27,11 @@ class InstaHashService extends BaseService
         return $this->dao->customAdd($hashtag);
     }
 
+    function getAccountsDataPerHashtag($id){
+        return $this->dao->getAccountsDataPerHashtag($id);
+    }
+
+
   
 
 

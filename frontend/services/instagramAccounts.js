@@ -24,8 +24,13 @@ const getAccountsPerHashtag = async ( hashtagId) => {
     });
 };
 
-
-
+const getAccountDataPerHashtag= async ( hashtagId) => {
+  return axios
+    .get(`http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/accountsdataperhashtag/${hashtagId}`)
+    .then((response) => {
+      return response.data;
+    });
+};
 
 const deleteAccount = async (customerId) => {
   console.log(customerId);
@@ -83,4 +88,4 @@ const addHashtag = async (hashtag) => {
 
 
 
-export default { getAccountData, getHashtagData, getAccountsPerHashtag, deleteAccount, deleteHashtag, addAccount, addHashtag };
+export default { getAccountData, getHashtagData, getAccountsPerHashtag, getAccountDataPerHashtag, deleteAccount, deleteHashtag, addAccount, addHashtag };

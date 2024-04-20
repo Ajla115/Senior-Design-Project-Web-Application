@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import TransitionsModal from "./deactive-account-modal";
 import { Visibility, VisibilityOff } from "@mui/icons-material"; //needed for password toggling
+import { useAuthContext } from "src/contexts/auth-context";
 
 const states = [
   {
@@ -36,14 +37,17 @@ const states = [
 ];
 
 export const AccountProfileDetails = () => {
-  const [initialValues, setInitialValues] = useState({
-    first_name: "Anika",
-    last_name: "Visser",
-    email: "demo@devias.io",
-    password: "anika123",
-    // state: 'los-angeles',
-    // country: 'USA'
-  });
+  const { user } = useAuthContext();
+  // const [initialValues, setInitialValues] = useState({
+  //   first_name: "Anika",
+  //   last_name: "Visser",
+  //   email: "demo@devias.io",
+  //   //password: "anika123",
+  //   // state: 'los-angeles',
+  //   // country: 'USA'
+  // });
+
+  const [initialValues, setInitialValues] = useState(user);
 
   const [showPassword, setShowPassword] = useState(false);
 
@@ -110,7 +114,7 @@ export const AccountProfileDetails = () => {
                   name="first_name"
                   onChange={handleChange}
                   required
-                  value={values.first_name}
+                  value={values.name.split(" ")[0]}
                 />
               </Grid>
               <Grid xs={12} md={6}>
@@ -120,7 +124,7 @@ export const AccountProfileDetails = () => {
                   name="last_name"
                   onChange={handleChange}
                   required
-                  value={values.last_name}
+                  value={values.name.split(" ")[1]}
                 />
               </Grid>
               <Grid xs={12} md={6}>

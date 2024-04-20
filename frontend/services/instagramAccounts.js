@@ -16,17 +16,21 @@ const getHashtagData = async () => {
     });
 };
 
-const getAccountsPerHashtag = async ( hashtagId) => {
+const getAccountsPerHashtag = async (hashtagId) => {
   return axios
-    .get(`http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/accountsperhashtag/${hashtagId}`)
+    .get(
+      `http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/accountsperhashtag/${hashtagId}`
+    )
     .then((response) => {
       return response.data;
     });
 };
 
-const getAccountDataPerHashtag= async ( hashtagId) => {
+const getAccountDataPerHashtag = async (hashtagId) => {
   return axios
-    .get(`http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/accountsdataperhashtag/${hashtagId}`)
+    .get(
+      `http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/accountsdataperhashtag/${hashtagId}`
+    )
     .then((response) => {
       return response.data;
     });
@@ -75,9 +79,7 @@ const addAccount = async (username) => {
 
 const addHashtag = async (hashtag) => {
   return axios
-    .post(
-      `http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/hashtags/${hashtag}`
-    )
+    .post(`http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/hashtags/${hashtag}`)
     .then((response) => {
       return response.data;
     })
@@ -86,6 +88,13 @@ const addHashtag = async (hashtag) => {
     });
 };
 
-
-
-export default { getAccountData, getHashtagData, getAccountsPerHashtag, getAccountDataPerHashtag, deleteAccount, deleteHashtag, addAccount, addHashtag };
+export default {
+  getAccountData,
+  getHashtagData,
+  getAccountsPerHashtag,
+  getAccountDataPerHashtag,
+  deleteAccount,
+  deleteHashtag,
+  addAccount,
+  addHashtag,
+};

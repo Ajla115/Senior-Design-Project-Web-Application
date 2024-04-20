@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 const HANDLERS = {
   INITIALIZE: "INITIALIZE",
@@ -58,6 +59,7 @@ const reducer = (state, action) =>
 export const AuthContext = createContext({ undefined });
 
 export const AuthProvider = (props) => {
+  const router = useRouter();
   const { children } = props;
   const [state, dispatch] = useReducer(reducer, initialState);
   const initialized = useRef(false);
@@ -72,6 +74,8 @@ export const AuthProvider = (props) => {
     if (token) {
       axios.defaults.headers.common["Authorization"] = "Bearer " + token;
       localStorage.setItem("token", token);
+      router.push("/");
+      return;
     } else {
       delete axios.defaults.headers.common["Authorization"];
       localStorage.removeItem("token");
@@ -92,7 +96,6 @@ export const AuthProvider = (props) => {
     if (initialized.current) {
       return;
     }
-
     initialized.current = true;
 
     let isAuthenticated = false;
@@ -173,10 +176,10 @@ export const AuthProvider = (props) => {
     // if (email !== "demo@devias.io" || password !== "Password123!") {
     //   throw new Error("Please check your email and password");
     // }
-
     try {
       window.sessionStorage.setItem("authenticated", "true");
       localStorage.setItem("token", userResponse.token);
+      setToken_(userResponse.token);
     } catch (err) {
       console.error(err);
     }
@@ -202,7 +205,7 @@ export const AuthProvider = (props) => {
     const user = {
       //id: "5e86809283e28b96d2d38537",
       // avatar: "/assets/avatars/avatar-anika-visser.png",
-      name: userResponse.first_name + userResponse.last_name,
+      name: userResponse.first_name + " " + userResponse.last_name,
       email: userResponse.email,
     };
 

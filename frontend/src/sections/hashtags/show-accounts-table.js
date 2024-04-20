@@ -20,7 +20,6 @@ import { getInitials } from "src/utils/get-initials";
 import { InstagramService, UserService } from "services";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 
-
 export const CustomersTable = (props) => {
   const {
     count = 0,
@@ -121,7 +120,7 @@ CustomersTable.propTypes = {
   selected: PropTypes.array,
 };
 
-function ShowAccountsData() {
+function ShowAccountsData(props) {
   //const posts = useSampleData();
   // console.log(posts);
 
@@ -140,7 +139,9 @@ function ShowAccountsData() {
   //fetching data from database
   const { isLoading, error, data, isFetching } = useQuery({
     queryKey: ["instagram-data"],
-    queryFn: InstagramService.getAccountDataPerHashtag,
+    queryFn: async () => {
+      return await InstagramService.getAccountDataPerHashtag(props.hashtag_id);
+    },
   });
 
   //const { isLoading, error, data, isFetching } = useSampleData();
@@ -156,9 +157,7 @@ function ShowAccountsData() {
 
         return (
           <TableRow hover key={customer.id}>
-            <TableCell>
-              {customer.id}
-            </TableCell>
+            <TableCell>{customer.id}</TableCell>
 
             <TableCell>
               <Stack alignItems="center" direction="row" spacing={1}>
@@ -171,7 +170,6 @@ function ShowAccountsData() {
           </TableRow>
         );
       })}
-
     </>
   );
 }

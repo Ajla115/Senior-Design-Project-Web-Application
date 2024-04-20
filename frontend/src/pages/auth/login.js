@@ -51,9 +51,9 @@ const Page = () => {
     }),
     onSubmit: async (values, helpers) => {
       try {
-        router.push("/");
-       // await mutation.mutateAsync();
-        // setBackendResult(result);
+        //router.push("/");
+        await mutation.mutateAsync();
+        //setBackendResult(result);
         // //console.log(JSON.stringify(backendResult));
         // if (result.status === 200) {
         //   router.push("/");
@@ -87,19 +87,19 @@ const Page = () => {
     },
   });
 
-  // useEffect(() => {
-  //   if (backendResult !== "") {
-  //     if (backendResult.status === 200) {
-  //       signIn(backendResult);
-  //       router.push("/");
-  //     }
+  useEffect(() => {
+    if (backendResult !== "") {
+      if (backendResult.status === 200) {
+        signIn(backendResult);
+        //router.push("/");
+      }
 
-  //     if (backendResult.status === 500) {
-  //       //console.log( backendResult.message) ;
-  //       setErrorMessage(backendResult.message);
-  //     }
-  //   }
-  // }, [backendResult, router]);
+      if (backendResult.status === 500) {
+        //console.log( backendResult.message) ;
+        setErrorMessage(backendResult.message);
+      }
+    }
+  }, [backendResult, router]);
 
   return (
     <>

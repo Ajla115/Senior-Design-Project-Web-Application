@@ -23,6 +23,7 @@ import { InstagramService, UserService } from "services";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import DeleteModal from "./delete-instagram-hashtag";
+import ShowAccountsData from "./show-accounts-table";
 
 export const HashtagsTable = (props) => {
   const {
@@ -125,7 +126,7 @@ function InstagramHashtagsData() {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [selectedHashtagId, setSelectedHashtagId] = React.useState(null);
   const [accountsPerHashtag, setAccountsPerHashtag] = React.useState({});
-  
+
   //I need this to open table with all accounts for one hashtag
   const [show, setShow] = useState(false);
 
@@ -198,7 +199,7 @@ function InstagramHashtagsData() {
               </Button>
             </TableCell>
 
-            {show && <ShowAccountsData closeButton={setShow} />}
+            {show && <ShowAccountsData closeButton={setShow} hashtag_id={hashtag.id} />}
 
             <TableCell>
               <DeleteOutlineIcon onClick={() => handleOpen(hashtag.id)} />

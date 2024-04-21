@@ -104,31 +104,28 @@ class UserService extends BaseService
         //extract individual attributes from JSON object
         $first_name = $data['first_name'];
         $last_name = $data['last_name'];
-        $email_address = $data['email_address'];
+        $email_address = $data['email'];
         $password = $data['password'];
 
         if (empty($first_name) || empty($last_name) || empty($email_address) || empty($password)) {
-            echo ('All fields have to be filled in.');
+            return array("status" => 500, "message" => "All fields have to be filled in.");
+
         }
 
         if (!ctype_alpha($first_name)) {
-            echo "First name can only contain letters, no numbers, special characters and spaces.";
-            exit;
+            return array("status" => 500, "message" => "First name can only contain letters, no numbers, special characters and spaces.");
         }
 
         if (!ctype_alpha($last_name)) {
-            echo "Last name can only contain letters, no numbers, special characters and spaces.";
-            exit;
+            return array("status" => 500, "message" => "Last name can only contain letters, no numbers, special characters and spaces.");
         }
 
         if (!filter_var($email_address, FILTER_VALIDATE_EMAIL)) {
-            echo "Invalid email format";
-            exit;
+            return array("status" => 500, "message" => "Invalid email format");
         }
 
         if (mb_strlen($password) < 8) {
-            echo "The password should be at least 8 characters long";
-            exit;
+            return array("status" => 500, "message" => "The password should be at least 8 characters long");
         }
 
 
@@ -146,9 +143,17 @@ class UserService extends BaseService
             $data["password"] = $hashedPassword;
 
             //if the compiler has reached this point, it means that all requirements are satisified, and user can be added to the database
-            return parent::add($data);
+            // Add the user to the database via the parent class's add method
+            $result = parent::add($data);
+
+            if ($result['status'] === 200) {
+                return array("status" => 200, "message" => "User registered successfully");
+            } else {
+                return array("status" => 500, "message" => "Failed to add user");
+            }
         }
     }
+
 
     public function login($data)
     {
@@ -178,7 +183,7 @@ class UserService extends BaseService
                 //encode only email address
                 $jwt = JWT::encode([$email_address], Config::JWT_SECRET(), 'HS256');
                 $data = $this->dao->get_user_by_email($email_address);
-               // print_r($data["message"][0]["first_name"]);
+                // print_r($data["message"][0]["first_name"]);
                 //die();
                 return array("status" => 200, "token" => $jwt, "first_name" => $data["message"][0]["first_name"], "last_name" => $data["message"][0]["last_name"], "email" => $email_address);
                 //return array("status" => 200, "message" => "Correct password! Logging in...");
@@ -210,5 +215,3 @@ class UserService extends BaseService
 
 
 
-
-?>

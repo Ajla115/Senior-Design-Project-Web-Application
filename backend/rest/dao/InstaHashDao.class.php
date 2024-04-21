@@ -32,7 +32,8 @@ class InstaHashDao extends BaseDao
   {
 
     try {
-      $stmt = $this->conn->prepare("SELECT * FROM " . $this->table_name . " WHERE activity = 'active' ORDER BY id DESC");
+      $stmt = $this->conn->prepare("
+      SELECT h.id, h.hashtag_name, COUNT(ah.hashtag_id) AS number_of_followers FROM " . $this->table_name . " AS h LEFT JOIN accounts_with_hashtag ah ON h.id = ah.hashtag_id WHERE h.activity = 'active' GROUP BY h.id, h.hashtag_name ORDER BY h.id DESC");
       $stmt->execute();
       return array("status" => 200, "message" => $stmt->fetchAll(PDO::FETCH_ASSOC));
 

@@ -71,7 +71,7 @@ login_button.click()
 
 sleep(15) # --> to ensure that page has loaded properly
 
-usernames = ["korman_ajla123", "asyya.m", "suada_korman"]
+usernames = ["korman_ajla123", "korman_ajla", "suada_korman"]
 existing_usernames = []
 for username in usernames:
     driver.get(insta_url + username) # --> check if users exist

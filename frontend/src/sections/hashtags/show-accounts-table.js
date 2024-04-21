@@ -1,23 +1,19 @@
 import PropTypes from "prop-types";
-import { format } from "date-fns";
 import React, { useState } from "react";
 import {
-  Avatar,
   Box,
   Card,
-  Checkbox,
-  Stack,
   Table,
   TableBody,
   TableCell,
+  Stack,
   TableHead,
   TablePagination,
   TableRow,
   Typography,
 } from "@mui/material";
 import { Scrollbar } from "src/components/scrollbar";
-import { getInitials } from "src/utils/get-initials";
-import { InstagramService, UserService } from "services";
+import { InstagramService } from "services";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 
 export const CustomersTable = (props) => {
@@ -59,17 +55,6 @@ export const CustomersTable = (props) => {
                 <TableCell>
                   {" "}
                   ID
-                  {/* <Checkbox
-                    checked={selectedAll}
-                    indeterminate={selectedSome}
-                    onChange={(event) => {
-                      if (event.target.checked) {
-                        onSelectAll?.();
-                      } else {
-                        onDeselectAll?.();
-                      }
-                    }}
-                  /> */}
                 </TableCell>
                 <TableCell>Username</TableCell>
                 <TableCell>Number of Posts</TableCell>

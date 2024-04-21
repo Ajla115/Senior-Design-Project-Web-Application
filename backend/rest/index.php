@@ -56,9 +56,6 @@ Flight::route('GET /connection-check', function () {
   new UserService();
 });
 
-
-
-
 /* This is needed for swagger - REST API documentation endpoint */
 /* REST API documentation endpoint */
 // Flight::route('GET /docs.json', function () {

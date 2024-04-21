@@ -1,11 +1,8 @@
 import PropTypes from "prop-types";
-import { format } from "date-fns";
 import React, { useEffect, useState } from "react";
 import {
-  Avatar,
   Box,
   Card,
-  Checkbox,
   Stack,
   Table,
   TableBody,
@@ -14,12 +11,10 @@ import {
   TablePagination,
   TableRow,
   Typography,
-  Button,
-  SvgIcon,
+  Button
 } from "@mui/material";
 import { Scrollbar } from "src/components/scrollbar";
-import { getInitials } from "src/utils/get-initials";
-import { InstagramService, UserService } from "services";
+import { InstagramService } from "services";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import DeleteModal from "./delete-instagram-hashtag";
@@ -125,7 +120,6 @@ function InstagramHashtagsData() {
   //This is all for deleting a modal
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [selectedHashtagId, setSelectedHashtagId] = React.useState(null);
-  const [accountsPerHashtag, setAccountsPerHashtag] = React.useState({});
 
   //I need this to open table with all accounts for one hashtag
   const [show, setShow] = useState(false);
@@ -146,26 +140,7 @@ function InstagramHashtagsData() {
     queryFn: InstagramService.getHashtagData,
   });
 
-  useEffect(() => {
-    if (data?.message) {
-      // Extracting hashtag IDs
-      const hashtagIds = data.message.map((hashtag) => hashtag.id);
-      // Fetch account counts for all hashtags in one go
-      for (let i = 0; i < hashtagIds.length; i++) {
-        try {
-          const data = InstagramService.getAccountsPerHashtag(hashtagIds[i]).then(
-            setAccountsPerHashtag
-          );
-          //console.log(`Data for hashtag ${hashtags[i]}: `, data);
-        } catch (error) {
-          console.error(`Error fetching data for hashtag ${hashtags[i]}: `, error);
-        }
-      }
-      //InstagramService.getAccountsPerHashtag(hashtagIds).then(setAccountsPerHashtag);
-    }
-  }, [data]);
 
-  //const { isLoading, error, data, isFetching } = useSampleData();
 
   if (isLoading) return "Loading...";
 
@@ -175,7 +150,6 @@ function InstagramHashtagsData() {
     <>
       {data.message.map((hashtag) => {
         //izvucem gotov podatak
-        const numberOfAccounts = InstagramService.getAccountsPerHashtag(hashtag.id);
         //{data.message.map((hashtag) => {
 
         return (
@@ -187,7 +161,7 @@ function InstagramHashtagsData() {
                 <Typography variant="subtitle2">{hashtag.hashtag_name}</Typography>
               </Stack>
             </TableCell>
-            <TableCell> {accountsPerHashtag[hashtag.id] || "Loading..."}</TableCell>
+            <TableCell> {hashtag.number_of_followers}</TableCell>
             <TableCell>
               <Button
                 onClick={() => {

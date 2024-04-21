@@ -1,4 +1,5 @@
 import instaloader
+import time
 import mysql.connector
 from datetime import date
 
@@ -61,23 +62,40 @@ def updateExistingUser(posts, followers, following, username, current_date):
     mycursor.execute(sql_query3, values)
     mydb.commit()
 
-def fetchUsernamesStatsFromDB():
-    sql_query = "SELECT username, stats FROM instagram_accounts"
+def fetchUsernameDataFromDB():
+    sql_query = "SELECT username, activity, stats FROM instagram_accounts"
     mycursor = mydb.cursor()
     mycursor.execute(sql_query)
     return mycursor.fetchall()
 
 def main():
-    usernames_stats = fetchUsernamesStatsFromDB()
+    usernames_stats = fetchUsernameDataFromDB()
+    #this count variable will be used create sleeps that mimic human behavior
+    count = 0
   
-    for username, stats in usernames_stats:
-        
-        if stats == 1:
-            # Update the user stats
-            updateUser(username, stats)
-        elif stats == 0:
-            # Scrape data for the new user
-            scrapeData(username)
+    for username, activity, stats in usernames_stats:
+        #this way it only checks for usernames whose activity status is not deleted
+        if activity != 'deleted':
+            #These are random sleeps, to mimic human behavior
+            if count > 0:
+                if count % 35 == 0:  
+                    time.sleep(9)  
+                elif count % 5 == 0:
+                    time.sleep(5)
+                elif count % 7 == 0:
+                    time.sleep(7)
+
+
+            if stats == 1:
+                # Update the user stats
+                updateUser(username, stats)
+            elif stats == 0:
+                # Scrape data for the new user
+                scrapeData(username)
+            
+            time.sleep(3)
+            #wait three seconds before moving on to the next username
+            count += 1
 
 if __name__ == '__main__':
     main()

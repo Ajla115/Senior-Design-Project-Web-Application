@@ -18,6 +18,7 @@ class BaseService{
 
     public function add($entity){
         return $this->dao->add($entity); 
+       
         //umjesto da pisemo ovo u customerService, samo stavimo parent::add, i to se odnosi na ovu super klasu
     }
 

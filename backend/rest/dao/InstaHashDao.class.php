@@ -36,7 +36,6 @@ class InstaHashDao extends BaseDao
       SELECT h.id, h.hashtag_name, COUNT(ah.hashtag_id) AS number_of_followers FROM " . $this->table_name . " AS h LEFT JOIN accounts_with_hashtag ah ON h.id = ah.hashtag_id WHERE h.activity = 'active' GROUP BY h.id, h.hashtag_name ORDER BY h.id DESC");
       $stmt->execute();
       return array("status" => 200, "message" => $stmt->fetchAll(PDO::FETCH_ASSOC));
-
     } catch (PDOException $e) {
       return array("status" => 500, "message" => $e->getMessage());
     }
@@ -69,7 +68,7 @@ class InstaHashDao extends BaseDao
   function getAccountsDataPerHashtag($id)
   {
     try {
-      $stmt = $this->conn->prepare("SELECT ia.id, ia.username, ia.post_number, ia.followers_number, ia.followings_number
+      $stmt = $this->conn->prepare("SELECT DISTINCT ia.id, ia.username, ia.post_number, ia.followers_number, ia.followings_number
       FROM instagram_accounts ia
       JOIN accounts_with_hashtag ah ON ia.id = ah.account_id
       JOIN instagram_hashtags ih ON ah.hashtag_id = ih.id  WHERE ih.id = :hashtagId");
@@ -80,17 +79,4 @@ class InstaHashDao extends BaseDao
       return array("status" => 500, "message" => $e->getMessage());
     }
   }
-
-
-
 }
-
-
-
-
-
-
-
-
-
-?>

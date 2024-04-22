@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Card,
@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import { Scrollbar } from "src/components/scrollbar";
 import { InstagramService } from "services";
-import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
+import { useMutation, QueryClientProvider, QueryClient } from "@tanstack/react-query";
 
 export const CustomersTable = (props) => {
   const {
@@ -52,10 +52,7 @@ export const CustomersTable = (props) => {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>
-                  {" "}
-                  ID
-                </TableCell>
+                <TableCell> ID</TableCell>
                 <TableCell>Username</TableCell>
                 <TableCell>Number of Posts</TableCell>
                 <TableCell>No. of Followers</TableCell>
@@ -106,6 +103,7 @@ CustomersTable.propTypes = {
 };
 
 function ShowAccountsData(props) {
+  const [data, setData] = useState(null);
   //const posts = useSampleData();
   // console.log(posts);
 
@@ -121,40 +119,38 @@ function ShowAccountsData(props) {
     setIsModalOpen(false);
   };
 
-  //fetching data from database
-  const { isLoading, error, data, isFetching } = useQuery({
-    queryKey: ["instagram-data"],
-    queryFn: async () => {
-      return await InstagramService.getAccountDataPerHashtag(props.hashtag_id);
+  const mutation = useMutation({
+    mutationFn: async () => {
+      const userResponse = await await InstagramService.getAccountDataPerHashtag(props.hashtag_id);
+      setData(userResponse);
     },
   });
 
-  //const { isLoading, error, data, isFetching } = useSampleData();
-
-  if (isLoading) return "Loading...";
-
-  if (error) return "An error has occurred: " + error.message;
+  useEffect(() => {
+    mutation.mutateAsync();
+  }, []);
 
   return (
     <>
-      {data.message.map((customer) => {
-        // const createdAt = format(customer.createdAt, "dd/MM/yyyy");
+      {data &&
+        data.message.map((customer) => {
+          // const createdAt = format(customer.createdAt, "dd/MM/yyyy");
 
-        return (
-          <TableRow hover key={customer.id}>
-            <TableCell>{customer.id}</TableCell>
+          return (
+            <TableRow hover key={customer.id}>
+              <TableCell>{customer.id}</TableCell>
 
-            <TableCell>
-              <Stack alignItems="center" direction="row" spacing={1}>
-                <Typography variant="subtitle2">{customer.username}</Typography>
-              </Stack>
-            </TableCell>
-            <TableCell>{customer.post_number}</TableCell>
-            <TableCell>{customer.followers_number}</TableCell>
-            <TableCell>{customer.followings_number}</TableCell>
-          </TableRow>
-        );
-      })}
+              <TableCell>
+                <Stack alignItems="center" direction="row" spacing={1}>
+                  <Typography variant="subtitle2">{customer.username}</Typography>
+                </Stack>
+              </TableCell>
+              <TableCell>{customer.post_number}</TableCell>
+              <TableCell>{customer.followers_number}</TableCell>
+              <TableCell>{customer.followings_number}</TableCell>
+            </TableRow>
+          );
+        })}
     </>
   );
 }

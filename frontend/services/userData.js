@@ -35,6 +35,8 @@ const login = async (email, password) => {
     email,
     password,
   };
+  user.email_address = user.email;
+  delete user.email;
   return axios
     .post(`http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/login/`, user)
     .then((response) => {

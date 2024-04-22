@@ -155,7 +155,7 @@ class UserService extends BaseService
 
     public function login($data)
     {
-        $email_address = $data['email'];
+        $email_address = $data['email_address'];
         //here, we will check if username is actually username or email
         $password = $data['password'];
 

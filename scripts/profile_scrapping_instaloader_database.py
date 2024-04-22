@@ -97,6 +97,8 @@ def main():
             #wait three seconds before moving on to the next username
             count += 1
 
+    print("All records have been succesfully updated.")
+
 if __name__ == '__main__':
     main()
 

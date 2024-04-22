@@ -137,7 +137,7 @@ export const AccountProfileDetails = () => {
                   value={values.email}
                 />
               </Grid>
-              <Grid xs={12} md={6}>
+              {/* <Grid xs={12} md={6}>
                 <TextField
                   fullWidth
                   label="Password"
@@ -155,7 +155,7 @@ export const AccountProfileDetails = () => {
                     ),
                   }}
                 />
-              </Grid>
+              </Grid> */}
               <Grid xs={12} md={6}>
                 {/* <TextField
                   fullWidth

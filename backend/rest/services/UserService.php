@@ -70,7 +70,6 @@ class UserService extends BaseService
         $password = Flight::userDao()->getUserByEmail($email_address);
 
         return $password;
-
     }
     public function update($entity, $id, $id_column = "id")
     {
@@ -104,12 +103,11 @@ class UserService extends BaseService
         //extract individual attributes from JSON object
         $first_name = $data['first_name'];
         $last_name = $data['last_name'];
-        $email_address = $data['email'];
+        $email_address = $data['email_address'];
         $password = $data['password'];
 
         if (empty($first_name) || empty($last_name) || empty($email_address) || empty($password)) {
             return array("status" => 500, "message" => "All fields have to be filled in.");
-
         }
 
         if (!ctype_alpha($first_name)) {
@@ -193,7 +191,6 @@ class UserService extends BaseService
         } else {
 
             return array("status" => 500, "message" => "This email does not exist");
-
         }
     }
 
@@ -211,7 +208,3 @@ class UserService extends BaseService
         return array($data['first_name'], $data['last_name'], $decoded);
     }
 }
-
-
-
-

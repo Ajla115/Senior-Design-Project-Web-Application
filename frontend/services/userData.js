@@ -14,8 +14,10 @@ const register = async (first_name, last_name, email, password) => {
     first_name,
     last_name,
     email,
-    password
-  }
+    password,
+  };
+  user.email_address = user.email;
+  delete user.email;
   return axios
     .post(`http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/register/`, user)
     .then((response) => {
@@ -27,12 +29,12 @@ const register = async (first_name, last_name, email, password) => {
     });
 };
 
-const login = async ( email, password) => {
+const login = async (email, password) => {
   //Creating JSON object because on the backend JSON object is only accepted
   const user = {
     email,
-    password
-  }
+    password,
+  };
   return axios
     .post(`http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/login/`, user)
     .then((response) => {

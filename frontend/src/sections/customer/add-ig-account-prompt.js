@@ -12,8 +12,7 @@ import {
 } from "@mui/material";
 import { InstagramService } from "services";
 
-
-const OpenPromptToAddNewAccount = ({ closeButton }) => {
+const OpenPromptToAddNewAccount = ({ closeButton, refetchAccounts }) => {
   const client = new QueryClient();
   const [isSearched, setIsSearched] = useState(false);
   const [username, setUsername] = useState("");
@@ -27,10 +26,12 @@ const OpenPromptToAddNewAccount = ({ closeButton }) => {
   const mutation = useMutation({
     mutationFn: async () => {
       await InstagramService.addAccount(username);
+      refetchAccounts();
       closeButton(false); //to close the modal
     },
     onSuccess: () => {
       setIsSearched(true);
+
       //console.log("bravo");
     },
     onError: (error) => {
@@ -96,7 +97,7 @@ const OpenPromptToAddNewAccount = ({ closeButton }) => {
                   onClick={handleSearch}
                   disabled={mutation.isLoading}
                 >
-                  Search
+                  Add account
                 </Button>
               </QueryClientProvider>
             </Stack>

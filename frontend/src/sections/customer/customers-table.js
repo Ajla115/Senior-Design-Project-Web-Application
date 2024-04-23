@@ -88,7 +88,7 @@ export const CustomersTable = (props) => {
                 const createdAt = format(customer.createdAt, "dd/MM/yyyy"); */}
 
               <QueryClientProvider client={client}>
-                <InstagramAccountsData />
+                <InstagramAccountsData accountList={props.accountList} />
               </QueryClientProvider>
               {/* })} */}
             </TableBody>
@@ -122,7 +122,7 @@ CustomersTable.propTypes = {
   selected: PropTypes.array,
 };
 
-function InstagramAccountsData() {
+function InstagramAccountsData(props) {
   //const posts = useSampleData();
   // console.log(posts);
 
@@ -140,20 +140,19 @@ function InstagramAccountsData() {
   };
 
   //fetching data from database
-  const { isLoading, error, data, isFetching } = useQuery({
-    queryKey: ["instagram-data"],
-    queryFn: InstagramService.getAccountData,
-  });
+  // const { isLoading, error, data, isFetching, refetch } = useQuery({
+  //   queryKey: ["instagram-data"],
+  //   queryFn: InstagramService.getAccountData,
+  // });
 
   //const { isLoading, error, data, isFetching } = useSampleData();
 
-  if (isLoading) return "Loading...";
+  // if (isLoading) return "Loading...";
 
-  if (error) return "An error has occurred: " + error.message;
-
+  // if (error) return "An error has occurred: " + error.message;
   return (
     <>
-      {data.message.map((customer) => {
+      {props.accountList.message.map((customer) => {
         // const createdAt = format(customer.createdAt, "dd/MM/yyyy");
 
         return (

@@ -57,7 +57,7 @@ export const AccountProfileDetails = () => {
 
   const [isChanged, setIsChanged] = useState(false); //this will track if input in any three fields changes
   const [values, setValues] = useState(initialValues); //this will keep track, if there are no changes, disable Save button again
-
+  console.log(values);
   useEffect(() => {
     setInitialValues(values); //this I need to keep track of the first values in the fields
   }, []);
@@ -114,7 +114,7 @@ export const AccountProfileDetails = () => {
                   name="first_name"
                   onChange={handleChange}
                   required
-                  value={values.name.split(" ")[0]}
+                  value={values.first_name}
                 />
               </Grid>
               <Grid xs={12} md={6}>
@@ -124,7 +124,7 @@ export const AccountProfileDetails = () => {
                   name="last_name"
                   onChange={handleChange}
                   required
-                  value={values.name.split(" ")[1]}
+                  value={values.last_name}
                 />
               </Grid>
               <Grid xs={12} md={6}>

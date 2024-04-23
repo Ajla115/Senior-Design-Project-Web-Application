@@ -209,7 +209,7 @@ def main():
     hashtag = input("Enter desired hashtag you want to search for: ") 
     addHashtagToTheDatabase(hashtag)
 
-    service = Service(executable_path="C:\\Users\\User\\Downloads\\chromedriver-win64\\chromedriver-win64\\chromedriver.exe")
+    service = Service(executable_path="C:\\Users\\User\\Downloads\\chromedriver-win64\\chromedriver.exe")
     options = webdriver.ChromeOptions()
     driver = webdriver.Chrome(service=service, options=options)
     driver.maximize_window()

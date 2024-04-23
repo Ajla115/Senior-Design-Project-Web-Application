@@ -97,29 +97,15 @@ cancel_notifications.click()
 sleep(15)
 
 for single_username in existing_usernames:
-  send_dm_button = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/div/div/div/div[1]/div/div[1]/div/div[1]/div[2]/div/div')))
-  send_dm_button.click()
-  sleep(300)
-  input_recipient = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME, 'queryBox')))
-  input_recipient.click()
-  input_recipient.send_keys(single_username)
-  sleep(15)
-  choose_recipient = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME, 'ContactSearchResultCheckbox')))
-  choose_recipient.click()
-  sleep(15)
-  chat_button = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "/html/body/div[6]/div[1]/div/div[2]/div/div/div/div/div/div/div[1]/div/div[4]/div")))
-  chat_button.click()
+  driver.get(insta_url + single_username)
+  message_button = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/div[2]/section/main/div/header/section/div[1]/div[2]/div/div[2]/div')))
+  message_button.click()
   sleep(15)
   send_message = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/div/div/div/div[1]/div/div[2]/div/div/div/div/div/div/div[2]/div/div/div[2]/div/div/div[2]/div/div[1]")))
   send_message.send_keys("This is an automated message. Please don't respond.")
   sleep(15)
   send_button = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/div/div/div/div[1]/div/div[2]/div/div/div/div/div/div/div[2]/div/div/div[2]/div/div/div[3]')))
   send_button.click()
-  sleep(5)
-  
-
-
-
 
 sleep(10)
 

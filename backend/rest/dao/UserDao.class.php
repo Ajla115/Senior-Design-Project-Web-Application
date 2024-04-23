@@ -77,7 +77,36 @@ class UserDao extends BaseDao
   }
 
 
+
+  public function userDataUpdate($first_name, $last_name, $email_address)
+  {
+    try {
+
+      $updateStmt = $this->conn->prepare("UPDATE users SET first_name = :first_name, last_name = :last_name, email_address = :new_email_address WHERE email_address = :email_address");
+      $updateStmt->bindParam(':first_name', $first_name);
+      $updateStmt->bindParam(':last_name', $last_name);
+      $updateStmt->bindParam(':new_email_address', $email_address);
+     // $updateStmt->bindParam(':email_address', $email_address);
+      $updateStmt->execute();
+
+      // Fetch the updated user data to return
+      $selectUpdated = $this->conn->prepare("SELECT * FROM users WHERE email_address = :email_address");
+      $selectUpdated->bindParam(':email_address', $email_address);
+      $selectUpdated->execute();
+      $updatedUser = $selectUpdated->fetch(PDO::FETCH_ASSOC);
+
+      return $updatedUser; // Return the updated user data
+
+
+    } catch (PDOException $e) {
+      return $e->getMessage();
+    }
+  }
+
+
 }
+
+
 
 
 

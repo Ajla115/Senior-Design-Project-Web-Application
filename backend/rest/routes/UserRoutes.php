@@ -153,10 +153,36 @@ Flight::route('DELETE /users/@id', function ($id) {
   Flight::userService()->delete($id);
 });
 
-//Get route to retrieve data based on their token
-//To decode JWT Token, you should not pass it as parameter rather it gets send through headers
-Flight::route('POST /userdata/', function () {
-  Flight::json(Flight::userService()->userData());
+
+/**
+ * @OA\Put(
+ *     path="/users/", security={{"ApiKeyAuth": {}}},
+ *       summary="Edit user data",
+ *     description="Edit user data",
+ *     tags={"users"},
+ *     @OA\RequestBody(description="Account data", required=true,
+ *       @OA\MediaType(mediaType="application/json",
+ *    			@OA\Schema(
+ *                  @OA\Property(property="first_name", type="string", example="Demo",	description="First name"),
+ *                  @OA\Property(property="last_name", type="string", example="Demoic",	description="Last name"),
+ *                   @OA\Property(property="email", type="string", example="demo@gmail.com",	description="Email" ),
+ *        )
+ *     )),
+ *     @OA\Response(
+ *         response=200,
+ *         description="User data has been edited"
+ *     ),
+ *     @OA\Response( response=400, description="Invalid ID"),
+ *      @OA\Response( response=404, description="User is not found" )
+ * )
+ */
+
+//PUT route to edit or update user's data
+//In the body, it will send the whole object, and then it will update then changed values
+//This is better than having to do PUT for every database column/attribute differently
+Flight::route("PUT /userDataUpdate/", function ($data) {
+  $data = Flight::request()->data->getData();
+  Flight::json(Flight::userService()->userDataUpdate($data));
 });
 
 ?>

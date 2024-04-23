@@ -206,6 +206,8 @@ export const AuthProvider = (props) => {
       //id: "5e86809283e28b96d2d38537",
       // avatar: "/assets/avatars/avatar-anika-visser.png",
       name: userResponse.first_name + " " + userResponse.last_name,
+      first_name: userResponse.first_name,
+      last_name: userResponse.last_name,
       email: userResponse.email,
     };
 

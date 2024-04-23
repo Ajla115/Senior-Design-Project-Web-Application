@@ -83,6 +83,13 @@ class UserService extends BaseService
         return parent::update($entity, $id);
     }
 
+    public function userDataUpdate($data){
+        $first_name = $data['first_name'];
+        $last_name = $data['last_name'];
+        $email_address = $data['email_address'];
+        return $this->dao->userDataUpdate($first_name, $last_name, $email_address);
+    }
+    
     // public function add($entity)
     // {
     //     //unset($entity['phone']); //ovo je da smo u form registration koloni imali i opciju da se unese phone, a nema ga u bazi

@@ -11,6 +11,7 @@ return array(
     'Symfony\\Component\\Finder\\' => array($vendorDir . '/symfony/finder'),
     'Psr\\Log\\' => array($vendorDir . '/psr/log/src'),
     'Psr\\Cache\\' => array($vendorDir . '/psr/cache/src'),
+    'PHPMailer\\PHPMailer\\' => array($vendorDir . '/phpmailer/phpmailer/src'),
     'OpenApi\\' => array($vendorDir . '/zircote/swagger-php/src'),
     'Firebase\\JWT\\' => array($vendorDir . '/firebase/php-jwt/src'),
     'Doctrine\\Deprecations\\' => array($vendorDir . '/doctrine/deprecations/lib/Doctrine/Deprecations'),

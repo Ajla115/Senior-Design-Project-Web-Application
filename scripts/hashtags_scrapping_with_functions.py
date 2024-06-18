@@ -135,45 +135,6 @@ def addHashtagToTheDatabase(hashtag):
     )
     mycursor = mydb.cursor()
 
-    sql = "SELECT * FROM instagram_hashtags WHERE hashtag_name = %s AND activity != 'deleted'"
-    val = (hashtag,)
-    mycursor.execute(sql, val)
-    result = mycursor.fetchone()
-
-    if not result:
-        # Check if the hashtag exists but is marked as deleted
-        sql = "SELECT * FROM instagram_hashtags WHERE hashtag_name = %s"
-        mycursor.execute(sql, val)
-        result_deleted = mycursor.fetchone()
-
-        if result_deleted:
-            # Update the record if it exists but is marked as deleted
-            sql = "UPDATE instagram_hashtags SET activity = 'active' WHERE hashtag_name = %s"
-            print(f"Hashtag '{hashtag}' was marked as deleted and has now been reactivated.")
-        else:
-            # Insert the new hashtag into the database
-            sql = "INSERT INTO instagram_hashtags (hashtag_name, activity) VALUES (%s, 'active')"
-            print(f"Hashtag '{hashtag}' added to the database.")
-
-        mycursor.execute(sql, val)
-        mydb.commit()
-
-    else:
-        print(f"Hashtag '{hashtag}' already exists in the database and is active.")
-
-    mycursor.close()
-    mydb.close()
- 
-
-def addHashtagToTheDatabase(hashtag):
-    mydb = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="a1b2c3d4e5",
-        database="sdp_project"
-    )
-    mycursor = mydb.cursor()
-
     # Check if the hashtag exists and is not marked as deleted
     sql = "SELECT * FROM instagram_hashtags WHERE hashtag_name = %s AND activity != 'deleted'"
     val = (hashtag,)

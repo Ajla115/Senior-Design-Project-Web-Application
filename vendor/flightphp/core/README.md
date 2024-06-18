@@ -1,7 +1,9 @@
-![PHPStan: enabled](https://user-images.githubusercontent.com/104888/50957476-9c4acb80-14be-11e9-88ce-6447364dc1bb.png)
-![PHPStan: level 6](https://img.shields.io/badge/PHPStan-level%206-brightgreen.svg?style=flat)
+[![Version](http://poser.pugx.org/flightphp/core/version)](https://packagist.org/packages/flightphp/core)
+[![Monthly Downloads](http://poser.pugx.org/flightphp/core/d/monthly)](https://packagist.org/packages/flightphp/core)
+![PHPStan: Level 6](https://img.shields.io/badge/PHPStan-level%206-brightgreen.svg?style=flat)
+[![License](http://poser.pugx.org/flightphp/core/license)](https://packagist.org/packages/flightphp/core)
+[![PHP Version Require](http://poser.pugx.org/flightphp/core/require/php)](https://packagist.org/packages/flightphp/core)
 ![Matrix](https://img.shields.io/matrix/flight-php-framework%3Amatrix.org?server_fqdn=matrix.org&style=social&logo=matrix)
-[![Hit Count](https://hits.dwyl.com/flightphp/core.svg?style=flat-square&show=unique)](http://hits.dwyl.com/flightphp/core)
 
 # What is Flight?
 
@@ -35,6 +37,10 @@ We have our own documentation website that is built with Flight (naturally). Lea
 
 Chat with us on Matrix IRC [#flight-php-framework:matrix.org](https://matrix.to/#/#flight-php-framework:matrix.org)
 
+# Upgrading From v2
+
+If you have a current project on v2, you should be able to upgrade to v2 with no issues depending on how your project was built. If there are any issues with upgrade, they are documented in the [migrating to v3](https://docs.flightphp.com/learn/migrating-to-v3) documentation page. It is the intention of Flight to maintain longterm stability of the project and to not add rewrites with major version changes.
+
 # Requirements
 
 > [!IMPORTANT]
@@ -43,6 +49,10 @@ Chat with us on Matrix IRC [#flight-php-framework:matrix.org](https://matrix.to/
 **Note:** PHP 7.4 is supported because at the current time of writing (2024) PHP 7.4 is the default version for some LTS Linux distributions. Forcing a move to PHP >8 would cause a lot of heartburn for those users.
 
 The framework also supports PHP >8.
+
+# Roadmap
+
+To see the current and future roadmap for the Flight Framework, visit the [project roadmap](https://github.com/orgs/flightphp/projects/1/views/1)
 
 # License
 

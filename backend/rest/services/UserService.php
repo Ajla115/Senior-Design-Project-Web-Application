@@ -4,6 +4,9 @@ require_once __DIR__ . "/../dao/UserDao.class.php";
 
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+use PHPMailer\PHPMailer\Exception;
 
 class UserService extends BaseService
 {
@@ -13,13 +16,6 @@ class UserService extends BaseService
     }
 
 
-    /* public function update($entity, $id, $id_column="id"){
-         $entity['password'] = md5($entity['password']);
-         if(isset($entity['id_column']) && !is_null($entity['id_column'])){
-             return parent::update($entity, $id, $entity['id_column']);
-         }
-         return parent::update($entity, $id);
-     }*/
 
     private function checkPassword($password)
     {
@@ -63,7 +59,7 @@ class UserService extends BaseService
     }
 
 
-    //get the hashed password from the database4
+    //get the hashed password from the database
     private function getPassword($email_address)
     {
 
@@ -90,12 +86,6 @@ class UserService extends BaseService
         return $this->dao->userDataUpdate($first_name, $last_name, $email_address);
     }
     
-    // public function add($entity)
-    // {
-    //     //unset($entity['phone']); //ovo je da smo u form registration koloni imali i opciju da se unese phone, a nema ga u bazi
-    //     $entity['password'] = md5($entity['password']); //ovo je za hashing sifre
-    //     return parent::add($entity);
-    // }
 
 
     public function get_user_by_email($email)
@@ -214,4 +204,39 @@ class UserService extends BaseService
         //now, we are returning first, and last name and password
         return array($data['first_name'], $data['last_name'], $decoded);
     }
+
+    private function send_email($senderEmail, $title, $recipientEmail, $recipientName, $description)
+    {
+        $mail = new PHPMailer(true);
+        try {
+            //Server settings
+            //$mail->SMTPDebug = SMTP::DEBUG_SERVER; //Enable verbose debug output
+            $mail->SMTPDebug = SMTP::DEBUG_OFF; //Enable verbose debug output
+
+            $mail->isSMTP(); //Send using SMTP
+            $mail->Host = Config::SMTP_HOST(); //Set the SMTP server to send through
+            $mail->SMTPAuth = true; //Enable SMTP authentication
+            $mail->Username = Config::SMTP_USERNAME(); //SMTP username
+            $mail->Password = Config::SMTP_PASSWORD(); //SMTP password
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            //$mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; //Enable implicit TLS encryption
+            $mail->Port = Config::SMTP_PORT();
+
+            //Recipients
+            $mail->setFrom($senderEmail, $title);
+            $mail->addAddress($recipientEmail, $recipientName); 
+
+            //Content
+            $mail->isHTML(true); 
+            $mail->Subject = $title;
+            $mail->Body = $description;
+            $mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
+            $mail->send();
+            //echo 'Message has been sent';
+        } catch (Exception $e) {
+            error_log("Message could not be sent. Mailer Error: {$mail->ErrorInfo}\n");
+            //echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+        }
+    }
+
 }

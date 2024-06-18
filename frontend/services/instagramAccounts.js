@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const getAccountData = async () => {
-  console.log("Beton");
+  //console.log("Beton");
   return axios
     .get("http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/accounts/")
     .then((response) => {

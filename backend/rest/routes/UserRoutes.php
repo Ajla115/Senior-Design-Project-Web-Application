@@ -185,4 +185,39 @@ Flight::route("PUT /userDataUpdate/", function ($data) {
   Flight::json(Flight::userService()->userDataUpdate($data));
 });
 
+
+
+//API for sending an email to the customer service
+
+/**
+ * @OA\Post(
+ *     path="/sendemailtocustomerservice",
+ *     summary = "Send email to the customer service",
+ *     description="Send email to the customer service",
+ *     tags={"users"},
+ *     @OA\RequestBody(description="Send email to the customer service", required=true,
+ *       @OA\MediaType(mediaType="application/json",
+ *    			@OA\Schema(
+ *    				@OA\Property(property="title", type="string", example="Forgot my password",	description="Title"),
+ *    				@OA\Property(property="description", type="string", example="Detailed explanation",	description="Detailed explanation" )
+ *        )
+ *     )),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Email has been sent"
+ *     ),
+ *     @OA\Response(
+ *         response=400,
+ *         description="Email was not sent"
+ *     )
+ * )
+ */
+
+
+Flight::route("POST /sendemailtocustomerservice", function ($data) {
+  $data = Flight::request()->data->getData();
+  Flight::json(Flight::userService()->sendemailtocustomerservice($data));
+});
+
+
 ?>

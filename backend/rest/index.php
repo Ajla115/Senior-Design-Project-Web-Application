@@ -11,6 +11,7 @@ require_once __DIR__ . '/services/UserService.php';
 require_once __DIR__ . '/services/InstaAccService.php';
 require_once __DIR__ . '/services/InstaHashService.php';
 require_once __DIR__ . '/services/DmService.php';
+require_once __DIR__ . '/../../config.php';
 
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;

@@ -196,7 +196,10 @@ class UserService extends BaseService
     public function userData()
     {
         $all_headers = getallheaders();
-        $token = $all_headers('authorization');
+        $token = $all_headers('Authorization');
+        //MOZDA OVE DVIJE LINIJE NECE RADITI
+
+
         //$decoded = JWT::decode($data->token, $key, array('HS256'));
         $decoded = (array) JWT::decode($token, new Key(Config::JWT_SECRET(), 'HS256'));
         //this decoded is the email once again
@@ -234,11 +237,38 @@ class UserService extends BaseService
             $mail->Body = $description;
             $mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
             $mail->send();
-            //echo 'Message has been sent';
+            return true;
         } catch (Exception $e) {
             error_log("Message could not be sent. Mailer Error: {$mail->ErrorInfo}\n");
+            return false;
             //echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
         }
+    }
+
+
+    public function sendemailtocustomerservice($data){
+        $title = $data["title"];
+        $description = $data["description"];
+
+        $recipientEmail = Config::EMAIL1();
+
+        $all_headers = getallheaders();
+
+        $token = $all_headers['Authorization'];
+        
+        $decoded = (array) JWT::decode($token, new Key(Config::JWT_SECRET(), 'HS256'));
+
+        $senderEmail = $decoded[0];
+
+        $result = $this->send_email($senderEmail, $title, $recipientEmail, "Customer Service Center", $description);
+
+        if($result){
+            return array("status"=>200, "message"=>"Success! Email is sent.");
+        } else{
+            return array("status"=>500, "message"=>"Error! Email was not sent.");
+        }
+
+
     }
 
 }

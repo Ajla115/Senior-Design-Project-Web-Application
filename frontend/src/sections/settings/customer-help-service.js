@@ -11,6 +11,7 @@ import {
 } from '@mui/material';
 
 import {CustomTextField} from 'src/sections/settings/customTextField';
+import { UserService } from 'services';
 
 export const CustomerHelpService = () => {
   const [values, setValues] = useState({
@@ -29,11 +30,20 @@ export const CustomerHelpService = () => {
   );
 
   const handleSubmit = useCallback(
-    (event) => {
+    async (event) => {
       event.preventDefault();
+      try {
+        const response = await UserService.sendEmailToCustomerService(values.title, values.description);
+        alert(response.message);
+        // console.log(response);
+      } catch (error) {
+        //console.error('Error sending email:', error);
+        alert("Error! Email has been not sent.\nCheck your error_log for more information.");
+      }
     },
-    []
+    [values]
   );
+
 
   return (
     <form onSubmit={handleSubmit}>
@@ -68,7 +78,7 @@ export const CustomerHelpService = () => {
         </CardContent>
         <Divider />
         <CardActions sx={{ justifyContent: 'flex-end', marginRight:0 }}>
-          <Button color = "success" variant="contained">
+        <Button type="submit" color="success" variant="contained">
             Send
           </Button>
           <Button color = "error" variant="contained"> 

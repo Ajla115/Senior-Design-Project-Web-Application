@@ -180,7 +180,7 @@ Flight::route('DELETE /users/@id', function ($id) {
 //PUT route to edit or update user's data
 //In the body, it will send the whole object, and then it will update then changed values
 //This is better than having to do PUT for every database column/attribute differently
-Flight::route("PUT /userDataUpdate/", function ($data) {
+Flight::route("PUT /userDataUpdate/", function () {
   $data = Flight::request()->data->getData();
   Flight::json(Flight::userService()->userDataUpdate($data));
 });
@@ -214,7 +214,7 @@ Flight::route("PUT /userDataUpdate/", function ($data) {
  */
 
 
-Flight::route("POST /sendemailtocustomerservice", function ($data) {
+Flight::route("POST /sendemailtocustomerservice/", function () {
   $data = Flight::request()->data->getData();
   Flight::json(Flight::userService()->sendemailtocustomerservice($data));
 });

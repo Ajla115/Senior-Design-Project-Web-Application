@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../../../config.php';
 class BaseDao
 {
     protected $conn;
@@ -11,13 +11,7 @@ class BaseDao
         try {
 
             $this->table_name = $table_name;
-            // $host = '127.0.0.1';
-            //  $schema = 'sdp_project';
-            // $username = 'root';
-            // $password = 'a1b2c3d4e5';
-            // $port = '3306';
 
-            /*Deployment on DO*/
             $host = Config::DB_HOST();
             $username = Config::DB_USERNAME();
             $password = Config::DB_PASSWORD();

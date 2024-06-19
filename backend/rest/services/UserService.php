@@ -1,9 +1,10 @@
 <?php
 require_once 'BaseService.php';
 require_once __DIR__ . "/../dao/UserDao.class.php";
+include (__DIR__ . '/validtlds.php');
 
 
-
+use OTPHP\TOTP;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use PHPMailer\PHPMailer\PHPMailer;
@@ -73,7 +74,6 @@ class UserService extends BaseService
     {
         //unset($entity['password']);
         //I turned off updating of password here because I will do that on seperate page
-        //I will do forget your password flow on the another page, but I will leave updating of password available also here
         $entity['password'] = md5($entity['password']);
         if (isset($entity['id_column']) && !is_null($entity['id_column'])) {
             return parent::update($entity, $id, $entity['id_column']);
@@ -81,19 +81,94 @@ class UserService extends BaseService
         return parent::update($entity, $id);
     }
 
-    public function userDataUpdate($data){
+    public function userDataUpdate($data)
+    {
         $first_name = $data['first_name'];
         $last_name = $data['last_name'];
         $email_address = $data['email_address'];
         return $this->dao->userDataUpdate($first_name, $last_name, $email_address);
     }
-    
+
 
 
     public function get_user_by_email($email)
     {
         return $this->dao->get_user_by_email($email);
     }
+
+    private function checkEmail($email)
+    {
+        global $tld_array;
+        //this is how it s recognizing varaible from another file
+
+        //this function checks if the email is just in a valid form with one @ and then it goes .com or . something else
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return false;
+        }
+
+        //Now, if the form of the email is correct, pursue further by checking the TLD of the email
+        //here, file validtlds.php has to be included
+        //I will take the last part of the current email and compare to see if it exists in the array of valid TLDs
+        //I will separate the email into array by using explode function
+        //Then I will take TLD, by applying end function to the array
+        //End function works only for an array, and not for the string
+        $email_array = explode(".", $email);
+        $email_tld = end($email_array);
+
+        //Here, it will be compared against imported list of valid TLDs from another file
+        if (!in_array($email_tld, $tld_array)) {
+
+            return false;
+        }
+
+        $domain_array = explode('@', $email);
+        $domain = $domain_array[1];
+        if (getmxrr($domain, $mx_details)) {
+            if (count($mx_details) > 0) {
+                return true;
+            } else {
+                return false;
+            }
+
+        }
+    }
+
+    private function checkPhoneNumber($phone)
+    {
+        $phone_util = \libphonenumber\PhoneNumberUtil::getInstance();
+        try {
+            $number_proto = $phone_util->parse($phone, "BA");
+            if ($phone_util->getNumberType($number_proto) === \libphonenumber\PhoneNumberType::MOBILE) {
+                //echo "Mobile phone number\n";
+                return true;
+            } else {
+                //in cases where the phone number is not correct exit and show an error message
+                //exit("Not mobile phone number\n");
+                return false;
+            }
+        } catch (\libphonenumber\NumberParseException $e) {
+            // exit($e->getMessage());
+            return false;
+        }
+    }
+
+    private function checkPlusSign($phone)
+    {
+        //substr(string, starting_index, length)
+        $result = substr($phone, 0, 1) === '+';
+        return $result;
+    }
+
+    private function generateOTPassword()
+    {
+        // A random secret will be generated from this.
+        // You should store the secret with the user for verification.
+        //The secret is a seperate function because it will be used for sending by email and password
+        $otp = TOTP::generate();
+        return $otp->getSecret();
+        //echo "The OTP secret is: {$otp->getSecret()}\n";
+    }
+
 
 
     public function register($data)
@@ -102,10 +177,15 @@ class UserService extends BaseService
         //extract individual attributes from JSON object
         $first_name = $data['first_name'];
         $last_name = $data['last_name'];
+        $phone = $data["phone"];
         $email_address = $data['email_address'];
         $password = $data['password'];
+        $reserved_names = array("admin", "root", "system", "administrator");
 
-        if (empty($first_name) || empty($last_name) || empty($email_address) || empty($password)) {
+        $full_name = $first_name . " " . $last_name;
+
+
+        if (empty($first_name) || empty($last_name) || empty($phone) || empty($email_address) || empty($password)) {
             return array("status" => 500, "message" => "All fields have to be filled in.");
         }
 
@@ -117,9 +197,29 @@ class UserService extends BaseService
             return array("status" => 500, "message" => "Last name can only contain letters, no numbers, special characters and spaces.");
         }
 
-        if (!filter_var($email_address, FILTER_VALIDATE_EMAIL)) {
+        $emailResult = $this->checkEmail($email_address);
+
+        if (!$emailResult) {
             return array("status" => 500, "message" => "Invalid email format");
         }
+
+          //If result of phone check is true, then continue doing further
+          $result = $this->checkPhoneNumber($phone);
+          if (!$result) {
+              //Flight::halt(500, "Phone number input invalid");
+              return array("status" => 500, "message" => "Phone number input invalid");
+              
+          }
+  
+          //now, when we have checked that the phone number is in correct Bosnian form
+          //I will check if the phone has that + sign in front of it.
+  
+          if (!($this->checkPlusSign($phone))) {
+              //Flight::halt(500, "Please put a + sign in front of the phone number.");
+              return array("status" => 500, "message" => "Please put a + sign in front of the phone number.");
+          }
+  
+
 
         if (mb_strlen($password) < 8) {
             return array("status" => 500, "message" => "The password should be at least 8 characters long");
@@ -139,17 +239,57 @@ class UserService extends BaseService
             //change the value of the JSON object that contains password
             $data["password"] = $hashedPassword;
 
-            //if the compiler has reached this point, it means that all requirements are satisified, and user can be added to the database
+             //after hashing password, generate the OTP password as secret
+             $secret = $this->generateOTPassword();
+             $login_count = 0;
+ 
+             //now, I have added these two new elements to the existing array and sent that to the database to be inserted
+             $data["secret"] = $secret;
+             $data["login_count"] = $login_count;
+ 
+             //until the user clicks on the confirmation link, it will be unverified
+             $data["verified"] = "unverified";
+ 
+             //I am using uniqID function to create unique identifiers based on microseconds
+             //Plus I added user_ and true parameter for more entropy to increase uniqnuess
+             $register_token = uniqid('user_', true);
+             $data["register_token"] = $register_token;
+ 
+
+             //if the compiler has reached this point, it means that all requirements are satisified, and user can be added to the database
             // Add the user to the database via the parent class's add method
             $result = parent::add($data);
 
-            if ($result['status'] === 200) {
-                return array("status" => 200, "message" => "User registered successfully");
-            } else {
+            if ($result['status'] === 500) {
                 return array("status" => 500, "message" => "Failed to add user");
+            } 
+
+            if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
+                $url = "https://";
+            } else {
+                $url = "http://";
             }
-        }
-    }
+            
+            // Add the HTTP host (localhost or www.example.com, etc.)
+            $url .= $_SERVER['HTTP_HOST'];
+            
+            // Define the verification path directly
+            $verificationPath = '/verifyAccount';
+            
+            // Combine URL with verification path and token
+            $verificationLink = $url . $verificationPath . '?register_token=' . $register_token;
+            
+            $subject = "Confirm Register Verification";
+            $body = "Please click the following link to verify your registration:<br><a href='$verificationLink'>Verify Registration By Clicking Here</a>";
+            
+
+            $this->send_email(Config::EMAIL1(), $subject, $email_address, $full_name, $body);
+ 
+             $result["message"] .= " Confirm your account registration through email.";
+             return array("status" => $result["status"], "message" => $result["message"]);
+         }
+     }
+ 
 
 
     public function login($data)
@@ -229,10 +369,10 @@ class UserService extends BaseService
 
             //Recipients
             $mail->setFrom($senderEmail, $title);
-            $mail->addAddress($recipientEmail, $recipientName); 
+            $mail->addAddress($recipientEmail, $recipientName);
 
             //Content
-            $mail->isHTML(true); 
+            $mail->isHTML(true);
             $mail->Subject = $title;
             $mail->Body = $description;
             $mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
@@ -246,7 +386,8 @@ class UserService extends BaseService
     }
 
 
-    public function sendemailtocustomerservice($data){
+    public function sendemailtocustomerservice($data)
+    {
         $title = $data["title"];
         $description = $data["description"];
 
@@ -255,17 +396,21 @@ class UserService extends BaseService
         $all_headers = getallheaders();
 
         $token = $all_headers['Authorization'];
-        
+
         $decoded = (array) JWT::decode($token, new Key(Config::JWT_SECRET(), 'HS256'));
 
         $senderEmail = $decoded[0];
 
+        if (!isset($title) || !isset($description)) {
+            return array("status" => 500, "message" => "Fields cannot be empty.");
+        }
+
         $result = $this->send_email($senderEmail, $title, $recipientEmail, "Customer Service Center", $description);
 
-        if($result){
-            return array("status"=>200, "message"=>"Success! Email is sent.");
-        } else{
-            return array("status"=>500, "message"=>"Error! Email was not sent.");
+        if ($result) {
+            return array("status" => 200, "message" => "Success! Email is sent.");
+        } else {
+            return array("status" => 500, "message" => "Error! Email was not sent.");
         }
 
 

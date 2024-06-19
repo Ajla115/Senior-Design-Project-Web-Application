@@ -8,11 +8,12 @@ const getUserData = async () => {
     });
 };
 
-const register = async (first_name, last_name, email, password) => {
+const register = async (first_name, last_name, phone, email, password) => {
   //Creating JSON object because on the backend JSON object is only accepted
   const user = {
     first_name,
     last_name,
+    phone,
     email,
     password,
   };

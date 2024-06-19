@@ -261,7 +261,7 @@ class UserService extends BaseService
             $result = parent::add($data);
 
             if ($result['status'] === 500) {
-                return array("status" => 500, "message" => "Failed to add user");
+                return array("status" => 500, "message" => $result["message"]);
             } 
 
             if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
@@ -271,7 +271,11 @@ class UserService extends BaseService
             }
             
             // Add the HTTP host (localhost or www.example.com, etc.)
-            $url .= $_SERVER['HTTP_HOST'];
+            //$url .= $_SERVER['HTTP_HOST'];
+
+            if ($_SERVER['HTTP_HOST'] === '127.0.0.1') {
+                $url .= 'localhost:3000';
+            }
             
             // Define the verification path directly
             $verificationPath = '/verifyAccount';
@@ -357,6 +361,7 @@ class UserService extends BaseService
             //Server settings
             //$mail->SMTPDebug = SMTP::DEBUG_SERVER; //Enable verbose debug output
             $mail->SMTPDebug = SMTP::DEBUG_OFF; //Enable verbose debug output
+           
 
             $mail->isSMTP(); //Send using SMTP
             $mail->Host = Config::SMTP_HOST(); //Set the SMTP server to send through

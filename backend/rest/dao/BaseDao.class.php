@@ -26,7 +26,8 @@ class BaseDao
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             // echo "Connected successfully";
         } catch (PDOException $e) {
-            echo "Connection failed: " . $e->getMessage();
+            error_log($e->getMessage());
+            echo "Connection failed.";
         }
     }
 
@@ -41,7 +42,9 @@ class BaseDao
             return array("status" => 200, "message" => $stmt->fetchAll(PDO::FETCH_ASSOC));
         } catch (PDOException $e) {
             //Internal Server Error
-            return array("status" => 500, "message" => $e->getMessage());
+            error_log($e->getMessage());
+            return array("status" => 500, "message" => "Internal Server Error.");
+
 
         }
 
@@ -57,7 +60,9 @@ class BaseDao
             $stmt->execute();
             return array("status" => 200, "message" => $stmt->fetchAll(PDO::FETCH_ASSOC));
         } catch (PDOException $e) {
-            return array("status" => 500, "message" => $e->getMessage());
+            //return array("status" => 500, "message" => $e->getMessage());
+            error_log($e->getMessage());
+            return array("status" => 500, "message" => "Internal Server Error.");
         }
 
     }
@@ -70,7 +75,10 @@ class BaseDao
             $stmt->execute();
             return array("status" => 200, "message" => "Deletion was successful.");
         } catch (PDOException $e) {
+            error_log($e->getMessage());
             return array("status" => 500, "message" => "Deletion was not successful.");
+            
+            
         }
     }
 
@@ -109,7 +117,8 @@ class BaseDao
             $entity['id'] = $this->conn->lastInsertId(); //this is will return the ID of the last entry
             return array("status" => 200, "message" => "Registration Successfull");
         } catch (PDOException $e) {
-            return array("status" => 500, "message" => $e->getMessage());
+            error_log($e->getMessage());
+            return array("status" => 500, "message" => "Internal Server Error");
         }
 
     }
@@ -134,7 +143,8 @@ class BaseDao
             // die();
             return array("status" => 200, "message" => $entity);
         } catch (PDOException $e) {
-            return array("status" => 500, "message" => $e->getMessage());
+            error_log($e->getMessage());
+            return array("status" => 500, "message" => "Internal Server Error");
         }
 
     }

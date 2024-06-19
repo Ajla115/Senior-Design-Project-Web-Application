@@ -23,6 +23,8 @@ class InstaHashDao extends BaseDao
       $stmt->execute();
       return array("status" => 200, "message" => "Deleted successfully");
     } catch (PDOException $e) {
+      error_log($e->getMessage());
+      //return array("status" => 500, "message" => "Internal Server Error");
       return array("status" => 500, "message" => "Deletion failed");
     }
   }
@@ -37,7 +39,9 @@ class InstaHashDao extends BaseDao
       $stmt->execute();
       return array("status" => 200, "message" => $stmt->fetchAll(PDO::FETCH_ASSOC));
     } catch (PDOException $e) {
-      return array("status" => 500, "message" => $e->getMessage());
+      //return array("status" => 500, "message" => $e->getMessage());
+      error_log($e->getMessage());
+      return array("status" => 500, "message" => "Internal Server Error");
     }
   }
 
@@ -49,7 +53,9 @@ class InstaHashDao extends BaseDao
       $stmt->execute();
       return array("status" => 200, "message" => $stmt->fetchAll(PDO::FETCH_ASSOC));
     } catch (PDOException $e) {
-      return array("status" => 500, "message" => $e->getMessage());
+      //return array("status" => 500, "message" => $e->getMessage());
+      error_log($e->getMessage());
+      return array("status" => 500, "message" => "Internal Server Error");
     }
   }
 
@@ -61,7 +67,9 @@ class InstaHashDao extends BaseDao
       $stmt->execute();
       return array("status" => 200, "message" => "Inserted successfully");
     } catch (PDOException $e) {
-      return array("status" => 500, "message" => $e->getMessage());
+      //return array("status" => 500, "message" => $e->getMessage());
+      error_log($e->getMessage());
+      return array("status" => 500, "message" => "Internal Server Error");
     }
   }
 
@@ -76,7 +84,9 @@ class InstaHashDao extends BaseDao
       $stmt->execute();
       return array("status" => 200, "message" => $stmt->fetchAll(PDO::FETCH_ASSOC));
     } catch (PDOException $e) {
-      return array("status" => 500, "message" => $e->getMessage());
+      //return array("status" => 500, "message" => $e->getMessage());
+      error_log($e->getMessage());
+      return array("status" => 500, "message" => "Internal Server Error");
     }
   }
 }

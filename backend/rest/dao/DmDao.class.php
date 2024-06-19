@@ -23,7 +23,9 @@ class DmDao extends BaseDao
       $count = $stmt->rowCount();
       return array("status" => 200, "message" => $count); //return $count;
     } catch (PDOException $e) {
-      return array("status" => 500, "message" => $e->getMessage());
+      //return array("status" => 500, "message" => $e->getMessage());
+      error_log($e->getMessage());
+      return array("status" => 500, "message" => "Internal Server Error");
     }
   }
 
@@ -39,7 +41,9 @@ class DmDao extends BaseDao
       $count = $stmt->rowCount();
       return array("status" => 200, "message" => $count); //return $count;
     } catch (PDOException $e) {
-      return array("status" => 500, "message" => $e->getMessage());
+      //return array("status" => 500, "message" => $e->getMessage());
+      error_log($e->getMessage());
+      return array("status" => 500, "message" => "Internal Server Error");
     }
   }
 
@@ -55,7 +59,9 @@ class DmDao extends BaseDao
       $count = $stmt->rowCount();
       return array("status" => 200, "message" => $count); //return $count; 
     } catch (PDOException $e) {
-      return array("status" => 500, "message" => $e->getMessage());
+      //return array("status" => 500, "message" => $e->getMessage());
+      error_log($e->getMessage());
+      return array("status" => 500, "message" => "Internal Server Error");
     }
 
   }
@@ -70,7 +76,9 @@ class DmDao extends BaseDao
       $count = $stmt->rowCount();
       return array("status" => 200, "message" => $count); //return $count; 
     } catch (PDOException $e) {
-      return array("status" => 500, "message" => $e->getMessage());
+      //return array("status" => 500, "message" => $e->getMessage());
+      error_log($e->getMessage());
+      return array("status" => 500, "message" => "Internal Server Error");
     }
   }
 
@@ -83,9 +91,10 @@ class DmDao extends BaseDao
       $stmt->execute();
       $row = $stmt->fetch(PDO::FETCH_ASSOC);
       return array("status" => 200, "message" => $row['id']);//return $row['id'];
-    }
-    catch (PDOException $e) {
-      return array("status" => 500, "message" => $e->getMessage());
+    } catch (PDOException $e) {
+      //return array("status" => 500, "message" => $e->getMessage());
+      error_log($e->getMessage());
+      return array("status" => 500, "message" => "Internal Server Error");
     }
   }
 
@@ -129,7 +138,9 @@ class DmDao extends BaseDao
 
       return array("status" => 200, "message" => "Insertion was successful.");
     } catch (PDOException $e) {
-      return array("status" => 500, "message" => $e->getMessage());
+      //return array("status" => 500, "message" => $e->getMessage());
+      error_log($e->getMessage());
+      return array("status" => 500, "message" => "Internal Server Error");
     }
   }
 
@@ -181,7 +192,9 @@ class DmDao extends BaseDao
 
       return array("status" => 200, "message" => "Update was successful.");
     } catch (PDOException $e) {
-      return array("status" => 500, "message" => $e->getMessage());
+      //return array("status" => 500, "message" => $e->getMessage());
+      error_log($e->getMessage());
+      return array("status" => 500, "message" => "Internal Server Error");
     }
   }
 }

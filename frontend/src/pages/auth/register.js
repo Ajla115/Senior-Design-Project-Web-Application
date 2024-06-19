@@ -79,6 +79,7 @@ const Page = () => {
       const userResponse = await UserService.register(
         formik.values.first_name,
         formik.values.last_name,
+        formik.values.phone,
         formik.values.email,
         formik.values.password
       );
@@ -92,9 +93,11 @@ const Page = () => {
 
   useEffect(() => {
     if (backendResult !== "") {
-      if (backendResult.status === 200) {
+      //console.log(backendResult);
+      if (backendResult.status == 200) {
+        
         router.push("/auth/login");
-      } else if (backendResult.status === 500) {
+      } else if (backendResult.status == 500) {
         setErrorMessage(backendResult.message);
       }
     }
@@ -161,6 +164,16 @@ const Page = () => {
                   onBlur={formik.handleBlur}
                   onChange={formik.handleChange}
                   value={formik.values.last_name}
+                />
+                <TextField
+                  error={!!(formik.touched.phone && formik.errors.phone)}
+                  fullWidth
+                  helperText={formik.touched.phone && formik.errors.phone}
+                  label="Phone" //label is what the user sees
+                  name="phone" //name is what gets sent to formik for
+                  onBlur={formik.handleBlur}
+                  onChange={formik.handleChange}
+                  value={formik.values.phone}
                 />
                 <TextField
                   error={!!(formik.touched.email && formik.errors.email)}

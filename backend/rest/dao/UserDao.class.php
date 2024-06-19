@@ -21,7 +21,9 @@ class UserDao extends BaseDao
       $stmt->execute();
       return array("status" => 200, "message" => $stmt->fetchAll(PDO::FETCH_ASSOC));
     } catch (PDOException $e) {
-      return array("status" => 500, "message" => $e->getMessage());
+      //return array("status" => 500, "message" => $e->getMessage());
+      error_log($e->getMessage());
+      return array("status" => 500, "message" => "Internal Server Error");
     }
   }
 
@@ -39,7 +41,9 @@ class UserDao extends BaseDao
       $stmt->execute();
       return array("status" => 200, "message" => $stmt->fetchAll(PDO::FETCH_ASSOC));
     } catch (PDOException $e) {
-      return array("status" => 500, "error" => $e->getMessage());
+      //return array("status" => 500, "error" => $e->getMessage());
+      error_log($e->getMessage());
+      return array("status" => 500, "message" => "Internal Server Error");
     }
 
 
@@ -56,7 +60,9 @@ class UserDao extends BaseDao
         return 1; // Return 1 as symbol that user with this email exists
       }
     } catch (PDOException $e) {
-      return $e->getMessage();
+      //return $e->getMessage();
+      error_log($e->getMessage());
+      return 0;
     }
   }
 
@@ -72,7 +78,9 @@ class UserDao extends BaseDao
         return $user['password']; // Return just the password
       }
     } catch (PDOException $e) {
-      return $e->getMessage();
+      //return $e->getMessage();
+      error_log($e->getMessage());
+      return "Internal Server Error";
     }
   }
 
@@ -86,7 +94,7 @@ class UserDao extends BaseDao
       $updateStmt->bindParam(':first_name', $first_name);
       $updateStmt->bindParam(':last_name', $last_name);
       $updateStmt->bindParam(':new_email_address', $email_address);
-     // $updateStmt->bindParam(':email_address', $email_address);
+      // $updateStmt->bindParam(':email_address', $email_address);
       $updateStmt->execute();
 
       // Fetch the updated user data to return
@@ -99,7 +107,9 @@ class UserDao extends BaseDao
 
 
     } catch (PDOException $e) {
-      return $e->getMessage();
+      //return $e->getMessage();
+      error_log($e->getMessage());
+      return "Internal Server Error";
     }
   }
 

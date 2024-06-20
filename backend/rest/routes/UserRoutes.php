@@ -156,7 +156,7 @@ Flight::route('DELETE /users/@id', function ($id) {
 
 /**
  * @OA\Put(
- *     path="/users/", security={{"ApiKeyAuth": {}}},
+ *     path="/userdataupdate/", security={{"ApiKeyAuth": {}}},
  *       summary="Edit user data",
  *     description="Edit user data",
  *     tags={"users"},
@@ -165,7 +165,8 @@ Flight::route('DELETE /users/@id', function ($id) {
  *    			@OA\Schema(
  *                  @OA\Property(property="first_name", type="string", example="Demo",	description="First name"),
  *                  @OA\Property(property="last_name", type="string", example="Demoic",	description="Last name"),
- *                   @OA\Property(property="email", type="string", example="demo@gmail.com",	description="Email" ),
+ *                  @OA\Property(property="phone", type="string", example="demo@gmail.com",	description="Phone number"),
+ *                  @OA\Property(property="email", type="string", example="+38761123456",	description="Email"),
  *        )
  *     )),
  *     @OA\Response(
@@ -180,7 +181,7 @@ Flight::route('DELETE /users/@id', function ($id) {
 //PUT route to edit or update user's data
 //In the body, it will send the whole object, and then it will update then changed values
 //This is better than having to do PUT for every database column/attribute differently
-Flight::route("PUT /userDataUpdate/", function () {
+Flight::route("PUT /userdataupdate/", function () {
   $data = Flight::request()->data->getData();
   Flight::json(Flight::userService()->userDataUpdate($data));
 });
@@ -218,6 +219,33 @@ Flight::route("POST /sendemailtocustomerservice/", function () {
   $data = Flight::request()->data->getData();
   Flight::json(Flight::userService()->sendemailtocustomerservice($data));
 });
+
+
+/**
+ * @OA\Post(
+ *     path="/markuserasdeleted'", 
+ *     summary = "Delete your own account", 
+ *     description="Deletion of account",
+ *     tags={"users"},
+ *     @OA\RequestBody(description="Delete account", required=true,
+ *       @OA\MediaType(mediaType="application/json",
+ *    			
+ *     )),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Account is successfully deleted"
+ *     ),
+ *     @OA\Response(
+ *         response=500,
+ *         description="Error"
+ *     )
+ * )
+ */
+
+Flight::route('POST /markuserasdeleted/', function () {
+  Flight::json(Flight::userService()->markUserAsDeleted());
+});
+
 
 
 ?>

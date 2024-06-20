@@ -48,55 +48,111 @@ const login = async (email, password) => {
     });
 };
 
-
 export const sendEmailToCustomerService = async (title, description) => {
   const user = {
     title,
-    description
+    description,
   };
 
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
 
   if (!token) {
-    console.error('No token found in local storage');
+    console.error("No token found in local storage");
     return;
   }
 
   return axios
-    .post(`http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/sendemailtocustomerservice/`, user, {
-      headers: {
-        'Authorization': `${token}`
+    .post(
+      `http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/sendemailtocustomerservice/`,
+      user,
+      {
+        headers: {
+          Authorization: `${token}`,
+        },
       }
-    })
+    )
     .then((response) => {
       return response.data;
     })
     .catch((error) => {
       console.error("Error logging: ", error);
-      throw error; 
+      throw error;
     });
 };
 
-
-const changeData = async (first_name, last_name, email) => {
-  //Creating JSON object because on the backend JSON object is only accepted
+const userDataUpdate = async (first_name, last_name, email, phone) => {
   const user = {
     first_name,
     last_name,
-    email
+    email,
+    phone,
   };
   user.email_address = user.email;
   delete user.email;
+
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    console.error("No token found in local storage");
+    return;
+  }
+
   return axios
-    .post(`http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/login/`, user)
+    .put(
+      `http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/userdataupdate/`,
+      user,
+      {
+        headers: {
+          Authorization: `${token}`,
+        },
+      }
+    )
     .then((response) => {
+      if (response.data.status !== 200) {
+        throw new Error(response.data.message || "Unknown error");
+      }
       return response.data;
     })
     .catch((error) => {
-      console.error("Error logging: ", error);
+      console.error("Error updating: ", error);
+      throw error;
     });
 };
 
+const markUserAsDeleted = async () => {
+  const token = localStorage.getItem("token");
 
+  if (!token) {
+    console.error("No token found in local storage");
+    return;
+  }
 
-export default { getUserData, register, login, sendEmailToCustomerService };
+  return axios
+    .post(
+      'http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/markuserasdeleted/',
+      {}, 
+      {
+        headers: {
+          Authorization: `${token}`, 
+        },
+      }
+    )
+    .then((response) => {
+      if (response.data.status !== 200) {
+        throw new Error(response.data.message || "Unknown error");
+      }
+      return response.data;
+    })
+    .catch((error) => {
+      console.error("Error deleting an account: ", error);
+      throw error;
+    });
+};
+export default {
+  getUserData,
+  register,
+  login,
+  sendEmailToCustomerService,
+  userDataUpdate,
+  markUserAsDeleted,
+};

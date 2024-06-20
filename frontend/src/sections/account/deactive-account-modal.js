@@ -4,12 +4,27 @@ import { styled, css } from '@mui/system';
 import { Modal as BaseModal } from '@mui/base/Modal';
 import Fade from '@mui/material/Fade';
 import { Button, Stack, CardActions } from '@mui/material';
+import { UserService } from "services";
+import { useRouter } from "next/navigation";
 
-export default function TransitionsModal() {
+export default function DeleteAccountModal() {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
   const[close, setClose] = React.useState(false);
+  const router = useRouter();
+
+  const handleDeleteAccount = async () => {
+    
+    try {
+      await UserService.markUserAsDeleted();
+      alert('Your account has been successfully marked as deleted.');
+      setOpen(false);
+      router.push('/auth/register');
+    } catch (error) {
+      alert(error.message || 'Failed to delete your account.');
+    }
+  };
 
   return (
     <div>
@@ -36,7 +51,7 @@ export default function TransitionsModal() {
             {/* <CardActions sx={{ justifyContent: 'flex-end', marginLeft: 185}}> */}
             <CardActions>
             <Button variant = "contained" color = "error" onClick={() => { setOpen(false)}}>No</Button>
-            <Button variant = "contained" color = "success">Yes</Button>
+            <Button variant = "contained" color = "success" onClick={handleDeleteAccount}>Yes</Button>
             </CardActions></Stack>
           </ModalContent>
         </Fade>

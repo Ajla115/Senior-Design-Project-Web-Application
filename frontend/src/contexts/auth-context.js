@@ -127,9 +127,10 @@ export const AuthProvider = (props) => {
         }
 
         // Getting the first_name, last_name and email values
+        var email = payload.email;
         var firstName = payload.first_name;
         var lastName = payload.last_name;
-        var email = payload.email;
+        var phone = payload.phone
 
         const user = {
           //avatar: "/assets/avatars/avatar-anika-visser.png",
@@ -137,6 +138,7 @@ export const AuthProvider = (props) => {
           first_name: firstName,
           last_name: lastName,
           email: email,
+          phone: phone,
         };
       }
 
@@ -209,6 +211,7 @@ export const AuthProvider = (props) => {
       first_name: userResponse.first_name,
       last_name: userResponse.last_name,
       email: userResponse.email,
+      phone: userResponse.phone
     };
 
     dispatch({

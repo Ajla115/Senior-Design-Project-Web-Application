@@ -13,9 +13,11 @@ import {
   IconButton,
   InputAdornment,
 } from "@mui/material";
-import TransitionsModal from "./deactive-account-modal";
 import { Visibility, VisibilityOff } from "@mui/icons-material"; //needed for password toggling
 import { useAuthContext } from "src/contexts/auth-context";
+import { UserService } from "services";
+import { useRouter } from "next/navigation";
+import DeleteAccountModal from "./deactive-account-modal";
 
 const states = [
   {
@@ -37,15 +39,8 @@ const states = [
 ];
 
 export const AccountProfileDetails = () => {
+  const router = useRouter();
   const { user } = useAuthContext();
-  // const [initialValues, setInitialValues] = useState({
-  //   first_name: "Anika",
-  //   last_name: "Visser",
-  //   email: "demo@devias.io",
-  //   //password: "anika123",
-  //   // state: 'los-angeles',
-  //   // country: 'USA'
-  // });
 
   const [initialValues, setInitialValues] = useState(user);
 
@@ -57,7 +52,7 @@ export const AccountProfileDetails = () => {
 
   const [isChanged, setIsChanged] = useState(false); //this will track if input in any three fields changes
   const [values, setValues] = useState(initialValues); //this will keep track, if there are no changes, disable Save button again
-  console.log(values);
+  //console.log(values);
   useEffect(() => {
     setInitialValues(values); //this I need to keep track of the first values in the fields
   }, []);
@@ -89,6 +84,18 @@ export const AccountProfileDetails = () => {
     return true;
   };
 
+  const handleSaveDetails = async (values) => {
+    try {
+      await UserService.userDataUpdate(values.first_name, values.last_name, values.email, values.phone);
+      alert('User details updated successfully');
+      router.push('/auth/login');
+      setIsChanged(false);
+    } catch (error) {
+      console.error('Error updating user details:', error);
+      // Show error message to the user
+      alert(error.message || 'Failed to update user details');
+    }
+  };
   return (
     <form autoComplete="off" noValidate onSubmit={handleSubmit}>
       <Card>
@@ -99,8 +106,9 @@ export const AccountProfileDetails = () => {
         >
           <CardHeader subheader="The information can be edited" title="Profile" />
           <CardActions sx={{ justifyContent: "flex-end", marginRight: 0 }}>
-            {/* <Button variant = 'outlined' color = 'error'>Deactive your account</Button> */}
-            <TransitionsModal />
+            {/* <Button variant = 'outlined' color = 'error'>Deactive your account</Button>  */}
+            <DeleteAccountModal />
+            {/* <DeactiveAccountModal /> */}
           </CardActions>
         </Stack>
         <CardContent sx={{ pt: 0 }}>
@@ -135,6 +143,16 @@ export const AccountProfileDetails = () => {
                   onChange={handleChange}
                   required
                   value={values.email}
+                />
+              </Grid>
+              <Grid xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Phone"
+                  name="phone"
+                  onChange={handleChange}
+                  required
+                  value={values.phone}
                 />
               </Grid>
               {/* <Grid xs={12} md={6}>
@@ -192,7 +210,11 @@ export const AccountProfileDetails = () => {
         </CardContent>
         <Divider />
         <CardActions sx={{ justifyContent: "flex-end" }}>
-          <Button variant="contained" disabled={!isChanged}>
+          <Button
+            variant="contained"
+            disabled={!isChanged}
+            onClick={() => handleSaveDetails(values)}
+          >
             Save details
           </Button>
         </CardActions>

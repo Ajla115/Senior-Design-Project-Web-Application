@@ -85,8 +85,48 @@ class UserService extends BaseService
     {
         $first_name = $data['first_name'];
         $last_name = $data['last_name'];
-        $email_address = $data['email_address'];
-        return $this->dao->userDataUpdate($first_name, $last_name, $email_address);
+        $new_email_address = $data['email_address'];
+        $phone = $data["phone"];
+
+        $all_headers = getallheaders();
+
+        $token = $all_headers['Authorization'];
+
+        $decoded = (array) JWT::decode($token, new Key(Config::JWT_SECRET(), 'HS256'));
+        
+        $current_email = $decoded[0];
+        
+
+        if (empty($first_name) || empty($last_name) || empty($phone) || empty($new_email_address)) {
+            return array("status" => 400, "message" => "All fields have to be filled in.");
+        }
+
+        if (!ctype_alpha($first_name) || !ctype_alpha($last_name)) {
+            return array("status" => 400, "message" => "First and last name fields can only contain letters, no numbers, special characters and spaces.");
+        }
+
+        $emailResult = $this->checkEmail($new_email_address);
+
+        if (!$emailResult) {
+            return array("status" => 400, "message" => "Invalid email format");
+        }
+        $result = $this->checkPhoneNumber($phone);
+        if (!$result) {
+            return array("status" => 400, "message" => "Phone number input invalid");
+
+        }
+
+        if (!($this->checkPlusSign($phone))) {
+            return array("status" => 400, "message" => "Please put a + sign in front of the phone number.");
+        }
+
+        $result = $this->dao->userDataUpdate($first_name, $last_name, $new_email_address, $phone, $current_email);
+
+        if ($result["status"] == 200) {
+            return array("status" => 200, "message" => "User data has been successfully updated.");
+        } else {
+            return array("status" => 400, "message" => $result["message"]);
+        }
     }
 
 
@@ -203,22 +243,22 @@ class UserService extends BaseService
             return array("status" => 500, "message" => "Invalid email format");
         }
 
-          //If result of phone check is true, then continue doing further
-          $result = $this->checkPhoneNumber($phone);
-          if (!$result) {
-              //Flight::halt(500, "Phone number input invalid");
-              return array("status" => 500, "message" => "Phone number input invalid");
-              
-          }
-  
-          //now, when we have checked that the phone number is in correct Bosnian form
-          //I will check if the phone has that + sign in front of it.
-  
-          if (!($this->checkPlusSign($phone))) {
-              //Flight::halt(500, "Please put a + sign in front of the phone number.");
-              return array("status" => 500, "message" => "Please put a + sign in front of the phone number.");
-          }
-  
+        //If result of phone check is true, then continue doing further
+        $result = $this->checkPhoneNumber($phone);
+        if (!$result) {
+            //Flight::halt(500, "Phone number input invalid");
+            return array("status" => 500, "message" => "Phone number input invalid");
+
+        }
+
+        //now, when we have checked that the phone number is in correct Bosnian form
+        //I will check if the phone has that + sign in front of it.
+
+        if (!($this->checkPlusSign($phone))) {
+            //Flight::halt(500, "Please put a + sign in front of the phone number.");
+            return array("status" => 500, "message" => "Please put a + sign in front of the phone number.");
+        }
+
 
 
         if (mb_strlen($password) < 8) {
@@ -239,61 +279,61 @@ class UserService extends BaseService
             //change the value of the JSON object that contains password
             $data["password"] = $hashedPassword;
 
-             //after hashing password, generate the OTP password as secret
-             $secret = $this->generateOTPassword();
-             $login_count = 0;
- 
-             //now, I have added these two new elements to the existing array and sent that to the database to be inserted
-             $data["secret"] = $secret;
-             $data["login_count"] = $login_count;
- 
-             //until the user clicks on the confirmation link, it will be unverified
-             $data["verified"] = "unverified";
- 
-             //I am using uniqID function to create unique identifiers based on microseconds
-             //Plus I added user_ and true parameter for more entropy to increase uniqnuess
-             $register_token = uniqid('user_', true);
-             $data["register_token"] = $register_token;
- 
+            //after hashing password, generate the OTP password as secret
+            $secret = $this->generateOTPassword();
+            $login_count = 0;
 
-             //if the compiler has reached this point, it means that all requirements are satisified, and user can be added to the database
+            //now, I have added these two new elements to the existing array and sent that to the database to be inserted
+            $data["secret"] = $secret;
+            $data["login_count"] = $login_count;
+
+            //until the user clicks on the confirmation link, it will be unverified
+            $data["status"] = "unverified";
+
+            //I am using uniqID function to create unique identifiers based on microseconds
+            //Plus I added user_ and true parameter for more entropy to increase uniqnuess
+            $register_token = uniqid('user_', true);
+            $data["register_token"] = $register_token;
+
+
+            //if the compiler has reached this point, it means that all requirements are satisified, and user can be added to the database
             // Add the user to the database via the parent class's add method
             $result = parent::add($data);
 
             if ($result['status'] === 500) {
                 return array("status" => 500, "message" => $result["message"]);
-            } 
+            }
 
             if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
                 $url = "https://";
             } else {
                 $url = "http://";
             }
-            
+
             // Add the HTTP host (localhost or www.example.com, etc.)
             //$url .= $_SERVER['HTTP_HOST'];
 
             if ($_SERVER['HTTP_HOST'] === '127.0.0.1') {
                 $url .= 'localhost:3000';
             }
-            
+
             // Define the verification path directly
             $verificationPath = '/verifyAccount';
-            
+
             // Combine URL with verification path and token
             $verificationLink = $url . $verificationPath . '?register_token=' . $register_token;
-            
+
             $subject = "Confirm Register Verification";
             $body = "Please click the following link to verify your registration:<br><a href='$verificationLink'>Verify Registration By Clicking Here</a>";
-            
+
 
             $this->send_email(Config::EMAIL1(), $subject, $email_address, $full_name, $body);
- 
-             $result["message"] .= " Confirm your account registration through email.";
-             return array("status" => $result["status"], "message" => $result["message"]);
-         }
-     }
- 
+
+            $result["message"] .= " Confirm your account registration through email.";
+            return array("status" => $result["status"], "message" => $result["message"]);
+        }
+    }
+
 
 
     public function login($data)
@@ -322,11 +362,17 @@ class UserService extends BaseService
 
             if (password_verify($data["password"], $hashedPassword)) {
                 //encode only email address
-                $jwt = JWT::encode([$email_address], Config::JWT_SECRET(), 'HS256');
                 $data = $this->dao->get_user_by_email($email_address);
+
+                $data2 = array($data["message"][0]["email_address"], $data["message"][0]["first_name"], $data["message"][0]["last_name"], $data["message"][0]["phone"], $data["message"][0]["login_count"]);
+
+               $jwt = JWT::encode($data2, Config::JWT_SECRET(), 'HS256');
+                
                 // print_r($data["message"][0]["first_name"]);
                 //die();
-                return array("status" => 200, "token" => $jwt, "first_name" => $data["message"][0]["first_name"], "last_name" => $data["message"][0]["last_name"], "email" => $email_address);
+                
+                return array("status" => 200, "token" => $jwt, "first_name" => $data["message"][0]["first_name"], "last_name" => $data["message"][0]["last_name"], "email" => $data["message"][0]["email_address"], "phone" => $data["message"][0]["phone"]);
+
                 //return array("status" => 200, "message" => "Correct password! Logging in...");
             } else {
                 return array("status" => 500, "message" => "Invalid password");
@@ -361,7 +407,7 @@ class UserService extends BaseService
             //Server settings
             //$mail->SMTPDebug = SMTP::DEBUG_SERVER; //Enable verbose debug output
             $mail->SMTPDebug = SMTP::DEBUG_OFF; //Enable verbose debug output
-           
+
 
             $mail->isSMTP(); //Send using SMTP
             $mail->Host = Config::SMTP_HOST(); //Set the SMTP server to send through
@@ -416,6 +462,28 @@ class UserService extends BaseService
             return array("status" => 200, "message" => "Success! Email is sent.");
         } else {
             return array("status" => 500, "message" => "Error! Email was not sent.");
+        }
+
+
+    }
+
+
+    public function markUserAsDeleted(){
+
+        $all_headers = getallheaders();
+
+        $token = $all_headers['Authorization'];
+
+        $decoded = (array) JWT::decode($token, new Key(Config::JWT_SECRET(), 'HS256'));
+
+        $senderEmail = $decoded[0];
+
+        $result = $this->dao->markUserAsDeleted($senderEmail);
+
+        if ($result["status"] == 200) {
+            return array("status" => 200, "message" => "Your account has been successfully deleted.");
+        } else {
+            return array("status" => 400, "message" => $result["message"]);
         }
 
 

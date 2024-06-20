@@ -86,34 +86,51 @@ class UserDao extends BaseDao
 
 
 
-  public function userDataUpdate($first_name, $last_name, $email_address)
+  public function userDataUpdate($first_name, $last_name, $new_email_address, $phone, $current_email)
   {
     try {
-
-      $updateStmt = $this->conn->prepare("UPDATE users SET first_name = :first_name, last_name = :last_name, email_address = :new_email_address WHERE email_address = :email_address");
+      $updateStmt = $this->conn->prepare("UPDATE users SET first_name = :first_name, last_name = :last_name, email_address = :new_email_address, phone = :phone WHERE email_address = :current_email");
       $updateStmt->bindParam(':first_name', $first_name);
       $updateStmt->bindParam(':last_name', $last_name);
-      $updateStmt->bindParam(':new_email_address', $email_address);
-      // $updateStmt->bindParam(':email_address', $email_address);
-      $updateStmt->execute();
+      $updateStmt->bindParam(':new_email_address', $new_email_address);
+      $updateStmt->bindParam(':phone', $phone);
+      $updateStmt->bindParam(':current_email', $current_email);
 
-      // Fetch the updated user data to return
-      $selectUpdated = $this->conn->prepare("SELECT * FROM users WHERE email_address = :email_address");
-      $selectUpdated->bindParam(':email_address', $email_address);
-      $selectUpdated->execute();
-      $updatedUser = $selectUpdated->fetch(PDO::FETCH_ASSOC);
-
-      return $updatedUser; // Return the updated user data
-
-
+      // Execute the statement and check if rows were affected
+      if ($updateStmt->execute()) {
+        if ($updateStmt->rowCount() > 0) {
+          return array("status" => 200, "message" => "Your data has been successfully updated.");
+        } else {
+          return array("status" => 500, "message" => "No rows affected. Please check if the email address exists.");
+        }
+      } else {
+        return array("status" => 500, "message" => "Failed to execute update statement.");
+      }
     } catch (PDOException $e) {
-      //return $e->getMessage();
       error_log($e->getMessage());
-      return "Internal Server Error";
+      return array("status" => 500, "message" => "Internal Server Error: " . $e->getMessage());
     }
   }
 
-
+  public function markUserAsDeleted($email)
+  {
+    try {
+      $stmt = $this->conn->prepare("UPDATE users SET status = 'deleted' WHERE email_address = :email");
+      $stmt->bindParam(':email', $email);
+      if ($stmt->execute()) {
+        if ($stmt->rowCount() > 0) {
+          return array("status" => 200, "message" => "User status updated to 'deleted'.");
+        } else {
+          return array("status" => 500, "message" => "No rows affected. Please check if the email address exists.");
+        }
+      } else {
+        return array("status" => 500, "message" => "Failed to execute update statement.");
+      }
+    } catch (PDOException $e) {
+      error_log($e->getMessage());
+      return array("status" => 500, "message" => "Internal Server Error: " . $e->getMessage());
+    }
+  }
 }
 
 
@@ -122,4 +139,5 @@ class UserDao extends BaseDao
 
 
 
-?>
+
+

@@ -93,9 +93,9 @@ class UserService extends BaseService
         $token = $all_headers['Authorization'];
 
         $decoded = (array) JWT::decode($token, new Key(Config::JWT_SECRET(), 'HS256'));
-        
+
         $current_email = $decoded[0];
-        
+
 
         if (empty($first_name) || empty($last_name) || empty($phone) || empty($new_email_address)) {
             return array("status" => 400, "message" => "All fields have to be filled in.");
@@ -334,7 +334,10 @@ class UserService extends BaseService
         }
     }
 
-
+    private function getStatusByEmail($email)
+    {
+        return $this->dao->getStatusByEmail($email);
+    }
 
     public function login($data)
     {
@@ -358,6 +361,12 @@ class UserService extends BaseService
 
         if ($emailExistence == 1) {
 
+            $statusResult = $this->getStatusByEmail($email_address);
+
+            if ($statusResult['status'] == 200 && $statusResult['data'] != 'verified') {
+                return array("status" => 500, "message" => "Only verified accounts can login.");
+            }
+
             $hashedPassword = $this->getPassword($email_address);
 
             if (password_verify($data["password"], $hashedPassword)) {
@@ -366,11 +375,11 @@ class UserService extends BaseService
 
                 $data2 = array($data["message"][0]["email_address"], $data["message"][0]["first_name"], $data["message"][0]["last_name"], $data["message"][0]["phone"], $data["message"][0]["login_count"]);
 
-               $jwt = JWT::encode($data2, Config::JWT_SECRET(), 'HS256');
-                
+                $jwt = JWT::encode($data2, Config::JWT_SECRET(), 'HS256');
+
                 // print_r($data["message"][0]["first_name"]);
                 //die();
-                
+
                 return array("status" => 200, "token" => $jwt, "first_name" => $data["message"][0]["first_name"], "last_name" => $data["message"][0]["last_name"], "email" => $data["message"][0]["email_address"], "phone" => $data["message"][0]["phone"]);
 
                 //return array("status" => 200, "message" => "Correct password! Logging in...");
@@ -468,7 +477,8 @@ class UserService extends BaseService
     }
 
 
-    public function markUserAsDeleted(){
+    public function markUserAsDeleted()
+    {
 
         $all_headers = getallheaders();
 
@@ -488,5 +498,22 @@ class UserService extends BaseService
 
 
     }
+
+    public function verifyAccount($data)
+    {
+        $url = $data["register_token"];
+        $result = $this->dao->verifyAccount($url);
+        if ($result["status"] == 200) {
+            return array("status" => 200, "message" => "Account has been verified.");
+        } else if ($result["status"] == 400) {
+            return array("status" => 400, "message" => "Account is already verified.");
+        } else {
+            return array("status" => 500, "message" => $result["message"]);
+        }
+    }
+
+
+
+
 
 }

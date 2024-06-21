@@ -54,7 +54,7 @@ const AccountProfile = () => {
       <Divider />
       <CardActions>
         <Button fullWidth variant="text">
-          Upload picture
+          Change your password
         </Button>
       </CardActions>
     </Card>

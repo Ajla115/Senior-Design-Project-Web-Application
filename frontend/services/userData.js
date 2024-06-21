@@ -129,11 +129,11 @@ const markUserAsDeleted = async () => {
 
   return axios
     .post(
-      'http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/markuserasdeleted/',
-      {}, 
+      "http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/markuserasdeleted/",
+      {},
       {
         headers: {
-          Authorization: `${token}`, 
+          Authorization: `${token}`,
         },
       }
     )
@@ -148,6 +148,32 @@ const markUserAsDeleted = async () => {
       throw error;
     });
 };
+
+const verifyAccount = async (register_token) => {
+  try {
+    const user = {
+      register_token,
+    };
+    const response = await axios.post(
+      `http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/verifyaccount/`,
+      user,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (response.data.status !== 200 && response.data.status !== 400) {
+      throw new Error(response.data.message || "Unknown error");
+    }
+    return response.data;
+  } catch (error) {
+    console.error("Error verifying an account: ", error);
+    throw error;
+  }
+};
+
 export default {
   getUserData,
   register,
@@ -155,4 +181,5 @@ export default {
   sendEmailToCustomerService,
   userDataUpdate,
   markUserAsDeleted,
+  verifyAccount,
 };

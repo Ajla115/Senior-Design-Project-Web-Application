@@ -68,7 +68,7 @@ class InstaAccDao extends BaseDao
     //     WHERE activity = 'active'
     // ");
     try {
-      $stmt = $this->conn->prepare("SELECT * FROM " . $this->table_name . " WHERE activity = 'active' ORDER BY stats ASC");
+      $stmt = $this->conn->prepare("SELECT * FROM " . $this->table_name . " WHERE activity = 'active' ORDER BY id DESC");
       $stmt->execute();
       return array("status" => 200, "message" => $stmt->fetchAll(PDO::FETCH_ASSOC));
 

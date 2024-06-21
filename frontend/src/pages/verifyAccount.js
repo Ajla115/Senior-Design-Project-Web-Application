@@ -1,6 +1,5 @@
 import Head from 'next/head';
 import { Box, Container, Stack, Typography } from '@mui/material';
-import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
 import { VerifyAccount } from 'src/sections/verifyAccount/verify-account';
 
 const Page = () => (
@@ -29,10 +28,5 @@ const Page = () => (
   </>
 );
 
-Page.getLayout = (page) => (
-  <DashboardLayout>
-    {page}
-  </DashboardLayout>
-);
 
 export default Page;

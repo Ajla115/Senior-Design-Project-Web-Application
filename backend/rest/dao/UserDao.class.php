@@ -131,6 +131,64 @@ class UserDao extends BaseDao
       return array("status" => 500, "message" => "Internal Server Error: " . $e->getMessage());
     }
   }
+
+  public function verifyAccount($registerToken)
+  {
+    try {
+      // Check if the account is already verified
+      $checkStmt = $this->conn->prepare("SELECT status FROM users WHERE register_token = :register_token");
+      $checkStmt->bindParam(':register_token', $registerToken);
+      $checkStmt->execute();
+
+      $user = $checkStmt->fetch(PDO::FETCH_ASSOC);
+
+      if ($user) {
+        if ($user['status'] === 'verified') {
+          return array("status" => 400, "message" => "Account is already verified.");
+        }
+
+        // Proceed to update the account status if not already verified
+        $stmt = $this->conn->prepare("UPDATE users SET status = 'verified' WHERE register_token = :register_token");
+        $stmt->bindParam(':register_token', $registerToken);
+
+        if ($stmt->execute()) {
+          if ($stmt->rowCount() > 0) {
+            return array("status" => 200, "message" => "User status updated to 'verified'.");
+          } else {
+            return array("status" => 500, "message" => "No rows affected. Please check if the register token exists.");
+          }
+        } else {
+          return array("status" => 500, "message" => "Failed to execute update statement.");
+        }
+      } else {
+        return array("status" => 500, "message" => "No user found with the provided register token.");
+      }
+    } catch (PDOException $e) {
+      error_log($e->getMessage());
+      return array("status" => 500, "message" => "Internal Server Error: " . $e->getMessage());
+    }
+  }
+
+  public function getStatusByEmail($email)
+  {
+    try {
+      $stmt = $this->conn->prepare("SELECT status FROM users WHERE email_address = :email");
+      $stmt->bindParam(':email', $email);
+      if ($stmt->execute()) {
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($result) {
+          return array("status" => 200, "data" => $result["status"]);
+        } else {
+          return array("status" => 404, "message" => "User not found.");
+        }
+      } else {
+        return array("status" => 500, "message" => "Failed to execute query.");
+      }
+    } catch (PDOException $e) {
+      error_log($e->getMessage());
+      return array("status" => 500, "message" => "Internal Server Error.");
+    }
+  }
 }
 
 

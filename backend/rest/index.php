@@ -46,6 +46,27 @@ function allow_preflight()
 }
 allow_preflight();
 
+// function allow_preflight()
+// {
+//   $allowed_origins = ['http://localhost:3000', 'http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/ ']; // Add allowed origins
+//   $origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
+
+//   if (in_array($origin, $allowed_origins)) {
+//     header('Access-Control-Allow-Origin: ' . $origin);
+//   }
+
+//   header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
+//   header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+
+//   if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+//     header('HTTP/1.1 200 OK');
+//     die();
+//   }
+// }
+
+// allow_preflight();
+
+
 Flight::route('GET /', function () {
   //This is the most basic route to just check connection
   new UserService();

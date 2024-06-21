@@ -95,22 +95,13 @@ const Page = () => {
     if (backendResult !== "") {
       //console.log(backendResult);
       if (backendResult.status == 200) {
-        
+        alert(backendResult.message);
         router.push("/auth/login");
       } else if (backendResult.status == 500) {
         setErrorMessage(backendResult.message);
       }
     }
   }, [backendResult, router]);
-
-  // const handleRegistration = async () => {
-  //   console.log("Registering");
-  //   try {
-  //     await mutation.mutateAsync();
-  //   } catch (error) {
-  //     console.error("Error adding a new user:", error);
-  //   }
-  // };
 
   return (
     <>

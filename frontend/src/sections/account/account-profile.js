@@ -22,6 +22,7 @@ const user = {
 const AccountProfile = () => {
   const { user } = useAuthContext();
 
+
   return (
     <Card>
       <CardContent>
@@ -52,11 +53,7 @@ const AccountProfile = () => {
         </Box>
       </CardContent>
       <Divider />
-      <CardActions>
-        <Button fullWidth variant="text">
-          Change your password
-        </Button>
-      </CardActions>
+      
     </Card>
   );
 };

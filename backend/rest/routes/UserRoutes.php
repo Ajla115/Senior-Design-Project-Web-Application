@@ -263,6 +263,11 @@ Flight::route('POST /verifyAccount/', function () {
   Flight::json(Flight::userService()->verifyAccount($data));
 });
 
+Flight::route('POST /changepassword/', function () {
+  $data = Flight::request()->data->getData();
+  Flight::json(Flight::userService()->changePassword($data));
+});
+
 
 
 

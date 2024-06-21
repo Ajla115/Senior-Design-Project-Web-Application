@@ -9,33 +9,21 @@ import {
   CardHeader,
   Divider,
   TextField,
-  Unstable_Grid2 as Grid,
+  Grid,
   IconButton,
   InputAdornment,
 } from "@mui/material";
-import { Visibility, VisibilityOff } from "@mui/icons-material"; //needed for password toggling
+import { Visibility, VisibilityOff } from "@mui/icons-material"; // needed for password toggling
 import { useAuthContext } from "src/contexts/auth-context";
 import { UserService } from "services";
-import { useRouter } from "next/navigation";
-import DeleteAccountModal from "./deactive-account-modal";
+import { useRouter } from "next/router"; // corrected import
+import DeleteAccountModal from "./deactive-account-modal"; // corrected import
 
 const states = [
-  {
-    value: "alabama",
-    label: "Alabama",
-  },
-  {
-    value: "new-york",
-    label: "New York",
-  },
-  {
-    value: "san-francisco",
-    label: "San Francisco",
-  },
-  {
-    value: "los-angeles",
-    label: "Los Angeles",
-  },
+  { value: "alabama", label: "Alabama" },
+  { value: "new-york", label: "New York" },
+  { value: "san-francisco", label: "San Francisco" },
+  { value: "los-angeles", label: "Los Angeles" },
 ];
 
 export const AccountProfileDetails = () => {
@@ -43,22 +31,20 @@ export const AccountProfileDetails = () => {
   const { user } = useAuthContext();
 
   const [initialValues, setInitialValues] = useState(user);
-
   const [showPassword, setShowPassword] = useState(false);
+  const [isChanged, setIsChanged] = useState(false); // tracks if input in any three fields changes
+  const [values, setValues] = useState(initialValues); // keeps track of current values
 
-  const handleTogglePassword = () => {
-    setShowPassword(!showPassword); //setting the state of visibility
-  };
+  const [password, setPassword] = useState(''); // added state for password
+  const [newPassword, setNewPassword] = useState(''); // added state for new_password
+  const [repeatPassword, setRepeatPassword] = useState(''); // added state for repeat_password
 
-  const [isChanged, setIsChanged] = useState(false); //this will track if input in any three fields changes
-  const [values, setValues] = useState(initialValues); //this will keep track, if there are no changes, disable Save button again
-  //console.log(values);
   useEffect(() => {
-    setInitialValues(values); //this I need to keep track of the first values in the fields
+    setInitialValues(values); // keeps track of the initial values in the fields
   }, []);
 
   const handleChange = useCallback((event) => {
-    setIsChanged(true); //if we are triggering this function, it means something has changes
+    setIsChanged(true); // triggers if something has changed
     setValues((prevState) => ({
       ...prevState,
       [event.target.name]: event.target.value,
@@ -70,8 +56,7 @@ export const AccountProfileDetails = () => {
   }, []);
 
   useEffect(() => {
-    //this will compare current values with the initial values
-    //and it will set the state of setIsChanged
+    // compares current values with the initial values and sets the state of setIsChanged
     setIsChanged(!compareValues(values, initialValues));
   }, [values, initialValues]);
 
@@ -92,32 +77,36 @@ export const AccountProfileDetails = () => {
       setIsChanged(false);
     } catch (error) {
       console.error('Error updating user details:', error);
-      // Show error message to the user
-      alert(error.message || 'Failed to update user details');
+      alert(error.message || 'Failed to update user details'); // shows error message to the user
     }
   };
+
+  const handleChangePassword = async () => {
+    try {
+      await UserService.changePassword(password, newPassword, repeatPassword);
+      alert("Password successfully changed.");
+      router.push("/auth/login");
+    } catch (error) {
+      console.error("Error updating password:", error);
+      alert(error.message || "Failed to change password");
+    }
+  };
+
   return (
     <form autoComplete="off" noValidate onSubmit={handleSubmit}>
       <Card>
-        <Stack
-          spacing={37}
-          // sx={{maxWidth: 300, marginTop: 2}}
-          direction="row"
-        >
+        <Stack spacing={3} direction="row">
           <CardHeader subheader="The information can be edited" title="Profile" />
           <CardActions sx={{ justifyContent: "flex-end", marginRight: 0 }}>
-            {/* <Button variant = 'outlined' color = 'error'>Deactive your account</Button>  */}
             <DeleteAccountModal />
-            {/* <DeactiveAccountModal /> */}
           </CardActions>
         </Stack>
         <CardContent sx={{ pt: 0 }}>
           <Box sx={{ m: -1.5 }}>
             <Grid container spacing={3}>
-              <Grid xs={12} md={6}>
+              <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
-                  // helperText="Please specify the first name"
                   label="First name"
                   name="first_name"
                   onChange={handleChange}
@@ -125,7 +114,7 @@ export const AccountProfileDetails = () => {
                   value={values.first_name}
                 />
               </Grid>
-              <Grid xs={12} md={6}>
+              <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
                   label="Last name"
@@ -135,7 +124,7 @@ export const AccountProfileDetails = () => {
                   value={values.last_name}
                 />
               </Grid>
-              <Grid xs={12} md={6}>
+              <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
                   label="Email Address"
@@ -145,7 +134,7 @@ export const AccountProfileDetails = () => {
                   value={values.email}
                 />
               </Grid>
-              <Grid xs={12} md={6}>
+              <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
                   label="Phone"
@@ -155,67 +144,89 @@ export const AccountProfileDetails = () => {
                   value={values.phone}
                 />
               </Grid>
-              {/* <Grid xs={12} md={6}>
+            </Grid>
+          </Box>
+        </CardContent>
+        <Divider />
+        <CardActions sx={{ justifyContent: "flex-end" }}>
+          <Button variant="contained" disabled={!isChanged} onClick={() => handleSaveDetails(values)}>
+            Save details
+          </Button>
+        </CardActions>
+      </Card>
+      <Divider />
+      <Card>
+        <CardHeader subheader="Change Your Password here" title="Change Password" />
+        <CardContent sx={{ pt: 0 }}>
+          <Box sx={{ m: -1.5 }}>
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
-                  label="Password"
+                  label="Current Password"
                   name="password"
-                  onChange={handleChange}
                   type={showPassword ? "text" : "password"}
-                  value={values.password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  value={password}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
-                        <IconButton color="primary" onClick={handleTogglePassword} edge="end">
+                        <IconButton color="primary" onClick={() => setShowPassword(!showPassword)} edge="end">
                           {showPassword ? <VisibilityOff /> : <Visibility />}
                         </IconButton>
                       </InputAdornment>
                     ),
                   }}
                 />
-              </Grid> */}
-              <Grid xs={12} md={6}>
-                {/* <TextField
-                  fullWidth
-                  label="Country"
-                  name="country"
-                  onChange={handleChange}
-                  required
-                  value={values.country}
-                /> */}
               </Grid>
-              <Grid xs={12} md={6}>
-                {/* <TextField
+              <Grid item xs={12} md={6}>
+                <TextField
                   fullWidth
-                  label="Select State"
-                  name="state"
-                  onChange={handleChange}
+                  label="New Password"
+                  name="new_password"
+                  type={showPassword ? "text" : "password"}
+                  onChange={(e) => setNewPassword(e.target.value)}
                   required
-                  select
-                  SelectProps={{ native: true }}
-                  value={values.state}
-                >
-                  {states.map((option) => (
-                    <option
-                      key={option.value}
-                      value={option.value}
-                    >
-                      {option.label}
-                    </option>
-                  ))}
-                </TextField> */}
+                  value={newPassword}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton color="primary" onClick={() => setShowPassword(!showPassword)} edge="end">
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Repeat new password"
+                  name="repeat_password"
+                  type={showPassword ? "text" : "password"}
+                  onChange={(e) => setRepeatPassword(e.target.value)}
+                  required
+                  value={repeatPassword}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton color="primary" onClick={() => setShowPassword(!showPassword)} edge="end">
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
               </Grid>
             </Grid>
           </Box>
         </CardContent>
         <Divider />
         <CardActions sx={{ justifyContent: "flex-end" }}>
-          <Button
-            variant="contained"
-            disabled={!isChanged}
-            onClick={() => handleSaveDetails(values)}
-          >
-            Save details
+          <Button variant="contained" onClick={handleChangePassword}>
+            Change Password
           </Button>
         </CardActions>
       </Card>

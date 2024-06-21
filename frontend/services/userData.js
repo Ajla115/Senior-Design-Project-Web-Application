@@ -174,6 +174,42 @@ const verifyAccount = async (register_token) => {
   }
 };
 
+const changePassword = async (password, new_password, repeat_password) => {
+  const user = {
+    password,
+    new_password,
+    repeat_password
+  }
+
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    console.error("No token found in local storage");
+    return;
+  }
+
+  return axios
+    .post(
+      "http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/changepassword/",
+      user, 
+      {
+        headers: {
+          Authorization: `${token}`,
+        },
+      }
+    )
+    .then((response) => {
+      if (response.data.status !== 200 && response.data.status !== 400  ) {
+        throw new Error(response.data.message || "Unknown error");
+      }
+      return response.data;
+    })
+    .catch((error) => {
+      console.error("Error deleting an account: ", error);
+      throw error;
+    });
+};
+
 export default {
   getUserData,
   register,
@@ -182,4 +218,5 @@ export default {
   userDataUpdate,
   markUserAsDeleted,
   verifyAccount,
+  changePassword,
 };

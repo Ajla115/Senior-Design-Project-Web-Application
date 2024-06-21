@@ -189,6 +189,27 @@ class UserDao extends BaseDao
       return array("status" => 500, "message" => "Internal Server Error.");
     }
   }
+
+  public function updatePassword($password, $email)
+  {
+
+    try {
+      $stmt = $this->conn->prepare("UPDATE users SET password = :password WHERE email_address = :email_address");
+      $stmt->bindParam(':password', $password);
+      $stmt->bindParam(':email_address', $email);
+      $stmt->execute();
+      if ($stmt->rowCount() > 0) {
+        return array("status" => 200, "message" => "Password has been successfully updated.");
+      } else {
+        return array("status" => 500, "message" => "Password update has failed.");
+      }
+    } catch (PDOException $e) {
+      error_log($e->getMessage());
+      return array("status" => 400, "message" => "Backend error");
+    }
+
+  }
+
 }
 
 

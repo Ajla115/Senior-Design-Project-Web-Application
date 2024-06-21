@@ -83,49 +83,58 @@ class UserService extends BaseService
 
     public function userDataUpdate($data)
     {
-        $first_name = $data['first_name'];
-        $last_name = $data['last_name'];
-        $new_email_address = $data['email_address'];
-        $phone = $data["phone"];
-
-        $all_headers = getallheaders();
-
-        $token = $all_headers['Authorization'];
-
-        $decoded = (array) JWT::decode($token, new Key(Config::JWT_SECRET(), 'HS256'));
-
-        $current_email = $decoded[0];
+        try {
+            $first_name = $data['first_name'];
+            $last_name = $data['last_name'];
+            $new_email_address = $data['email_address'];
+            $phone = $data["phone"];
 
 
-        if (empty($first_name) || empty($last_name) || empty($phone) || empty($new_email_address)) {
-            return array("status" => 400, "message" => "All fields have to be filled in.");
-        }
+            $all_headers = getallheaders();
 
-        if (!ctype_alpha($first_name) || !ctype_alpha($last_name)) {
-            return array("status" => 400, "message" => "First and last name fields can only contain letters, no numbers, special characters and spaces.");
-        }
+            if (!isset($all_headers['Authorization'])) {
+                throw new Exception('Authorization token not provided');
+            }
 
-        $emailResult = $this->checkEmail($new_email_address);
+            $token = $all_headers['Authorization'];
 
-        if (!$emailResult) {
-            return array("status" => 400, "message" => "Invalid email format");
-        }
-        $result = $this->checkPhoneNumber($phone);
-        if (!$result) {
-            return array("status" => 400, "message" => "Phone number input invalid");
+            $decoded = (array) JWT::decode($token, new Key(Config::JWT_SECRET(), 'HS256'));
 
-        }
+            $current_email = $decoded[0];
 
-        if (!($this->checkPlusSign($phone))) {
-            return array("status" => 400, "message" => "Please put a + sign in front of the phone number.");
-        }
 
-        $result = $this->dao->userDataUpdate($first_name, $last_name, $new_email_address, $phone, $current_email);
+            if (empty($first_name) || empty($last_name) || empty($phone) || empty($new_email_address)) {
+                return array("status" => 400, "message" => "All fields have to be filled in.");
+            }
 
-        if ($result["status"] == 200) {
-            return array("status" => 200, "message" => "User data has been successfully updated.");
-        } else {
-            return array("status" => 400, "message" => $result["message"]);
+            if (!ctype_alpha($first_name) || !ctype_alpha($last_name)) {
+                return array("status" => 400, "message" => "First and last name fields can only contain letters, no numbers, special characters and spaces.");
+            }
+
+            $emailResult = $this->checkEmail($new_email_address);
+
+            if (!$emailResult) {
+                return array("status" => 400, "message" => "Invalid email format");
+            }
+            $result = $this->checkPhoneNumber($phone);
+            if (!$result) {
+                return array("status" => 400, "message" => "Phone number input invalid");
+
+            }
+
+            if (!($this->checkPlusSign($phone))) {
+                return array("status" => 400, "message" => "Please put a + sign in front of the phone number.");
+            }
+
+            $result = $this->dao->userDataUpdate($first_name, $last_name, $new_email_address, $phone, $current_email);
+
+            if ($result["status"] == 200) {
+                return array("status" => 200, "message" => "User data has been successfully updated.");
+            } else {
+                return array("status" => 400, "message" => $result["message"]);
+            }
+        } catch (Exception $e) {
+            return array("status" => 500, "message" => $e->getMessage());
         }
     }
 
@@ -259,12 +268,9 @@ class UserService extends BaseService
             return array("status" => 500, "message" => "Please put a + sign in front of the phone number.");
         }
 
-
-
         if (mb_strlen($password) < 8) {
             return array("status" => 500, "message" => "The password should be at least 8 characters long");
         }
-
 
         $pawned = $this->checkPassword($password);
         //if the result is true, notify the user that the password is pawned and abort the mission
@@ -398,8 +404,6 @@ class UserService extends BaseService
         $token = $all_headers('Authorization');
         //MOZDA OVE DVIJE LINIJE NECE RADITI
 
-
-        //$decoded = JWT::decode($data->token, $key, array('HS256'));
         $decoded = (array) JWT::decode($token, new Key(Config::JWT_SECRET(), 'HS256'));
         //this decoded is the email once again
         //connect to the database and extract first and last name based on the email
@@ -448,30 +452,42 @@ class UserService extends BaseService
 
     public function sendemailtocustomerservice($data)
     {
-        $title = $data["title"];
-        $description = $data["description"];
+        try {
+            $title = $data["title"];
+            $description = $data["description"];
 
-        $recipientEmail = Config::EMAIL1();
+            $recipientEmail = Config::EMAIL1();
 
-        $all_headers = getallheaders();
 
-        $token = $all_headers['Authorization'];
+            $all_headers = getallheaders();
 
-        $decoded = (array) JWT::decode($token, new Key(Config::JWT_SECRET(), 'HS256'));
+            if (!isset($all_headers['Authorization'])) {
+                throw new Exception('Authorization token not provided');
+            }
 
-        $senderEmail = $decoded[0];
 
-        if (!isset($title) || !isset($description)) {
-            return array("status" => 500, "message" => "Fields cannot be empty.");
+            $token = $all_headers['Authorization'];
+
+            $decoded = (array) JWT::decode($token, new Key(Config::JWT_SECRET(), 'HS256'));
+
+            $senderEmail = $decoded[0];
+
+            if (!isset($title) || !isset($description)) {
+                return array("status" => 500, "message" => "Fields cannot be empty.");
+            }
+
+            $result = $this->send_email($senderEmail, $title, $recipientEmail, "Customer Service Center", $description);
+
+            if ($result) {
+                return array("status" => 200, "message" => "Success! Email is sent.");
+            } else {
+                return array("status" => 500, "message" => "Error! Email was not sent.");
+            }
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            return array("status" => 500, "message" => $e->getMessage());
         }
 
-        $result = $this->send_email($senderEmail, $title, $recipientEmail, "Customer Service Center", $description);
-
-        if ($result) {
-            return array("status" => 200, "message" => "Success! Email is sent.");
-        } else {
-            return array("status" => 500, "message" => "Error! Email was not sent.");
-        }
 
 
     }
@@ -480,20 +496,30 @@ class UserService extends BaseService
     public function markUserAsDeleted()
     {
 
-        $all_headers = getallheaders();
+        try {
+            $all_headers = getallheaders();
 
-        $token = $all_headers['Authorization'];
+            if (!isset($all_headers['Authorization'])) {
+                throw new Exception('Authorization token not provided');
+            }
 
-        $decoded = (array) JWT::decode($token, new Key(Config::JWT_SECRET(), 'HS256'));
 
-        $senderEmail = $decoded[0];
+            $token = $all_headers['Authorization'];
 
-        $result = $this->dao->markUserAsDeleted($senderEmail);
+            $decoded = (array) JWT::decode($token, new Key(Config::JWT_SECRET(), 'HS256'));
 
-        if ($result["status"] == 200) {
-            return array("status" => 200, "message" => "Your account has been successfully deleted.");
-        } else {
-            return array("status" => 400, "message" => $result["message"]);
+            $senderEmail = $decoded[0];
+
+            $result = $this->dao->markUserAsDeleted($senderEmail);
+
+            if ($result["status"] == 200) {
+                return array("status" => 200, "message" => "Your account has been successfully deleted.");
+            } else {
+                return array("status" => 400, "message" => $result["message"]);
+            }
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            return array("status" => 500, "message" => $e->getMessage());
         }
 
 
@@ -510,6 +536,82 @@ class UserService extends BaseService
         } else {
             return array("status" => 500, "message" => $result["message"]);
         }
+    }
+
+    private function updatePassword($password, $email)
+    {
+        $result = Flight::userDao()->updatePassword($password, $email);
+        return $result;
+    }
+
+
+
+    public function changePassword($data)
+    {
+        try {
+            $all_headers = getallheaders();
+
+            if (!isset($all_headers['Authorization'])) {
+                throw new Exception('Authorization token not provided');
+            }
+
+            $token = $all_headers['Authorization'];
+            
+
+            $decoded = (array) JWT::decode($token, new Key(Config::JWT_SECRET(), 'HS256'));
+
+            $userEmail = $decoded[0];
+
+            if (!isset($data['password']) || !isset($data['new_password']) || !isset($data['repeat_password'])) {
+                return array("status" => 500, "message" => "Fields cannot be empty");
+            }
+
+            // Now I will extract all data about the user just based on the email, using already created function
+            $user = $this->get_user_by_email($userEmail);
+            $full_name = $user["message"][0]["first_name"] . " " . $user["message"][0]["last_name"];
+
+            // First compare, if the password saved in the database is it same with the password that the user entered for old value
+            if (!password_verify($data["password"], $user["message"][0]["password"])) {
+                return array("status" => 500, "message" => "Password does not match saved password.");
+            }
+
+            // Check if the new and repeated password are the same
+            if (!hash_equals($data["new_password"], $data["repeat_password"])) {
+                return array("status" => 500, "message" => "New and repeated password are not the same.");
+            }
+
+            // Now check if the new password fits the criteria
+            if (mb_strlen($data["new_password"]) < 8) {
+                return array("status" => 500, "message" => "The password should be at least 8 characters long");
+            }
+
+            $pawned = $this->checkPassword($data["new_password"]);
+
+            if ($pawned) {
+                return array("status" => 500, "message" => "Password is pawned. Use another password.");
+            } else {
+                $hashedPassword = $this->hashPassword($data["new_password"]);
+
+                $daoResult = $this->updatePassword($hashedPassword, $userEmail);
+
+                if ($daoResult["status"] == 500) {
+                    return array("status" => 500, "message" => $daoResult["message"]);
+                } else if ($daoResult["status"] == 200) {
+                    $subject = "Successful password change.";
+                    $body = "Your password has been successfully updated.";
+                    $this->send_email(Config::EMAIL1(), $subject, $userEmail, $full_name, $body);
+                }
+                return array("status" => $daoResult["status"], "message" => $daoResult["message"]);
+            }
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            return array("status" => 500, "message" => "Internal Server Error.");
+        }
+
+
+
+
+
     }
 
 

@@ -10,51 +10,15 @@ import {
 } from "@mui/material";
 import { useAuthContext } from "src/contexts/auth-context";
 
-const user = {
-  avatar: "/assets/avatars/avatar-anika-visser.png",
-  //city: 'Los Angeles',
-  //country: 'USA',
-  //jobTitle: 'Senior Developer',
-  name: "Anika Visser",
-  //timezone: 'GTM-7'
-};
-
 const AccountProfile = () => {
   const { user } = useAuthContext();
 
-
   return (
-    <Card>
-      <CardContent>
-        <Box
-          sx={{
-            alignItems: "center",
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <Avatar
-            src={user.avatar}
-            sx={{
-              height: 80,
-              mb: 2,
-              width: 80,
-            }}
-          />
-          <Typography gutterBottom variant="h5">
-            {user.name}
-          </Typography>
-          <Typography color="text.secondary" variant="body2">
-            {user.city} {user.country}
-          </Typography>
-          <Typography color="text.secondary" variant="body2">
-            {user.timezone}
-          </Typography>
-        </Box>
-      </CardContent>
-      <Divider />
-      
-    </Card>
+    <Box display="flex" justifyContent="center" alignItems="center" my={2}>
+      <Typography gutterBottom variant="h4" align="center">
+        {user.name}
+      </Typography>
+    </Box>
   );
 };
 

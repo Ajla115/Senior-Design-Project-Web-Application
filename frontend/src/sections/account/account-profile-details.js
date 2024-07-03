@@ -2,7 +2,6 @@ import { useCallback, useState, useEffect } from "react";
 import {
   Box,
   Button,
-  Stack,
   Card,
   CardActions,
   CardContent,
@@ -12,32 +11,30 @@ import {
   Grid,
   IconButton,
   InputAdornment,
+  Typography,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material"; // needed for password toggling
 import { useAuthContext } from "src/contexts/auth-context";
 import { UserService } from "services";
-import { useRouter } from "next/router"; // corrected import
-import DeleteAccountModal from "./deactive-account-modal"; // corrected import
-
-const states = [
-  { value: "alabama", label: "Alabama" },
-  { value: "new-york", label: "New York" },
-  { value: "san-francisco", label: "San Francisco" },
-  { value: "los-angeles", label: "Los Angeles" },
-];
+import { useRouter } from "next/router";
+import DeleteAccountModal from "./deactive-account-modal";
 
 export const AccountProfileDetails = () => {
   const router = useRouter();
   const { user } = useAuthContext();
 
   const [initialValues, setInitialValues] = useState(user);
-  const [showPassword, setShowPassword] = useState(false);
-  const [isChanged, setIsChanged] = useState(false); // tracks if input in any three fields changes
-  const [values, setValues] = useState(initialValues); // keeps track of current values
+  const [showPassword, setShowPassword] = useState({
+    current: false,
+    new: false,
+    repeat: false,
+  }); // Initialize showPassword state as an object
+  const [isChanged, setIsChanged] = useState(false);
+  const [values, setValues] = useState(initialValues);
 
-  const [password, setPassword] = useState(''); // added state for password
-  const [newPassword, setNewPassword] = useState(''); // added state for new_password
-  const [repeatPassword, setRepeatPassword] = useState(''); // added state for repeat_password
+  const [password, setPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [repeatPassword, setRepeatPassword] = useState('');
 
   useEffect(() => {
     setInitialValues(values); // keeps track of the initial values in the fields
@@ -92,19 +89,25 @@ export const AccountProfileDetails = () => {
     }
   };
 
+  const togglePasswordVisibility = (field) => {
+    setShowPassword((prev) => ({
+      ...prev,
+      [field]: !prev[field],
+    }));
+  };
+
   return (
     <form autoComplete="off" noValidate onSubmit={handleSubmit}>
       <Card>
-        <Stack spacing={3} direction="row">
-          <CardHeader subheader="The information can be edited" title="Profile" />
-          <CardActions sx={{ justifyContent: "flex-end", marginRight: 0 }}>
-            <DeleteAccountModal />
-          </CardActions>
-        </Stack>
+        <CardHeader
+          title="Profile"
+          subheader="The information can be edited"
+          action={<DeleteAccountModal />}
+        />
         <CardContent sx={{ pt: 0 }}>
           <Box sx={{ m: -1.5 }}>
             <Grid container spacing={3}>
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12}>
                 <TextField
                   fullWidth
                   label="First name"
@@ -114,7 +117,7 @@ export const AccountProfileDetails = () => {
                   value={values.first_name}
                 />
               </Grid>
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12}>
                 <TextField
                   fullWidth
                   label="Last name"
@@ -124,7 +127,7 @@ export const AccountProfileDetails = () => {
                   value={values.last_name}
                 />
               </Grid>
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12}>
                 <TextField
                   fullWidth
                   label="Email Address"
@@ -134,7 +137,7 @@ export const AccountProfileDetails = () => {
                   value={values.email}
                 />
               </Grid>
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12}>
                 <TextField
                   fullWidth
                   label="Phone"
@@ -147,73 +150,86 @@ export const AccountProfileDetails = () => {
             </Grid>
           </Box>
         </CardContent>
-        <Divider />
         <CardActions sx={{ justifyContent: "flex-end" }}>
           <Button variant="contained" disabled={!isChanged} onClick={() => handleSaveDetails(values)}>
             Save details
           </Button>
         </CardActions>
       </Card>
-      <Divider />
+      <Box my={3}>
+        <Divider sx={{ borderBottomWidth: 2, borderColor: 'white' }} />
+      </Box>
       <Card>
         <CardHeader subheader="Change Your Password here" title="Change Password" />
         <CardContent sx={{ pt: 0 }}>
           <Box sx={{ m: -1.5 }}>
             <Grid container spacing={3}>
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12}>
                 <TextField
                   fullWidth
                   label="Current Password"
                   name="password"
-                  type={showPassword ? "text" : "password"}
+                  type={showPassword.current ? "text" : "password"} // Use state to control password visibility
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   value={password}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
-                        <IconButton color="primary" onClick={() => setShowPassword(!showPassword)} edge="end">
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        <IconButton
+                          color="primary"
+                          onClick={() => togglePasswordVisibility('current')} // Toggle visibility for current password
+                          edge="end"
+                        >
+                          {showPassword.current ? <VisibilityOff /> : <Visibility />} {/* Use showPassword.current */}
                         </IconButton>
                       </InputAdornment>
                     ),
                   }}
                 />
               </Grid>
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12}>
                 <TextField
                   fullWidth
                   label="New Password"
-                  name="new_password"
-                  type={showPassword ? "text" : "password"}
+                  name="newPassword" // Updated to match the state key
+                  type={showPassword.new ? "text" : "password"} // Use state to control password visibility
                   onChange={(e) => setNewPassword(e.target.value)}
                   required
                   value={newPassword}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
-                        <IconButton color="primary" onClick={() => setShowPassword(!showPassword)} edge="end">
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        <IconButton
+                          color="primary"
+                          onClick={() => togglePasswordVisibility('new')} // Toggle visibility for new password
+                          edge="end"
+                        >
+                          {showPassword.new ? <VisibilityOff /> : <Visibility />} {/* Use showPassword.new */}
                         </IconButton>
                       </InputAdornment>
                     ),
                   }}
                 />
               </Grid>
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12}>
                 <TextField
                   fullWidth
                   label="Repeat new password"
-                  name="repeat_password"
-                  type={showPassword ? "text" : "password"}
+                  name="repeatPassword" // Updated to match the state key
+                  type={showPassword.repeat ? "text" : "password"} // Use state to control password visibility
                   onChange={(e) => setRepeatPassword(e.target.value)}
                   required
                   value={repeatPassword}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
-                        <IconButton color="primary" onClick={() => setShowPassword(!showPassword)} edge="end">
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        <IconButton
+                          color="primary"
+                          onClick={() => togglePasswordVisibility('repeat')} // Toggle visibility for repeat password
+                          edge="end"
+                        >
+                          {showPassword.repeat ? <VisibilityOff /> : <Visibility />} {/* Use showPassword.repeat */}
                         </IconButton>
                       </InputAdornment>
                     ),
@@ -223,7 +239,7 @@ export const AccountProfileDetails = () => {
             </Grid>
           </Box>
         </CardContent>
-        <Divider />
+        <Divider sx={{ borderBottomWidth: 2, borderColor: 'grey' }} />
         <CardActions sx={{ justifyContent: "flex-end" }}>
           <Button variant="contained" onClick={handleChangePassword}>
             Change Password

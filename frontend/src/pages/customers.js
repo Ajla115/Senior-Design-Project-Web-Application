@@ -1,18 +1,12 @@
 import { useCallback, useMemo, useState, useEffect } from "react";
 import Head from "next/head";
-import { subDays, subHours } from "date-fns";
-import ArrowDownOnSquareIcon from "@heroicons/react/24/solid/ArrowDownOnSquareIcon";
-import ArrowUpOnSquareIcon from "@heroicons/react/24/solid/ArrowUpOnSquareIcon";
 import PlusIcon from "@heroicons/react/24/solid/PlusIcon";
 import { Box, Button, Container, Divider, Stack, SvgIcon, Typography } from "@mui/material";
-import { useSelection } from "src/hooks/use-selection";
 import { Layout as DashboardLayout } from "src/layouts/dashboard/layout";
 import { CustomersTable } from "src/sections/customer/customers-table";
-import { CustomersSearch } from "src/sections/customer/customers-search";
-import { applyPagination } from "src/utils/apply-pagination";
 import OpenPromptToAddNewAccount from "src/sections/customer/add-ig-account-prompt";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
-import { InstagramService, UserService } from "services";
+import { InstagramService } from "services";
 
 const now = new Date();
 

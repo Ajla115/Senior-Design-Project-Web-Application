@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   Box,
   Card,
@@ -18,7 +18,7 @@ import { InstagramService } from "services";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import DeleteModal from "./delete-instagram-hashtag";
-import ShowAccountsData from "./show-accounts-table";
+import ShowAccountsDataModal from "./show-account-table-modal";
 
 export const HashtagsTable = (props) => {
   const {
@@ -56,22 +56,8 @@ export const HashtagsTable = (props) => {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>
-                  {" "}
-                  ID
-                  {/* <Checkbox
-                    checked={selectedAll}
-                    indeterminate={selectedSome}
-                    onChange={(event) => {
-                      if (event.target.checked) {
-                        onSelectAll?.();
-                      } else {
-                        onDeselectAll?.();
-                      }
-                    }}
-                  /> */}
-                </TableCell>
-                <TableCell>Name </TableCell>
+                <TableCell>ID</TableCell>
+                <TableCell>Name</TableCell>
                 <TableCell>Number of Accounts</TableCell>
                 <TableCell>Show Accounts</TableCell>
                 <TableCell>Other</TableCell>
@@ -81,7 +67,6 @@ export const HashtagsTable = (props) => {
               <QueryClientProvider client={client}>
                 <InstagramHashtagsData />
               </QueryClientProvider>
-              {/* })} */}
             </TableBody>
           </Table>
         </Box>
@@ -114,33 +99,32 @@ HashtagsTable.propTypes = {
 };
 
 function InstagramHashtagsData() {
-  //const posts = useSampleData();
-  // console.log(posts);
-
-  //This is all for deleting a modal
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [isAccountsModalOpen, setIsAccountsModalOpen] = React.useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
   const [selectedHashtagId, setSelectedHashtagId] = React.useState(null);
 
-  //I need this to open table with all accounts for one hashtag
-  const [show, setShow] = useState(false);
-
-  const handleOpen = (hashtagId) => {
+  const handleOpenAccountsModal = (hashtagId) => {
     setSelectedHashtagId(hashtagId);
-    setIsModalOpen(true);
+    setIsAccountsModalOpen(true);
   };
 
-  const handleClose = () => {
-    setIsModalOpen(false);
+  const handleCloseAccountsModal = () => {
+    setIsAccountsModalOpen(false);
   };
 
-  //fetching data from database
-  //fetching data from database
-  const { isLoading, error, data, isFetching } = useQuery({
+  const handleOpenDeleteModal = (hashtagId) => {
+    setSelectedHashtagId(hashtagId);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleCloseDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+  };
+
+  const { isLoading, error, data } = useQuery({
     queryKey: ["instagram-data"],
     queryFn: InstagramService.getHashtagData,
   });
-
-
 
   if (isLoading) return "Loading...";
 
@@ -148,41 +132,30 @@ function InstagramHashtagsData() {
 
   return (
     <>
-      {data.message.map((hashtag) => {
-        //izvucem gotov podatak
-        //{data.message.map((hashtag) => {
-
-        return (
-          <TableRow hover key={hashtag.id}>
-            <TableCell>{hashtag.id}</TableCell>
-
-            <TableCell>
-              <Stack alignItems="center" direction="row" spacing={1}>
-                <Typography variant="subtitle2">{hashtag.hashtag_name}</Typography>
-              </Stack>
-            </TableCell>
-            <TableCell> {hashtag.number_of_followers}</TableCell>
-            <TableCell>
-              <Button
-                onClick={() => {
-                  setShow(true);
-                }}
-                variant="text"
-              >
-                See accounts
-              </Button>
-            </TableCell>
-
-            {show && <ShowAccountsData closeButton={setShow} hashtag_id={hashtag.id} />}
-
-            <TableCell>
-              <DeleteOutlineIcon onClick={() => handleOpen(hashtag.id)} />
-            </TableCell>
-          </TableRow>
-        );
-      })}
-
-      <DeleteModal isOpen={isModalOpen} onClose={handleClose} hashtagId={selectedHashtagId} />
+      {data.message.map((hashtag) => (
+        <TableRow hover key={hashtag.id}>
+          <TableCell>{hashtag.id}</TableCell>
+          <TableCell>
+            <Stack alignItems="center" direction="row" spacing={1}>
+              <Typography variant="subtitle2">{hashtag.hashtag_name}</Typography>
+            </Stack>
+          </TableCell>
+          <TableCell>{hashtag.number_of_followers}</TableCell>
+          <TableCell>
+            <Button
+              onClick={() => handleOpenAccountsModal(hashtag.id)}
+              variant="text"
+            >
+              See accounts
+            </Button>
+          </TableCell>
+          <TableCell>
+            <DeleteOutlineIcon onClick={() => handleOpenDeleteModal(hashtag.id)} />
+          </TableCell>
+        </TableRow>
+      ))}
+      <ShowAccountsDataModal open={isAccountsModalOpen} onClose={handleCloseAccountsModal} hashtagId={selectedHashtagId} />
+      <DeleteModal isOpen={isDeleteModalOpen} onClose={handleCloseDeleteModal} hashtagId={selectedHashtagId} />
     </>
   );
 }

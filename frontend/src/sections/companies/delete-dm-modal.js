@@ -9,13 +9,13 @@ import axios from "axios";
 import { useMutation, QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { InstagramService } from "services";
 
-const DeleteModal = ({ isOpen, onClose, hashtagId }) => {
+const DeleteDMModal = ({ isOpen, onClose, customerId }) => {
   const client = new QueryClient();
   const [isDeleted, setIsDeleted] = useState(false);
 
   const mutation = useMutation({
     mutationFn: async () => {
-      await InstagramService.deleteHashtag(hashtagId);
+      await InstagramService.deleteAccount(customerId);
     },
     onSuccess: () => {
       setIsDeleted(true);
@@ -23,7 +23,7 @@ const DeleteModal = ({ isOpen, onClose, hashtagId }) => {
       onClose();
     },
     onError: (error) => {
-      console.error("Error deleting Instagram hashtag:", error);
+      console.error("Error deleting Instagram account:", error);
     },
   });
 
@@ -32,7 +32,7 @@ const DeleteModal = ({ isOpen, onClose, hashtagId }) => {
     try {
       await mutation.mutateAsync();
     } catch (error) {
-      console.error("Error deleting Instagram hashtag:", error);
+      console.error("Error deleting Instagram account:", error);
     }
   };
 
@@ -51,7 +51,7 @@ const DeleteModal = ({ isOpen, onClose, hashtagId }) => {
             Confirmation
           </h2>
           <p id="transition-modal-description" className="modal-description">
-            Are you sure you want to delete this hashtag with ID: {hashtagId}?
+            Are you sure you want to delete this account with ID: {customerId}?
           </p>
           <Stack spacing={5} sx={{ maxWidth: 300, marginLeft: 22 }} direction="row">
             {/* <CardActions sx={{ justifyContent: 'flex-end', marginLeft: 185}}> */}
@@ -202,4 +202,4 @@ const TriggerButton = styled(Button)(
   `
 );
 
-export default DeleteModal;
+export default DeleteDMModal;

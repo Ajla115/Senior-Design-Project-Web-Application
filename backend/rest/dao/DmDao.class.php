@@ -119,20 +119,20 @@ class DmDao extends BaseDao
 
   // }
 
-  public function createNewDM($data, $existingRecipientsID)
+  public function createNewDM($userID, $data, $existingRecipientsID, $status)
   {
     try {
       $query = "INSERT INTO " . $this->table_name . " (users_id, users_email, users_password, recipients_id, message, date_and_time, status) 
                   VALUES (:users_id, :users_email, :users_password, :recipients_id, :message, :date_and_time, :status)";
 
       $stmt = $this->conn->prepare($query);
-      $stmt->bindParam(':users_id', $data['users_id']);
-      $stmt->bindParam(':users_email', $data['users_email']);
-      $stmt->bindParam(':users_password', $data['users_password']);
+      $stmt->bindParam(':users_id', $userID);
+      $stmt->bindParam(':users_email', $data['email']);
+      $stmt->bindParam(':users_password', $data['password']);
       $stmt->bindParam(':recipients_id', $existingRecipientsID);
       $stmt->bindParam(':message', $data['message']);
       $stmt->bindParam(':date_and_time', $data['date_and_time']);
-      $stmt->bindParam(':status', $data['status']);
+      $stmt->bindParam(':status', $status);
 
       $stmt->execute();
 
@@ -197,6 +197,27 @@ class DmDao extends BaseDao
       return array("status" => 500, "message" => "Internal Server Error");
     }
   }
+
+  public function getAllDMS($userID)
+  {
+    try {
+      $stmt = $this->conn->prepare("SELECT id, recipients_id, message, date_and_time 
+                                    FROM " . $this->table_name . " 
+                                    WHERE users_id = :users_id AND status = :status");
+      $scheduled = "Scheduled";
+      $stmt->bindParam(':users_id', $userID);
+      $stmt->bindParam(':status', $scheduled);
+      $stmt->execute();
+      $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+      return array("status" => 200, "message" => $rows);
+    } catch (PDOException $e) {
+      error_log($e->getMessage());
+      return array("status" => 500, "message" => "Internal Server Error");
+    }
+  }
+
+
+
 }
 
 

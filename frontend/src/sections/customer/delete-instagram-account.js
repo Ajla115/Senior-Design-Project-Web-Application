@@ -19,7 +19,7 @@ const DeleteModal = ({ isOpen, onClose, customerId }) => {
     },
     onSuccess: () => {
       setIsDeleted(true);
-      console.log("bravo");
+      //console.log("bravo");
       onClose();
     },
     onError: (error) => {

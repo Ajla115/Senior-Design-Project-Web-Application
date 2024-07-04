@@ -2,6 +2,8 @@
 require_once 'BaseService.php';
 require_once __DIR__ . "/../dao/DmDao.class.php";
 
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 
 class DmService extends BaseService
 {
@@ -15,37 +17,94 @@ class DmService extends BaseService
     //function needed to split new DM by each username and then add it to the database
     // here, I am extracting the array of recipients from the whole data load
     //RADI !!!!!!!
+
+    private function retrieveIDbasedOnEmail($email)
+    {
+        $user = Flight::userDao()->get_user_by_email($email);
+        return $user;
+    }
     function splitAndAdd($data)
     {
-
-        $usernames = $data['usernames'];
-
-        unset($data['usernames']);
-
         try {
+            // Get all headers
+            $all_headers = getallheaders();
 
+            // Check for Authorization token
+            if (!isset($all_headers['Authorization'])) {
+                throw new Exception('Authorization token not provided');
+            }
+
+            // Decode the JWT token to get user email
+            $token = $all_headers['Authorization'];
+            $decoded = (array) JWT::decode($token, new Key(Config::JWT_SECRET(), 'HS256'));
+            $userEmail = $decoded[0];
+
+            // Get user ID based on email
+            $whole_user = $this->retrieveIDbasedOnEmail($userEmail);
+            if ($whole_user['status'] !== 200 || !isset($whole_user['message'])) {
+                throw new Exception('Error retrieving user ID');
+            }
+
+            $userID = $whole_user['message'][0]["id"];
+
+            if (!is_numeric($userID)) {
+                throw new Exception('Invalid user ID');
+            }
+
+            // Check if usernames is an array
+            if (!isset($data['usernames']) || !is_array($data['usernames'])) {
+                throw new Exception('Usernames must be an array');
+            }
+
+            $usernames = $data['usernames'];
+
+            // Remove usernames from data
+            unset($data['usernames']);
+
+            // Initialize result variable
+            $result = null;
+
+            // Iterate over each username
             foreach ($usernames as $username) {
-
+                // Check existence in instagram_accounts table
                 $count = $this->dao->checkExistence($username);
+                if ($count['status'] !== 200) {
+                    throw new Exception('Error checking username existence');
+                }
 
-                //Case no. 1: user does not exist at all in the instagram account table, so it has to be first added
-                if ($count == 0) {
-
+                // Add username if it does not exist
+                if ($count['message'] == 0) {
                     Flight::instaAccService()->addIndividually($username);
                 }
 
-                //Since it already exists in the instagram accounts table, or we have just added it, extract its id
-                $existingRecipientsID = $this->dao->getRecipientIDByUsername($username);
+                // Get recipient ID by username
+                $recipientIDResponse = $this->dao->getRecipientIDByUsername($username);
+                if ($recipientIDResponse['status'] !== 200 || !isset($recipientIDResponse['message'])) {
+                    throw new Exception('Error retrieving recipient ID');
+                }
 
-                $this->dao->createNewDM($data, $existingRecipientsID);
+                $existingRecipientsID = $recipientIDResponse['message'];
+                if (!is_numeric($existingRecipientsID)) {
+                    throw new Exception('Invalid recipient ID');
+                }
+
+                // Create new DM entry
+                $status = "Scheduled";
+                $result = $this->dao->createNewDM($userID, $data, $existingRecipientsID, $status);
+                if ($result['status'] != 200) {
+                    throw new Exception('Error creating new DM');
+                }
             }
 
-        } catch (Exception $e) {
-            return "An error occurred: " . $e->getMessage();
-        }
 
-        return 'DM was successfully added to the database';
+            return array("status" => 200, "message" => "DM was successfully added to the database.");
+
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            return array("status" => 500, "message" => "Internal Server Error: " . $e->getMessage());
+        }
     }
+
     //this is to delete multiple DMs at the same time
     function bulkDelete($data)
     {
@@ -83,7 +142,7 @@ class DmService extends BaseService
                 return "Deletion was successful";
             }
         } catch (Exception $e) {
-            return  "An error occurred: " . $e->getMessage();
+            return "An error occurred: " . $e->getMessage();
         }
     }
 
@@ -148,12 +207,12 @@ class DmService extends BaseService
                     }
                 }
             } catch (Exception $e) {
-                return  "An error occurred: " . $e->getMessage();
+                return "An error occurred: " . $e->getMessage();
             }
 
             return "Bulk update was successful";
         } else {
-            return  "The status has to be 'Scheduled'";
+            return "The status has to be 'Scheduled'";
         }
     }
 
@@ -218,10 +277,75 @@ class DmService extends BaseService
 
             return "Individual update was successful";
         } else {
-            return  "The status has to be 'Scheduled'";
+            return "The status has to be 'Scheduled'";
         }
     }
+
+    private function getDMS($id)
+    {
+        return Flight::dmDao()->getAllDMS($id);
+    }
+
+    public function getAllDMS($data)
+    {
+        try {
+            // Get all headers
+            $all_headers = getallheaders();
+
+            // Check for Authorization token
+            if (!isset($all_headers['Authorization'])) {
+                throw new Exception('Authorization token not provided');
+            }
+
+            // Decode the JWT token to get user email
+            $token = $all_headers['Authorization'];
+            $decoded = (array) JWT::decode($token, new Key(Config::JWT_SECRET(), 'HS256'));
+            $userEmail = $decoded[0];
+
+            // Get user ID based on email
+            $whole_user = $this->retrieveIDbasedOnEmail($userEmail);
+            if ($whole_user['status'] !== 200 || !isset($whole_user['message'])) {
+                throw new Exception('Error retrieving user ID');
+            }
+
+            $userID = $whole_user['message'][0]["id"];
+
+            if (!is_numeric($userID)) {
+                throw new Exception('Invalid user ID');
+            }
+
+            $response = $this->getDMS($userID);
+
+
+            if ($response['status'] === 200) {
+                $dms = $response['message'];
+                $result = [];
+
+                // Process the DMs and store them in an array
+                foreach ($dms as $dm) {
+                    $result[] = [
+                        "ID" => $dm['id'],
+                        "Recipients ID" => $dm['recipients_id'],
+                        "Message" => $dm['message'],
+                        "Date and Time" => $dm['date_and_time']
+                    ];
+                }
+
+                return array("status" => 200, "message" => $result);
+            } else {
+                return array("status" => 500, "message" => $response['message']);
+            }
+
+
+
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            return array("status" => 500, "message" => "Internal Server Error: " . $e->getMessage());
+        }
+    }
+
 }
+
 
 
 

@@ -12,26 +12,21 @@
  *         @OA\MediaType(
  *             mediaType="application/json",
  *             @OA\Schema(
- *                 @OA\Property(
- *                     property="users_id",
- *                     type="int",
- *                     example="1",
- *                     description="Users ID"
- *                 ),
+ *
  *                @OA\Property(
- *                     property="users_email",
+ *                     property="email",
  *                     type="string",
  *                     example="demo@gmail.com",
- *                     description="Users email"
+ *                     description="User's IG email or username"
  *                 ),
  *               @OA\Property(
- *                     property="users_password",
+ *                     property="password",
  *                     type="string",
  *                     example="abcde",
- *                     description="Users password"
+ *                     description="User's IG password"
  *                 ),
  *               @OA\Property(
- *                     property="usernames",
+ *                     property="recipients",
  *                     type="string",
  *                     example="['firstname_lastname']",
  *                     description="Recipients Usernames"
@@ -43,9 +38,9 @@
  *                     description="Message Content"
  *                 ),
  *                @OA\Property(
- *                     property="date_and_time",
+ *                     property="scheduledDateTime",
  *                     type="string",
- *                     example="2024-02-24",
+ *                     example="07/04/2024 12:40 PM",
  *                     description="Date and time of message"
  *                 ),
  *                @OA\Property(
@@ -59,7 +54,7 @@
  *     ),
  *     @OA\Response(
  *         response=200,
- *         description="Direct Message has been added"
+ *         description="Direct Message has been scheduled"
  *     ),
  *     @OA\Response(
  *         response=400,
@@ -284,6 +279,13 @@ Flight::route("PUT /dm/bulkUpdate", function () {
 Flight::route("PUT /dm/@id", function ($id) {
     $data = Flight::request()->data->getData();
     Flight::json(Flight::dmService()->checkRecipientsAndUpdateDMIndividually($data, $id));
+});
+
+
+
+Flight::route("GET /dms/", function () {
+    $data = Flight::request()->data->getData();
+    Flight::json(Flight::dmService()->getAllDMS($data));
 });
 
 

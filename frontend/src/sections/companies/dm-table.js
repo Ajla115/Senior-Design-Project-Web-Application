@@ -1,11 +1,8 @@
+import React, { useState } from "react";
 import PropTypes from "prop-types";
-import { format } from "date-fns";
-import React from "react";
 import {
-  Avatar,
   Box,
   Card,
-  Checkbox,
   Stack,
   Table,
   TableBody,
@@ -16,11 +13,11 @@ import {
   Typography,
 } from "@mui/material";
 import { Scrollbar } from "src/components/scrollbar";
-import { getInitials } from "src/utils/get-initials";
-import { DMService} from "services";
-import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import EditIcon from "@mui/icons-material/Edit";
 import DeleteDMModal from "./delete-dm-modal";
+import EditDMModal from "./edit-dm-modal"; // Ensure this is the correct import
 
 export const DMTable = (props) => {
   const {
@@ -58,38 +55,19 @@ export const DMTable = (props) => {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>
-                  {" "}
-                  ID
-                  {/* <Checkbox
-                    checked={selectedAll}
-                    indeterminate={selectedSome}
-                    onChange={(event) => {
-                      if (event.target.checked) {
-                        onSelectAll?.();
-                      } else {
-                        onDeselectAll?.();
-                      }
-                    }}
-                  /> */}
-                </TableCell>
+                <TableCell>ID</TableCell>
                 <TableCell>Email (IG username)</TableCell>
-                <TableCell>Recipients</TableCell>
+                <TableCell>Recipient</TableCell>
                 <TableCell>Message</TableCell>
                 <TableCell>Date & Time</TableCell>
-                <TableCell>Status</TableCell>
+                <TableCell>Edit</TableCell>
                 <TableCell>Other</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {/* {items.map((customer) => {
-                const isSelected = selected.includes(customer.id);
-                const createdAt = format(customer.createdAt, "dd/MM/yyyy"); */}
-
               <QueryClientProvider client={client}>
                 <DMAccountsData accountList={props.accountList} />
               </QueryClientProvider>
-              {/* })} */}
             </TableBody>
           </Table>
         </Box>
@@ -122,57 +100,58 @@ DMTable.propTypes = {
 };
 
 function DMAccountsData(props) {
-  //const posts = useSampleData();
-  // console.log(posts);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedCustomerId, setSelectedCustomerId] = useState(null);
+  const [initialValues, setInitialValues] = useState({});
 
-  //This is all for deleting a modal
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
-  const [selectedCustomerId, setSelectedCustomerId] = React.useState(null);
-
-  const handleOpen = (customerId) => {
+  const handleOpenDeleteModal = (customerId) => {
     setSelectedCustomerId(customerId);
-    setIsModalOpen(true);
+    setIsDeleteModalOpen(true);
   };
 
-  const handleClose = () => {
-    setIsModalOpen(false);
+  const handleCloseDeleteModal = () => {
+    setIsDeleteModalOpen(false);
   };
 
+  const handleOpenEditModal = (customer) => {
+    //console.log("Edit icon clicked", customer); // Debugging log
+    setSelectedCustomerId(customer.id);
+    setInitialValues({
+      recipients: customer.recipient,
+      message: customer.message,
+      date_and_time: customer.dateAndTime,
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+  };
 
   return (
     <>
-      {props.accountList.message.map((customer) => (
-          <TableRow hover key={customer.id}>
-            <TableCell>
-              {/* <Checkbox
-                checked={isSelected}
-                onChange={(event) => {
-                  if (event.target.checked) {
-                    onSelectOne?.(customer.id);
-                  } else {
-                    onDeselectOne?.(customer.id);
-                  }
-                }}
-              /> */}
-              {customer.id}
-            </TableCell>
-
-            <TableCell>
-              <Stack alignItems="center" direction="row" spacing={1}>
-                <Typography variant="subtitle2">{customer.users_email}</Typography>
-              </Stack>
-            </TableCell>
-            <TableCell>{customer.recipients_id}</TableCell>
-            <TableCell>{customer.message}</TableCell>
-            <TableCell>{customer.date_and_time}</TableCell>
-            <TableCell>{customer.status}</TableCell>
-            <TableCell>
-              <DeleteOutlineIcon onClick={() => handleOpen(customer.id)} />
-            </TableCell>
-          </TableRow>
-        ))};
-
-      <DeleteDMModal isOpen={isModalOpen} onClose={handleClose} customerId={selectedCustomerId} />
+      {props.accountList.map((customer) => (
+        <TableRow hover key={customer.id}>
+          <TableCell>{customer.id}</TableCell>
+          <TableCell>
+            <Stack alignItems="center" direction="row" spacing={1}>
+              <Typography variant="subtitle2">{customer.username}</Typography>
+            </Stack>
+          </TableCell>
+          <TableCell>{customer.recipient}</TableCell>
+          <TableCell>{customer.message}</TableCell>
+          <TableCell>{customer.dateAndTime}</TableCell>
+          <TableCell>
+            <EditIcon onClick={() => handleOpenEditModal(customer)} /> 
+          </TableCell>
+          <TableCell>
+            <DeleteOutlineIcon onClick={() => handleOpenDeleteModal(customer.id)} />
+          </TableCell>
+        </TableRow>
+      ))}
+      <DeleteDMModal isOpen={isDeleteModalOpen} onClose={handleCloseDeleteModal} customerId={selectedCustomerId} />
+      <EditDMModal isOpen={isEditModalOpen} onClose={handleCloseEditModal} customerId={selectedCustomerId} initialValues={initialValues} />
     </>
   );
 }

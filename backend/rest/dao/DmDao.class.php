@@ -14,18 +14,18 @@ class DmDao extends BaseDao
   public function deleteScheduled($id)
   {
     try {
-      $stmt = $this->conn->prepare("DELETE FROM " . $this->table_name . " WHERE id = :id AND status = :status1 ");
+      $stmt = $this->conn->prepare("DELETE FROM " . $this->table_name . " WHERE id = :id AND status = :status ");
       $scheduled = StatusEnum::SCHEDULED;
       $stmt->bindParam(':id', $id);
-      $stmt->bindParam(':status1', $scheduled);
+      
+      $stmt->bindParam(':status', $scheduled);
       $stmt->execute();
-      //print("Number of deleted rows is: ");
       $count = $stmt->rowCount();
-      return array("status" => 200, "message" => $count); //return $count;
+      return $count;
+      //return array("status" => 200, "message" => $count); 
     } catch (PDOException $e) {
-      //return array("status" => 500, "message" => $e->getMessage());
       error_log($e->getMessage());
-      return array("status" => 500, "message" => "Internal Server Error");
+      //return array("status" => 500, "message" => "Internal Server Error");
     }
   }
 
@@ -90,11 +90,11 @@ class DmDao extends BaseDao
       $stmt->bindParam(':username', $username);
       $stmt->execute();
       $row = $stmt->fetch(PDO::FETCH_ASSOC);
-      return array("status" => 200, "message" => $row['id']);//return $row['id'];
+      return $row['id'];
     } catch (PDOException $e) {
       //return array("status" => 500, "message" => $e->getMessage());
       error_log($e->getMessage());
-      return array("status" => 500, "message" => "Internal Server Error");
+      return -1;
     }
   }
 
@@ -144,77 +144,83 @@ class DmDao extends BaseDao
     }
   }
 
-  //Update existing route
-//   public function updateExistingDM($data, $existingRecipientsID, $current_dm_id)
-//   {
-//     return $this->query("
-//   UPDATE " . $this->table_name . " SET users_id = :value1, users_email= :value2, users_password = :value3, recipients_id = :value4, message = :value5,
-//   date_and_time = :value6, status = :value7 WHERE id = :id;",
-//       [
-//         "value1" => $data['users_id'],
-//         "value2" => $data['users_email'],
-//         "value3" => $data['users_password'],
-//         "value4" => $existingRecipientsID,
-//         "value5" => $data['message'],
-//         "value6" => $data['date_and_time'],
-//         "value7" => $data['status'],
-//         "id" => $current_dm_id
-//       ]
-//     );
-//   }
-// }
+  // //Update existing route
+  // public function updateExistingDM($data, $existingRecipientsID, $current_dm_id)
+  // {
+  //   return $this->query("
+  // UPDATE " . $this->table_name . " SET users_id = :value1, users_email= :value2, users_password = :value3, recipients_id = :value4, message = :value5,
+  // date_and_time = :value6, status = :value7 WHERE id = :id;",
+  //     [
+  //       "value1" => $data['users_id'],
+  //       "value2" => $data['users_email'],
+  //       "value3" => $data['users_password'],
+  //       "value4" => $existingRecipientsID,
+  //       "value5" => $data['message'],
+  //       "value6" => $data['date_and_time'],
+  //       "value7" => $data['status'],
+  //       "id" => $current_dm_id
+  //     ]
+  //   );
+  // }
 
-  public function updateExistingDM($data, $existingRecipientsID, $current_dm_id)
-  {
+
+public function updateExistingDM($data, $current_dm_id)
+{
     try {
-      $stmt = $this->conn->prepare("
-        UPDATE " . $this->table_name . " 
-        SET users_id = :users_id, 
-            users_email = :users_email, 
-            users_password = :users_password, 
-            recipients_id = :recipients_id, 
-            message = :message,
-            date_and_time = :date_and_time, 
-            status = :status 
-        WHERE id = :id
-    ");
+        $stmt = $this->conn->prepare("
+            UPDATE " . $this->table_name . " 
+            SET 
+                message = :message,
+                date_and_time = :date_and_time
+            WHERE id = :id
+        ");
+        $stmt->bindParam(':message', $data['message']);
+        $stmt->bindParam(':date_and_time', $data['date_and_time']);
+        $stmt->bindParam(':id', $current_dm_id);
 
-      $stmt->bindParam(':users_id', $data['users_id']);
-      $stmt->bindParam(':users_email', $data['users_email']);
-      $stmt->bindParam(':users_password', $data['users_password']);
-      $stmt->bindParam(':recipients_id', $existingRecipientsID);
-      $stmt->bindParam(':message', $data['message']);
-      $stmt->bindParam(':date_and_time', $data['date_and_time']);
-      $stmt->bindParam(':status', $data['status']);
-      $stmt->bindParam(':id', $current_dm_id);
-
-      $stmt->execute();
-
-      return array("status" => 200, "message" => "Update was successful.");
+        $stmt->execute();
+        return array("status" => 200, "message" => "Update was successful.");
     } catch (PDOException $e) {
-      //return array("status" => 500, "message" => $e->getMessage());
-      error_log($e->getMessage());
-      return array("status" => 500, "message" => "Internal Server Error");
+        error_log($e->getMessage());
+        return array("status" => 500, "message" => "Internal Server Error");
     }
-  }
+}
+
 
   public function getAllDMS($userID)
-  {
-    try {
-      $stmt = $this->conn->prepare("SELECT id, recipients_id, message, date_and_time 
-                                    FROM " . $this->table_name . " 
-                                    WHERE users_id = :users_id AND status = :status");
-      $scheduled = "Scheduled";
-      $stmt->bindParam(':users_id', $userID);
-      $stmt->bindParam(':status', $scheduled);
-      $stmt->execute();
-      $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-      return array("status" => 200, "message" => $rows);
-    } catch (PDOException $e) {
-      error_log($e->getMessage());
-      return array("status" => 500, "message" => "Internal Server Error");
-    }
+{
+  try {
+    $stmt = $this->conn->prepare("SELECT d.id, d.users_email, ia.username AS recipient_username, d.message, d.date_and_time 
+                                  FROM " . $this->table_name . " d
+                                  JOIN instagram_accounts ia ON d.recipients_id = ia.id
+                                  WHERE d.users_id = :users_id AND d.status = :status");
+    $scheduled = "Scheduled";
+    $stmt->bindParam(':users_id', $userID);
+    $stmt->bindParam(':status', $scheduled);
+    $stmt->execute();
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    return array("status" => 200, "message" => $rows);
+  } catch (PDOException $e) {
+    error_log($e->getMessage());
+    return array("status" => 500, "message" => "Internal Server Error");
   }
+}
+
+
+public function getPasswordForUsername($email){
+  try {
+    $stmt = $this->conn->prepare("SELECT users_password FROM users_dms WHERE users_email = :email");
+    $stmt->bindParam(':email', $email);
+    $stmt->execute();
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    return $row['users_password'];
+  } catch (PDOException $e) {
+    error_log($e->getMessage());
+    return null;
+  }
+}
+
+
 
 
 

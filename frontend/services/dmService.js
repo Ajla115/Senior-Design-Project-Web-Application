@@ -59,7 +59,36 @@ export const getAllDMS = async () => {
   }
 };
 
+const deleteDM = async (customerId) => {
+  //console.log(customerId);
+  return axios
+    .delete(
+      `http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/dm/${customerId}`
+    )
+    .then((response) => {
+      return response.data;
+    })
+    .catch((error) => {
+      console.error("Error deleting DM:", error);
+    });
+};
+
+const editDM = async (customerId, dmData) => {
+  return axios
+    .put(`http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/dm/${customerId}`, dmData)
+    .then((response) => {
+      return response.data;
+    })
+    .catch((error) => {
+      console.error("Error editing DM:", error);
+    });
+};
+
+
+
 export default {
   addDM,
-  getAllDMS
+  getAllDMS,
+  deleteDM,
+  editDM 
 };

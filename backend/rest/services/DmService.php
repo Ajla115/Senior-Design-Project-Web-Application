@@ -137,12 +137,14 @@ class DmService extends BaseService
         try {
             $count = $this->dao->deleteScheduled($id);
             if ($count == 0) { //it checks if the status is scheduled or not, because if the status is not scheduled, it wont delete
-                return "Deletion failed";
+
+                return array("status" => 500, "message" => "Deletion failed");
             } else if ($count == 1) {
-                return "Deletion was successful";
+                return array("status" => 200, "message" => "Deletion was success!");
             }
         } catch (Exception $e) {
-            return "An error occurred: " . $e->getMessage();
+            error_log($e->getMessage());
+            return array("status" => 500, "message" => "Internal Server Error");
         }
     }
 
@@ -216,70 +218,22 @@ class DmService extends BaseService
         }
     }
 
-    //This is for inidividual update per one DM ID
     function checkRecipientsAndUpdateDMIndividually($data, $id)
     {
+        try {
 
-        if ($data['status'] == "Scheduled") {
-
-            $usernames = $data['usernames'];
-
-            // then, I have removed usernames of recipients from the whole data object to avoid duplication
-            //also this wont be sent to the users_dms table
-            unset($data['usernames']);
-
-
-            try {
-                for ($i = 0; $i < count($usernames); $i++) {
-
-                    //foreach ($usernames as $username) {
-
-                    $count = $this->dao->checkExistence($usernames[$i]);
-
-                    //Case no. 1: user does not exist at all in the instagram account table and a completely new DM message with it has to be created
-                    //Case no. 1 -> RADI completelly
-                    if ($count == 0) {
-
-                        //since there is for each loop in Base Dao, here I created a seperate addIndividually function because creating an array that accepts one by one username and then proceeds has not worked properly
-                        //if a user does not exist in the instagream_accounts table, add it there
-                        Flight::instaAccService()->addIndividually($usernames[$i]);
-
-                        $existingRecipientsID = $this->dao->getRecipientIDByUsername($usernames[$i]);
-
-                        $this->dao->createNewDM($data, $existingRecipientsID);
-                    }
-                    //Case no. 2: user exists only in the instagram accounts or Case no. 3: exists in both tables  and its DM will get updated
-                    if ($count == 1) {
-
-                        //if user exists in instagram_account, just take his ID
-                        $existingRecipientsID = $this->dao->getRecipientIDByUsername($usernames[$i]);
-
-                        //check if it exists in the DM table, that is if any DMs with this ID have been sent
-                        $appearanceInDms = $this->dao->checkExistenceInDMs($existingRecipientsID);
-
-                        //Case no. 3: user exists  in the instagram account table, but does not have an appropriate DM, so it has to be be created
-                        if ($appearanceInDms == 0) {
-
-                            //but now create a DM message with it
-                            $this->dao->createNewDM($data, $existingRecipientsID);
-                        }
-
-                        //$current_dm_id = $dm_idsArr[$i];
-                        //print_r($dm_idsArr[$i]);
-
-                        //if IF is not the case, it means that this DM already exists with this ID so it will just get updated
-                        $this->dao->updateExistingDM($data, $existingRecipientsID, $id);
-                    }
-                }
-            } catch (Exception $e) {
-                return "An error occurred: " . $e->getMessage();
+            $result = $this->dao->updateExistingDM($data, $id);
+            if ($result["status"] != 200) {
+                throw new Exception('Failed to update DM');
             }
 
-            return "Individual update was successful";
-        } else {
-            return "The status has to be 'Scheduled'";
+            return array("status" => 200, "message" => "Update was successful.");
+        } catch (Exception $e) {
+            return array("status" => 500, "message" => "Update failed.");
         }
     }
+
+
 
     private function getDMS($id)
     {
@@ -324,10 +278,11 @@ class DmService extends BaseService
                 // Process the DMs and store them in an array
                 foreach ($dms as $dm) {
                     $result[] = [
-                        "ID" => $dm['id'],
-                        "Recipients ID" => $dm['recipients_id'],
-                        "Message" => $dm['message'],
-                        "Date and Time" => $dm['date_and_time']
+                        "id" => $dm['id'],
+                        "username" => $dm['users_email'],
+                        "recipient" => $dm['recipient_username'],
+                        "message" => $dm['message'],
+                        "dateAndTime" => $dm['date_and_time']
                     ];
                 }
 

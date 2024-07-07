@@ -3,35 +3,69 @@ import PropTypes from "prop-types";
 import { styled, css } from "@mui/system";
 import { Modal as BaseModal } from "@mui/base/Modal";
 import Fade from "@mui/material/Fade";
-import { Button, Stack, CardActions } from "@mui/material";
+import {
+  Button,
+  Stack,
+  CardActions,
+  Card,
+  CardHeader,
+  Divider,
+  CardContent,
+  TextField,
+} from "@mui/material";
 import { useMutation, QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { DMService } from "services";
+import dayjs from "dayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
-const DeleteDMModal = ({ isOpen, onClose, customerId }) => {
+const EditDMModal = ({ isOpen, onClose, customerId, initialValues }) => {
   const client = new QueryClient();
-  const [isDeleted, setIsDeleted] = useState(false);
-
-  const mutation = useMutation({
-    mutationFn: async () => {
-      await DMService.deleteDM(customerId);
-    },
-    onSuccess: () => {
-      setIsDeleted(true);
-      onClose();
-    },
-    onError: (error) => {
-      console.error("Error deleting DM:", error);
-    },
+  const [selectedDate, setSelectedDate] = useState(dayjs(initialValues.date_and_time));
+  const [formValues, setFormValues] = useState({
+    recipients: initialValues.recipients,
+    message: initialValues.message,
+    scheduledDateTime: selectedDate.toISOString(),
   });
 
-  const handleDelete = async () => {
-    console.log("Deleting...");
+  useEffect(() => {
+    setFormValues((prevValues) => ({
+      ...prevValues,
+      scheduledDateTime: selectedDate.toISOString(),
+    }));
+  }, [selectedDate]);
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormValues({ ...formValues, [name]: value });
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     try {
       await mutation.mutateAsync();
     } catch (error) {
-      console.error("Error deleting DM:", error);
+      console.error("Error editing a DM:", error);
     }
   };
+
+  const mutation = useMutation({
+    mutationFn: async () => {
+      const dmData = {
+        message: formValues.message,
+        date_and_time: formValues.scheduledDateTime,
+      };
+      await DMService.editDM(customerId, dmData);
+    },
+    onSuccess: () => {
+      alert("DM edited successfully");
+      onClose(); // Close the modal after success
+    },
+    onError: (error) => {
+      alert(error.message || "Error editing a DM");
+    },
+  });
 
   return (
     <Modal
@@ -44,30 +78,63 @@ const DeleteDMModal = ({ isOpen, onClose, customerId }) => {
     >
       <Fade in={isOpen}>
         <ModalContent sx={style}>
-          <h2 id="transition-modal-title" className="modal-title">
-            Confirmation
-          </h2>
-          <p id="transition-modal-description" className="modal-description">
-            Are you sure you want to delete this account with ID: {customerId}?
-          </p>
-          <Stack spacing={5} sx={{ maxWidth: 300, marginLeft: 22 }} direction="row">
-            {/* <CardActions sx={{ justifyContent: 'flex-end', marginLeft: 185}}> */}
-            <CardActions>
-              <Button variant="contained" color="error" onClick={onClose}>
-                No
-              </Button>
-              <QueryClientProvider client={client}>
+          <h3 id="transition-modal-title" className="modal-title">
+            Edit DM with ID: {customerId}
+          </h3>
+
+          <form onSubmit={handleSubmit}>
+            <Card>
+              <Divider />
+              <CardContent>
+                <Stack spacing={3} sx={{ maxWidth: 1200 }}>
+                  <TextField
+                    required
+                    fullWidth
+                    label="Edit message"
+                    name="message"
+                    multiline
+                    value={formValues.message}
+                    onChange={handleChange}
+                  />
+
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DateTimePicker
+                      label="Change date and time"
+                      value={selectedDate}
+                      onChange={(newValue) => {
+                        setSelectedDate(newValue);
+                        setFormValues({ ...formValues, scheduledDateTime: newValue.toISOString() });
+                      }}
+                      renderInput={(params) => <TextField {...params} fullWidth />}
+                      minDateTime={dayjs()} // Block past dates and times
+                    />
+                  </LocalizationProvider>
+                </Stack>
+              </CardContent>
+              <Divider />
+              <CardActions sx={{ justifyContent: "flex-end" }}>
+                <QueryClientProvider client={client}>
+                  <Button
+                    type="submit"
+                    color="success"
+                    variant="contained"
+                    disabled={mutation.isLoading}
+                  >
+                    Edit DM
+                  </Button>
+                </QueryClientProvider>
                 <Button
+                  color="error"
                   variant="contained"
-                  color="success"
-                  onClick={handleDelete}
-                  disabled={mutation.isLoading}
+                  onClick={() => {
+                    onClose();
+                  }}
                 >
-                  Yes
+                  Close
                 </Button>
-              </QueryClientProvider>
-            </CardActions>
-          </Stack>
+              </CardActions>
+            </Card>
+          </form>
         </ModalContent>
       </Fade>
     </Modal>
@@ -199,4 +266,4 @@ const TriggerButton = styled(Button)(
   `
 );
 
-export default DeleteDMModal;
+export default EditDMModal;

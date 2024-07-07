@@ -15,6 +15,7 @@ import axios from "axios";
 import useSampleData from "../../hooks/useSampleData";
 import { SampleService } from "services";
 
+
 const clientSideEmotionCache = createEmotionCache();
 
 const SplashScreen = () => null;

@@ -38,7 +38,7 @@ const getAccountDataPerHashtag = async (hashtagId) => {
 };
 
 const deleteAccount = async (customerId) => {
-  console.log(customerId);
+  //console.log(customerId);
   return axios
     .delete(
       `http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/accounts/${customerId}`

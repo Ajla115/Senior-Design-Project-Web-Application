@@ -31,7 +31,7 @@ export const OverviewBudget = (props) => {
               color="text.secondary"
               variant="overline"
             >
-              Number of mined IG Accounts
+              Number of  IG Accounts
             </Typography>
             <Typography variant="h4">
               {value}

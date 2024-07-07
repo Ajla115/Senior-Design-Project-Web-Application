@@ -285,13 +285,9 @@ class UserService extends BaseService
             //change the value of the JSON object that contains password
             $data["password"] = $hashedPassword;
 
-            //after hashing password, generate the OTP password as secret
-            $secret = $this->generateOTPassword();
-            $login_count = 0;
+            
 
-            //now, I have added these two new elements to the existing array and sent that to the database to be inserted
-            $data["secret"] = $secret;
-            $data["login_count"] = $login_count;
+            
 
             //until the user clicks on the confirmation link, it will be unverified
             $data["status"] = "unverified";
@@ -379,7 +375,7 @@ class UserService extends BaseService
                 //encode only email address
                 $data = $this->dao->get_user_by_email($email_address);
 
-                $data2 = array($data["message"][0]["email_address"], $data["message"][0]["first_name"], $data["message"][0]["last_name"], $data["message"][0]["phone"], $data["message"][0]["login_count"]);
+                $data2 = array($data["message"][0]["email_address"], $data["message"][0]["first_name"], $data["message"][0]["last_name"], $data["message"][0]["phone"]);
 
                 $jwt = JWT::encode($data2, Config::JWT_SECRET(), 'HS256');
 

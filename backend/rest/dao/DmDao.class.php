@@ -220,6 +220,30 @@ public function getPasswordForUsername($email){
   }
 }
 
+public function getCountOfScheduledAndSentDMs()
+    {
+        try {
+            // Count scheduled DMs
+            $stmt = $this->conn->prepare("SELECT COUNT(*) as count_scheduled FROM users_dms WHERE status = 'Scheduled'");
+            $stmt->execute();
+            $rowScheduled = $stmt->fetch(PDO::FETCH_ASSOC);
+            $countScheduled = $rowScheduled['count_scheduled'];
+
+            // Count sent DMs
+            $stmt = $this->conn->prepare("SELECT COUNT(*) as count_sent FROM users_dms WHERE status = 'Sent'");
+            $stmt->execute();
+            $rowSent = $stmt->fetch(PDO::FETCH_ASSOC);
+            $countSent = $rowSent['count_sent'];
+
+            return [
+                'count_scheduled' => $countScheduled,
+                'count_sent' => $countSent
+            ];
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return null;
+        }
+    }
 
 
 

@@ -210,6 +210,22 @@ const changePassword = async (password, new_password, repeat_password) => {
     });
 };
 
+
+
+const getTotalUsers = async () => {
+  return axios
+    .get('http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/totalUsers')
+    .then((response) => {
+      //console.log("Demo is ", response.data.message);
+      return response.data.message;
+    })
+    .catch((error) => {
+      console.error("Error fetching total users:", error);
+      return 0; // Return 0 if there's an error
+    });
+};
+
+
 export default {
   getUserData,
   register,
@@ -219,4 +235,5 @@ export default {
   markUserAsDeleted,
   verifyAccount,
   changePassword,
+  getTotalUsers
 };

@@ -10,9 +10,22 @@ import {
   SvgIcon,
   Typography
 } from '@mui/material';
+import { DMService } from 'services';
+import { useState, useEffect } from 'react';
 
 export const OverviewTasksProgress = (props) => {
   const { value, sx } = props;
+  const [scheduledDMsPercentage, setScheduledDMsPercentage] = useState('0');
+
+  useEffect(() => {
+    const fetchScheduledDMsPercentage = async () => {
+      const percentageScheduled = await DMService.getPercentageOfScheduledDMs();
+      setScheduledDMsPercentage(percentageScheduled);
+    };
+
+    fetchScheduledDMsPercentage();
+  }, []);
+
 
   return (
     <Card sx={sx}>
@@ -29,10 +42,10 @@ export const OverviewTasksProgress = (props) => {
               gutterBottom
               variant="overline"
             >
-              Task Progress
+              Number of Scheduled DMs
             </Typography>
             <Typography variant="h4">
-              {value}%
+            {scheduledDMsPercentage}%
             </Typography>
           </Stack>
           <Avatar

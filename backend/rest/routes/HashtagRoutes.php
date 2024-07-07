@@ -106,3 +106,9 @@ Flight::route('POST /hashtags/@hashtag', function ($hashtag) {
 
     Flight::json(Flight::instaHashService()->customAdd($hashtag));
 });
+
+
+Flight::route('GET /all_hashtags/', function () {
+    Flight::json(Flight::instaHashService()->getTotalHashtags());
+    
+});

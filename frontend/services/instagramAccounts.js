@@ -89,6 +89,32 @@ const addHashtag = async (hashtag) => {
     });
 };
 
+const getTotalAccounts = async () => {
+  return axios
+    .get('http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/all_accounts/total')
+    .then((response) => {
+      return response.data.message;
+    })
+    .catch((error) => {
+      console.error("Error fetching total users:", error);
+      return 0; 
+    });
+};
+
+const getTotalHashtags = async () => {
+  return axios
+    .get('http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/all_hashtags/')
+    .then((response) => {
+      return response.data.message;
+    })
+    .catch((error) => {
+      console.error("Error fetching number of hashtags:", error);
+      return 0; 
+    });
+};
+
+
+
 export default {
   getAccountData,
   getHashtagData,
@@ -98,4 +124,6 @@ export default {
   deleteHashtag,
   addAccount,
   addHashtag,
+  getTotalAccounts,
+  getTotalHashtags
 };

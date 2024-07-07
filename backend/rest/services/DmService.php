@@ -299,6 +299,26 @@ class DmService extends BaseService
         }
     }
 
+    public function getPercentageOfScheduledDMs()
+    {
+        $counts = $this->dao->getCountOfScheduledAndSentDMs();
+        if ($counts === null) {
+            return null;
+        }
+
+        $total = $counts['count_scheduled'] + $counts['count_sent'];
+        if ($total == 0) {
+            $percentageScheduled = 0;
+        } else {
+            $percentageScheduled = round(($counts['count_scheduled'] / $total) * 100, 2);
+        }
+
+        return [
+            'percentage_scheduled' => $percentageScheduled,
+            'count_scheduled' => $counts['count_scheduled'],
+            'count_sent' => $counts['count_sent']
+        ];
+    }
 }
 
 

@@ -27,6 +27,11 @@ class InstaHashService extends BaseService
         return $this->dao->customAdd($hashtag);
     }
 
+    function getTotalHashtags(){
+        $rows = $this->dao->getTotalHashtags();
+        return array("status"=>200, "message" => $rows);
+    }
+
     function getAccountsDataPerHashtag($id){
         return $this->dao->getAccountsDataPerHashtag($id);
     }

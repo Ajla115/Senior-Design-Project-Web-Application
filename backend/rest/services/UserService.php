@@ -607,11 +607,11 @@ class UserService extends BaseService
             error_log($e->getMessage());
             return array("status" => 500, "message" => "Internal Server Error.");
         }
+    }
 
-
-
-
-
+    public function totalUsers(){
+        $rows = $this->dao->getTotalUsers();
+        return array("status"=>200, "message"=> $rows);
     }
 
 

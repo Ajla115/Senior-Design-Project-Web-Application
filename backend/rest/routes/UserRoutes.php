@@ -268,6 +268,10 @@ Flight::route('POST /changepassword/', function () {
   Flight::json(Flight::userService()->changePassword($data));
 });
 
+Flight::route('GET /totalUsers/', function () {
+  Flight::json(Flight::userService()->totalUsers());
+});
+
 
 
 

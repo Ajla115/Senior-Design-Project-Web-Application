@@ -84,11 +84,24 @@ const editDM = async (customerId, dmData) => {
     });
 };
 
+const getPercentageOfScheduledDMs = async () => {
+  return axios
+    .get('http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/percentage_scheduled_dms')
+    .then((response) => {
+      
+      return response.data.percentage_scheduled;
+    })
+    .catch((error) => {
+      console.error("Error fetching percentage of scheduled DMs:", error);
+      return 0; 
+    });
+};
 
 
 export default {
   addDM,
   getAllDMS,
   deleteDM,
-  editDM 
+  editDM,
+  getPercentageOfScheduledDMs
 };

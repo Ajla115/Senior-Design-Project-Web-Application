@@ -1,11 +1,22 @@
 import PropTypes from 'prop-types';
-import ArrowDownIcon from '@heroicons/react/24/solid/ArrowDownIcon';
-import ArrowUpIcon from '@heroicons/react/24/solid/ArrowUpIcon';
-import UsersIcon from '@heroicons/react/24/solid/UsersIcon';
+import CurrencyDollarIcon from '@heroicons/react/24/solid/CurrencyDollarIcon';
 import { Avatar, Card, CardContent, Stack, SvgIcon, Typography } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { UserService } from 'services'; 
 
 export const OverviewTotalCustomers = (props) => {
-  const { difference, positive = false, sx, value } = props;
+  const { difference, positive = false, sx } = props;
+  const [value, setValue] = useState('0');
+
+  useEffect(() => {
+    const fetchTotalUsers = async () => {
+      const totalUsers = await UserService.getTotalUsers();
+      setValue(totalUsers);
+      
+    };
+
+    fetchTotalUsers();
+  }, []);
 
   return (
     <Card sx={sx}>
@@ -21,7 +32,7 @@ export const OverviewTotalCustomers = (props) => {
               color="text.secondary"
               variant="overline"
             >
-              Total Customers
+              Total Users
             </Typography>
             <Typography variant="h4">
               {value}
@@ -35,43 +46,29 @@ export const OverviewTotalCustomers = (props) => {
             }}
           >
             <SvgIcon>
-              <UsersIcon />
+            <CurrencyDollarIcon />
             </SvgIcon>
           </Avatar>
         </Stack>
-        {difference && (
+        <Stack
+          alignItems="center"
+          direction="row"
+          spacing={2}
+          sx={{ mt: 2 }}
+        >
           <Stack
             alignItems="center"
             direction="row"
-            spacing={2}
-            sx={{ mt: 2 }}
+            spacing={0.5}
           >
-            <Stack
-              alignItems="center"
-              direction="row"
-              spacing={0.5}
-            >
-              <SvgIcon
-                color={positive ? 'success' : 'error'}
-                fontSize="small"
-              >
-                {positive ? <ArrowUpIcon /> : <ArrowDownIcon />}
-              </SvgIcon>
-              <Typography
-                color={positive ? 'success.main' : 'error.main'}
-                variant="body2"
-              >
-                {difference}%
-              </Typography>
-            </Stack>
             <Typography
               color="text.secondary"
               variant="caption"
             >
-              Since last month
+              Since February
             </Typography>
           </Stack>
-        )}
+        </Stack>
       </CardContent>
     </Card>
   );
@@ -80,7 +77,5 @@ export const OverviewTotalCustomers = (props) => {
 OverviewTotalCustomers.propTypes = {
   difference: PropTypes.number,
   positive: PropTypes.bool,
-  value: PropTypes.string.isRequired,
   sx: PropTypes.object
 };
-

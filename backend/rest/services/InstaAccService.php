@@ -28,6 +28,12 @@ class InstaAccService extends BaseService
         return $this->dao->getActiveAccounts();
     }
 
+    public function getTotalInstagramAccounts()
+    {
+        $totalAccounts = $this->dao->getTotalInstagramAccounts();
+        return array("status" => 200, "message" => $totalAccounts);
+    }
+
     
   
 

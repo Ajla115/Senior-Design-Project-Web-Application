@@ -189,3 +189,12 @@ Flight::route("DELETE /accounts/@id", function ($id) {
 });
 
 
+
+
+Flight::route('GET /all_accounts/total/', function () {
+    Flight::json(Flight::instaAccService()->getTotalInstagramAccounts());
+    
+});
+
+
+

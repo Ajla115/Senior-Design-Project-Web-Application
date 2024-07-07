@@ -1,9 +1,21 @@
 import PropTypes from 'prop-types';
-import CurrencyDollarIcon from '@heroicons/react/24/solid/CurrencyDollarIcon';
+import UsersIcon from '@heroicons/react/24/solid/UsersIcon';
 import { Avatar, Card, CardContent, Stack, SvgIcon, Typography } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { InstagramService } from 'services'; 
 
 export const OverviewTotalProfit = (props) => {
-  const { value, sx } = props;
+  const { sx } = props;
+  const [value, setValue] = useState('0');
+
+  useEffect(() => {
+    const fetchTotalHashtags = async () => {
+      const totalHashtags = await InstagramService.getTotalHashtags();
+      setValue(totalHashtags);
+    };
+
+    fetchTotalHashtags();
+  }, []);
 
   return (
     <Card sx={sx}>
@@ -19,7 +31,7 @@ export const OverviewTotalProfit = (props) => {
               color="text.secondary"
               variant="overline"
             >
-              Total Profit
+              Extracted Hashtags
             </Typography>
             <Typography variant="h4">
               {value}
@@ -33,9 +45,28 @@ export const OverviewTotalProfit = (props) => {
             }}
           >
             <SvgIcon>
-              <CurrencyDollarIcon />
+            <UsersIcon />
             </SvgIcon>
           </Avatar>
+        </Stack>
+        <Stack
+          alignItems="center"
+          direction="row"
+          spacing={2}
+          sx={{ mt: 2 }}
+        >
+          <Stack
+            alignItems="center"
+            direction="row"
+            spacing={0.5}
+          >
+            <Typography
+              color="text.secondary"
+              variant="caption"
+            >
+              Since February
+            </Typography>
+          </Stack>
         </Stack>
       </CardContent>
     </Card>

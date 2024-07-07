@@ -211,6 +211,18 @@ class UserDao extends BaseDao
 
   }
 
+  public function getTotalUsers()
+    {
+        try {
+            $stmt = $this->conn->prepare("SELECT COUNT(*) as total_users FROM users");
+            $stmt->execute();
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $row['total_users'];
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return null;
+        }
+    }
 }
 
 

@@ -290,3 +290,9 @@ Flight::route("GET /dms/", function () {
 
 
 
+Flight::route('GET /percentage_scheduled_dms/', function () {
+    Flight::json(Flight::dmService()->getPercentageOfScheduledDMs());
+    
+});
+
+

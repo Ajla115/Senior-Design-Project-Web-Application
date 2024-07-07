@@ -89,4 +89,17 @@ class InstaHashDao extends BaseDao
       return array("status" => 500, "message" => "Internal Server Error");
     }
   }
+
+  public function getTotalHashtags()
+  {
+      try {
+          $stmt = $this->conn->prepare("SELECT COUNT(*) as total_hashtags FROM instagram_hashtags");
+          $stmt->execute();
+          $row = $stmt->fetch(PDO::FETCH_ASSOC);
+          return $row['total_hashtags'];
+      } catch (PDOException $e) {
+          error_log($e->getMessage());
+          return null;
+      }
+  }
 }

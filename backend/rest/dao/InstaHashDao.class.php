@@ -93,7 +93,7 @@ class InstaHashDao extends BaseDao
   public function getTotalHashtags()
   {
       try {
-          $stmt = $this->conn->prepare("SELECT COUNT(*) as total_hashtags FROM instagram_hashtags");
+          $stmt = $this->conn->prepare("SELECT COUNT(*) as total_hashtags FROM instagram_hashtags WHERE activity = 'active' ");
           $stmt->execute();
           $row = $stmt->fetch(PDO::FETCH_ASSOC);
           return $row['total_hashtags'];

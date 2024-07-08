@@ -82,7 +82,7 @@ class InstaAccDao extends BaseDao
   public function getTotalInstagramAccounts()
     {
         try {
-            $stmt = $this->conn->prepare("SELECT COUNT(*) as total_accounts FROM instagram_accounts");
+            $stmt = $this->conn->prepare("SELECT COUNT(*) as total_accounts FROM instagram_accounts WHERE activity = 'active' ");
             $stmt->execute();
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             return $row ? $row['total_accounts'] : 0;

@@ -9,7 +9,7 @@ import axios from "axios";
 import { useMutation, QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { InstagramService } from "services";
 
-const DeleteModal = ({ isOpen, onClose, hashtagId }) => {
+const DeleteModal = ({ isOpen, onClose, hashtagId, refetch }) => {
   const client = new QueryClient();
   const [isDeleted, setIsDeleted] = useState(false);
 
@@ -19,10 +19,11 @@ const DeleteModal = ({ isOpen, onClose, hashtagId }) => {
     },
     onSuccess: () => {
       setIsDeleted(true);
-      //console.log("bravo");
+      refetch();
       onClose();
     },
     onError: (error) => {
+      alert("Error deleting Instagram hashtag. Check server for more information.");
       console.error("Error deleting Instagram hashtag:", error);
     },
   });

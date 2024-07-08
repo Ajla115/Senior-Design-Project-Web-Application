@@ -35,6 +35,7 @@ export const CustomersTable = (props) => {
     page = 0,
     rowsPerPage = 0,
     selected = [],
+    refetch,
   } = props;
 
   const selectedSome = selected.length > 0 && selected.length < items.length;
@@ -88,7 +89,7 @@ export const CustomersTable = (props) => {
                 const createdAt = format(customer.createdAt, "dd/MM/yyyy"); */}
 
               <QueryClientProvider client={client}>
-                <InstagramAccountsData accountList={props.accountList} />
+                <InstagramAccountsData accountList={props.accountList} refetch={refetch}/>
               </QueryClientProvider>
               {/* })} */}
             </TableBody>
@@ -120,13 +121,12 @@ CustomersTable.propTypes = {
   page: PropTypes.number,
   rowsPerPage: PropTypes.number,
   selected: PropTypes.array,
+  refetchAccounts: PropTypes.func,
+  refetch: PropTypes.func,
 };
 
 function InstagramAccountsData(props) {
-  //const posts = useSampleData();
-  // console.log(posts);
-
-  //This is all for deleting a modal
+  const { accountList, refetch } = props; // Extract refetch from props
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [selectedCustomerId, setSelectedCustomerId] = React.useState(null);
 
@@ -139,38 +139,12 @@ function InstagramAccountsData(props) {
     setIsModalOpen(false);
   };
 
-  //fetching data from database
-  // const { isLoading, error, data, isFetching, refetch } = useQuery({
-  //   queryKey: ["instagram-data"],
-  //   queryFn: InstagramService.getAccountData,
-  // });
-
-  //const { isLoading, error, data, isFetching } = useSampleData();
-
-  // if (isLoading) return "Loading...";
-
-  // if (error) return "An error has occurred: " + error.message;
   return (
     <>
-      {props.accountList.message.map((customer) => {
-        // const createdAt = format(customer.createdAt, "dd/MM/yyyy");
-
+      {accountList.message.map((customer) => {
         return (
           <TableRow hover key={customer.id}>
-            <TableCell>
-              {/* <Checkbox
-                checked={isSelected}
-                onChange={(event) => {
-                  if (event.target.checked) {
-                    onSelectOne?.(customer.id);
-                  } else {
-                    onDeselectOne?.(customer.id);
-                  }
-                }}
-              /> */}
-              {customer.id}
-            </TableCell>
-
+            <TableCell>{customer.id}</TableCell>
             <TableCell>
               <Stack alignItems="center" direction="row" spacing={1}>
                 <Typography variant="subtitle2">{customer.username}</Typography>
@@ -188,7 +162,7 @@ function InstagramAccountsData(props) {
         );
       })}
 
-      <DeleteModal isOpen={isModalOpen} onClose={handleClose} customerId={selectedCustomerId} />
+      <DeleteModal isOpen={isModalOpen} onClose={handleClose} customerId={selectedCustomerId} refetch={refetch} />
     </>
   );
 }

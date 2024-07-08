@@ -13,7 +13,7 @@ import {
 import { InstagramService } from "services";
 
 
-const OpenPromptToAddNewHashtag = ({ closeButton }) => {
+const OpenPromptToAddNewHashtag = ({ closeButton, refetchHashtags }) => {
   const client = new QueryClient();
   const [isSearched, setIsSearched] = useState(false);
   const [hashtag, setHashtag] = useState("");
@@ -24,14 +24,37 @@ const OpenPromptToAddNewHashtag = ({ closeButton }) => {
     setHashtag(newHashtag);
   };
 
+  // const mutation = useMutation({
+  //   mutationFn: async () => {
+  //     const response = await InstagramService.addHashtag(hashtag);
+  //     alert(response.message);
+  //     refetchHashtags();
+  //     closeButton(false); //to close the modal
+  //   },
+  //   onSuccess: () => {
+  //     setIsSearched(true);
+  //     //console.log("bravo");
+  //   },
+  //   onError: (error) => {
+  //     alert("There was a problem while adding a hashtag. Please check your server.");
+  //     console.error("Error adding Instagram hashtag:", error);
+  //   },
+  // });
+
   const mutation = useMutation({
     mutationFn: async () => {
-      await InstagramService.addHashtag(hashtag);
-      closeButton(false); //to close the modal
+      const response = await InstagramService.addHashtag(hashtag);
+      if (response.status === 200) {
+        refetchHashtags();
+        closeButton(false); 
+        alert(response.message);    
+      } else {
+        alert("Failed to add hashtag. Go to server for more information.");
+        throw new Error(response.message || 'Failed to add hashtag');
+      }
     },
     onSuccess: () => {
       setIsSearched(true);
-      //console.log("bravo");
     },
     onError: (error) => {
       console.error("Error adding Instagram hashtag:", error);

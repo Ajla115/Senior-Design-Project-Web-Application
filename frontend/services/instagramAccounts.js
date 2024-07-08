@@ -79,15 +79,29 @@ const addAccount = async (username) => {
 };
 
 const addHashtag = async (hashtag) => {
-  return axios
-    .post(`http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/hashtags/${hashtag}`)
-    .then((response) => {
-      return response.data;
-    })
-    .catch((error) => {
-      console.error("Error adding an hashtag to the database:", error);
-    });
+  try {
+    const response = await axios.post(`http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/hashtags/${hashtag}`);
+    console.log("Raja: ", response);
+    if (response.status !== 200) {
+      throw new Error(response.data.message || "Unknown error");
+    }
+    return response.data;
+  } catch (error) {
+    console.error("Error adding a hashtag to the database: ", error);
+    throw error;
+  }
 };
+
+
+// const addHashtag = async (hashtag) => {
+//   try {
+//     const response = await axios.post(`http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/hashtags/${hashtag}`);
+//     return response;
+//   } catch (error) {
+//     console.error("Error adding a hashtag to the database:", error);
+//     throw error;
+//   }
+// };
 
 const getTotalAccounts = async () => {
   return axios

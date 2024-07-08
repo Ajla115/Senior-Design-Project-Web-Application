@@ -9,7 +9,7 @@ import axios from "axios";
 import { useMutation, QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { InstagramService } from "services";
 
-const DeleteModal = ({ isOpen, onClose, customerId }) => {
+const DeleteModal = ({ isOpen, onClose, customerId, refetch }) => {
   const client = new QueryClient();
   const [isDeleted, setIsDeleted] = useState(false);
 
@@ -19,7 +19,8 @@ const DeleteModal = ({ isOpen, onClose, customerId }) => {
     },
     onSuccess: () => {
       setIsDeleted(true);
-      //console.log("bravo");
+      refetch();
+      console.log("DEMO");
       onClose();
     },
     onError: (error) => {

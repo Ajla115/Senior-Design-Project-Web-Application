@@ -92,6 +92,7 @@ const Page = () => {
                 rowsPerPage={rowsPerPage}
                 //selected={customersSelection.selected}
                 accountList={accountList}
+                refetch={refetch} 
               />
             )}
           </Stack>

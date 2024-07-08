@@ -1,24 +1,11 @@
-import PropTypes from "prop-types";
-import React from "react";
-import {
-  Box,
-  Card,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TablePagination,
-  TableRow,
-  Typography,
-  Button
-} from "@mui/material";
-import { Scrollbar } from "src/components/scrollbar";
-import { InstagramService } from "services";
-import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import DeleteModal from "./delete-instagram-hashtag";
-import ShowAccountsDataModal from "./show-account-table-modal";
+import PropTypes from 'prop-types';
+import React from 'react';
+import { Box, Card, Stack, Table, TableBody, TableCell, TableHead, TablePagination, TableRow, Typography, Button } from '@mui/material';
+import { Scrollbar } from 'src/components/scrollbar';
+import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import DeleteModal from './delete-instagram-hashtag';
+import ShowAccountsDataModal from './show-account-table-modal';
 
 export const HashtagsTable = (props) => {
   const {
@@ -33,6 +20,7 @@ export const HashtagsTable = (props) => {
     page = 0,
     rowsPerPage = 0,
     selected = [],
+    refetch,
   } = props;
 
   const selectedSome = selected.length > 0 && selected.length < items.length;
@@ -65,7 +53,7 @@ export const HashtagsTable = (props) => {
             </TableHead>
             <TableBody>
               <QueryClientProvider client={client}>
-                <InstagramHashtagsData />
+                <InstagramHashtagsData items={items} refetch={refetch} />
               </QueryClientProvider>
             </TableBody>
           </Table>
@@ -96,9 +84,11 @@ HashtagsTable.propTypes = {
   page: PropTypes.number,
   rowsPerPage: PropTypes.number,
   selected: PropTypes.array,
+  refetch: PropTypes.func, 
 };
 
-function InstagramHashtagsData() {
+function InstagramHashtagsData(props) {
+  const { items, refetch } = props; 
   const [isAccountsModalOpen, setIsAccountsModalOpen] = React.useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
   const [selectedHashtagId, setSelectedHashtagId] = React.useState(null);
@@ -121,18 +111,9 @@ function InstagramHashtagsData() {
     setIsDeleteModalOpen(false);
   };
 
-  const { isLoading, error, data } = useQuery({
-    queryKey: ["instagram-data"],
-    queryFn: InstagramService.getHashtagData,
-  });
-
-  if (isLoading) return "Loading...";
-
-  if (error) return "An error has occurred: " + error.message;
-
   return (
     <>
-      {data.message.map((hashtag) => (
+      {items.map((hashtag) => (
         <TableRow hover key={hashtag.id}>
           <TableCell>{hashtag.id}</TableCell>
           <TableCell>
@@ -142,10 +123,7 @@ function InstagramHashtagsData() {
           </TableCell>
           <TableCell>{hashtag.number_of_followers}</TableCell>
           <TableCell>
-            <Button
-              onClick={() => handleOpenAccountsModal(hashtag.id)}
-              variant="text"
-            >
+            <Button onClick={() => handleOpenAccountsModal(hashtag.id)} variant="text">
               See accounts
             </Button>
           </TableCell>
@@ -155,7 +133,7 @@ function InstagramHashtagsData() {
         </TableRow>
       ))}
       <ShowAccountsDataModal open={isAccountsModalOpen} onClose={handleCloseAccountsModal} hashtagId={selectedHashtagId} />
-      <DeleteModal isOpen={isDeleteModalOpen} onClose={handleCloseDeleteModal} hashtagId={selectedHashtagId} />
+      <DeleteModal isOpen={isDeleteModalOpen} onClose={handleCloseDeleteModal} hashtagId={selectedHashtagId} refetch={refetch} />
     </>
   );
 }

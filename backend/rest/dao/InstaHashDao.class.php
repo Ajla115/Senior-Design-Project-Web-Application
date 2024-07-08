@@ -62,7 +62,7 @@ class InstaHashDao extends BaseDao
   function customAdd($hashtag)
   {
     try {
-      $stmt = $this->conn->prepare("INSERT INTO " . $this->table_name . " (hashtag, activity) VALUES (:hashtag, 'active')");
+      $stmt = $this->conn->prepare("INSERT INTO " . $this->table_name . " (hashtag_name, activity) VALUES (:hashtag, 'active')");
       $stmt->bindParam(':hashtag', $hashtag);
       $stmt->execute();
       return array("status" => 200, "message" => "Inserted successfully");

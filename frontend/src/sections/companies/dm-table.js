@@ -32,6 +32,7 @@ export const DMTable = (props) => {
     page = 0,
     rowsPerPage = 0,
     selected = [],
+    refetch,
   } = props;
 
   const selectedSome = selected.length > 0 && selected.length < items.length;
@@ -66,7 +67,7 @@ export const DMTable = (props) => {
             </TableHead>
             <TableBody>
               <QueryClientProvider client={client}>
-                <DMAccountsData accountList={props.accountList} />
+                <DMAccountsData accountList={props.accountList} refetch={refetch} />
               </QueryClientProvider>
             </TableBody>
           </Table>
@@ -97,9 +98,11 @@ DMTable.propTypes = {
   page: PropTypes.number,
   rowsPerPage: PropTypes.number,
   selected: PropTypes.array,
+  refetch: PropTypes.func
 };
 
 function DMAccountsData(props) {
+  const { accountList, refetch } = props; 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedCustomerId, setSelectedCustomerId] = useState(null);
@@ -115,7 +118,6 @@ function DMAccountsData(props) {
   };
 
   const handleOpenEditModal = (customer) => {
-    //console.log("Edit icon clicked", customer); // Debugging log
     setSelectedCustomerId(customer.id);
     setInitialValues({
       recipients: customer.recipient,
@@ -150,7 +152,7 @@ function DMAccountsData(props) {
           </TableCell>
         </TableRow>
       ))}
-      <DeleteDMModal isOpen={isDeleteModalOpen} onClose={handleCloseDeleteModal} customerId={selectedCustomerId} />
+      <DeleteDMModal isOpen={isDeleteModalOpen} onClose={handleCloseDeleteModal} customerId={selectedCustomerId} refetch = {refetch}/>
       <EditDMModal isOpen={isEditModalOpen} onClose={handleCloseEditModal} customerId={selectedCustomerId} initialValues={initialValues} />
     </>
   );

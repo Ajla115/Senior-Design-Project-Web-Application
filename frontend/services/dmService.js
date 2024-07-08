@@ -59,23 +59,42 @@ export const getAllDMS = async () => {
   }
 };
 
+// const deleteDM = async (customerId) => {
+//   //console.log(customerId);
+//   return axios
+//     .delete(
+//       `http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/dm/${customerId}`
+//     )
+//     .then((response) => {
+//       return response.data;
+//     })
+//     .catch((error) => {
+//       console.error("Error deleting DM:", error);
+//     });
+// };
+
 const deleteDM = async (customerId) => {
-  //console.log(customerId);
-  return axios
-    .delete(
+  try {
+    const response = await axios.delete(
       `http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/dm/${customerId}`
-    )
-    .then((response) => {
-      return response.data;
-    })
-    .catch((error) => {
-      console.error("Error deleting DM:", error);
-    });
+    );
+
+    if (response.status !== 200) {
+      throw new Error(response.data.message || "Unknown error");
+    }
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting a DM: ", error);
+    throw error;
+  }
 };
 
 const editDM = async (customerId, dmData) => {
   return axios
-    .put(`http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/dm/${customerId}`, dmData)
+    .put(
+      `http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/dm/${customerId}`,
+      dmData
+    )
     .then((response) => {
       return response.data;
     })
@@ -86,22 +105,22 @@ const editDM = async (customerId, dmData) => {
 
 const getPercentageOfScheduledDMs = async () => {
   return axios
-    .get('http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/percentage_scheduled_dms')
+    .get(
+      "http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/percentage_scheduled_dms"
+    )
     .then((response) => {
-      
       return response.data.percentage_scheduled;
     })
     .catch((error) => {
       console.error("Error fetching percentage of scheduled DMs:", error);
-      return 0; 
+      return 0;
     });
 };
-
 
 export default {
   addDM,
   getAllDMS,
   deleteDM,
   editDM,
-  getPercentageOfScheduledDMs
+  getPercentageOfScheduledDMs,
 };

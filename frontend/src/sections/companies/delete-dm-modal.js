@@ -7,20 +7,24 @@ import { Button, Stack, CardActions } from "@mui/material";
 import { useMutation, QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { DMService } from "services";
 
-const DeleteDMModal = ({ isOpen, onClose, customerId }) => {
+const DeleteDMModal = ({ isOpen, onClose, customerId, refetch }) => {
   const client = new QueryClient();
   const [isDeleted, setIsDeleted] = useState(false);
 
   const mutation = useMutation({
     mutationFn: async () => {
-      await DMService.deleteDM(customerId);
+      const response = await DMService.deleteDM(customerId);
+      return response;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       setIsDeleted(true);
+      refetch();
+      alert(data.message);
       onClose();
     },
     onError: (error) => {
       console.error("Error deleting DM:", error);
+      alert("Problem while deleting a DM. Please check your server for more information.");
     },
   });
 

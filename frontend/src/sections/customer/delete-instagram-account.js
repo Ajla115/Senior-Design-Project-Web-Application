@@ -20,7 +20,6 @@ const DeleteModal = ({ isOpen, onClose, customerId, refetch }) => {
     onSuccess: () => {
       setIsDeleted(true);
       refetch();
-      console.log("DEMO");
       onClose();
     },
     onError: (error) => {

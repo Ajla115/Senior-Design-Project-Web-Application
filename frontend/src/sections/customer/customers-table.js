@@ -126,7 +126,7 @@ CustomersTable.propTypes = {
 };
 
 function InstagramAccountsData(props) {
-  const { accountList, refetch } = props; // Extract refetch from props
+  const { accountList, refetch } = props; 
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [selectedCustomerId, setSelectedCustomerId] = React.useState(null);
 

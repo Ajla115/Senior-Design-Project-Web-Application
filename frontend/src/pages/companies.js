@@ -80,7 +80,7 @@ const Page = () => {
                 <Divider sx={{ borderBottomWidth: 2, borderColor: "grey" }} />
               </div>
             </Stack>
-            {showDMPrompt && <WriteDMForm closeButton={setDMPrompt} />}
+            {showDMPrompt && <WriteDMForm closeButton={setDMPrompt} refetchDMS = {refetch}/>}
             {accountList && (
               <DMTable
                 count={accountList.length}
@@ -95,6 +95,7 @@ const Page = () => {
                 rowsPerPage={rowsPerPage}
                 //selected={customersSelection.selected}
                 accountList={accountList}
+                refetch={refetch}
               />
             )}
 

@@ -153,7 +153,7 @@ function DMAccountsData(props) {
         </TableRow>
       ))}
       <DeleteDMModal isOpen={isDeleteModalOpen} onClose={handleCloseDeleteModal} customerId={selectedCustomerId} refetch = {refetch}/>
-      <EditDMModal isOpen={isEditModalOpen} onClose={handleCloseEditModal} customerId={selectedCustomerId} initialValues={initialValues} />
+      <EditDMModal isOpen={isEditModalOpen} onClose={handleCloseEditModal} customerId={selectedCustomerId} initialValues={initialValues} refetch = {refetch} />
     </>
   );
 }

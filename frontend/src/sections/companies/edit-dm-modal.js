@@ -20,7 +20,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
-const EditDMModal = ({ isOpen, onClose, customerId, initialValues }) => {
+const EditDMModal = ({ isOpen, onClose, customerId, initialValues, refetch }) => {
   const client = new QueryClient();
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const [formValues, setFormValues] = useState({
@@ -71,7 +71,8 @@ const EditDMModal = ({ isOpen, onClose, customerId, initialValues }) => {
     },
     onSuccess: () => {
       alert("DM edited successfully");
-      onClose(); // Close the modal after success
+      refetch();
+      onClose(); 
     },
     onError: (error) => {
       alert(error.message || "Error editing a DM");

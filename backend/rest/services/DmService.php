@@ -222,6 +222,10 @@ class DmService extends BaseService
     {
         try {
 
+            if(empty($data['message'])){
+                return array("status" => 500, "message" => "Message field cannot be empty.");
+            }
+
             $result = $this->dao->updateExistingDM($data, $id);
             if ($result["status"] != 200) {
                 throw new Exception('Failed to update DM');

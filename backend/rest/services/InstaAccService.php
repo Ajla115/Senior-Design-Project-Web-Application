@@ -17,6 +17,10 @@ class InstaAccService extends BaseService
     }
 
     function addIndividually($username){
+        if(empty($username)){
+            return array("status"=>500, "message" => "Username cannot be empty");
+
+        }
       return $this->dao->addIndividually($username);
     }
 

@@ -21,7 +21,13 @@ const OpenPromptToAddNewAccount = ({ closeButton, refetchAccounts }) => {
   const onChange = (event) => {
     const newUsername = event.target.value;
     setUsername(newUsername);
+    if (newUsername.trim() !== "") {
+      setUsernameError("");
+    }
   };
+
+  // This is to handle error message for the username field
+  const [usernameError, setUsernameError] = useState("");
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -40,6 +46,10 @@ const OpenPromptToAddNewAccount = ({ closeButton, refetchAccounts }) => {
   });
 
   const handleSearch = async () => {
+    if (username.trim() === "") {
+      setUsernameError("Username cannot be empty");
+      return;
+    }
     console.log("Searching");
     try {
       await mutation.mutateAsync();
@@ -65,6 +75,8 @@ const OpenPromptToAddNewAccount = ({ closeButton, refetchAccounts }) => {
               name="username"
               onChange={onChange}
               value={username}
+              error={!!usernameError} // Apply error styling if usernameError is not empty
+              helperText={usernameError} // Display the error message
             />
           </Stack>
 

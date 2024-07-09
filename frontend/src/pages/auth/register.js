@@ -42,6 +42,7 @@ const Page = () => {
       first_name: "",
       last_name: "",
       password: "",
+      phone: "",
       submit: null,
     },
     validationSchema: Yup.object({
@@ -49,6 +50,7 @@ const Page = () => {
       first_name: Yup.string().max(255).required("First name is required"),
       last_name: Yup.string().max(255).required("Last name is required"),
       password: Yup.string().max(255).required("Password is required"),
+      phone: Yup.string().max(255).required("Phone is required"),
     }),
     onSubmit: async (values, helpers) => {
       try {

@@ -26,10 +26,12 @@ def updateUser(username, stats):
     if not checkExistence(username):
         sql_query2 = "INSERT INTO instagram_accounts (username, stats, activity) VALUES (%s, %s, 'active')"
         values = (username, stats)
+        message = f"Added new user: {username}"
     else:
         sql_query2 = "UPDATE instagram_accounts SET stats = %s WHERE username = %s"
         values = (stats, username)
-    
+        message = f"Updated user: {username}"
+    print(message)
     mycursor = mydb.cursor()
     mycursor.execute(sql_query2, values)
     mydb.commit()
@@ -44,6 +46,7 @@ def scrapeData(username):
             updateExistingUser(posts, followers, followings, username, current_date)
         except:
             setInvalidUser(username, current_date)
+            print(f"Invalid username: {username}")
             #in case the profile does not exist any more, or username has changed
             #set the profile to be invalid
 
@@ -53,6 +56,7 @@ def setInvalidUser(username, current_date):
     mycursor = mydb.cursor()
     mycursor.execute(sql_query3, values)
     mydb.commit()    
+    print(f"Invalid username: {username}")
 
 
 def updateExistingUser(posts, followers, following, username, current_date):
@@ -61,6 +65,7 @@ def updateExistingUser(posts, followers, following, username, current_date):
     mycursor = mydb.cursor()
     mycursor.execute(sql_query3, values)
     mydb.commit()
+    print(f"Updated user: {username}")
 
 def fetchUsernameDataFromDB():
     sql_query = "SELECT username, activity, stats FROM instagram_accounts"

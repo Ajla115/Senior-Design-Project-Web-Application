@@ -28,6 +28,7 @@ class DmService extends BaseService
         try {
             // Get all headers
             $all_headers = getallheaders();
+            
 
             // Check for Authorization token
             if (!isset($all_headers['Authorization'])) {
@@ -36,23 +37,33 @@ class DmService extends BaseService
 
             // Decode the JWT token to get user email
             $token = $all_headers['Authorization'];
+            
+            
             $decoded = (array) JWT::decode($token, new Key(Config::JWT_SECRET(), 'HS256'));
+            
             $userEmail = $decoded[0];
+            
 
+            
             // Get user ID based on email
             $whole_user = $this->retrieveIDbasedOnEmail($userEmail);
+            
+            
             if ($whole_user['status'] !== 200 || !isset($whole_user['message'])) {
-                throw new Exception('Error retrieving user ID');
+                throw new Exception('Error retrieving user based on the email');
             }
 
             $userID = $whole_user['message'][0]["id"];
-
+            
+            
             if (!is_numeric($userID)) {
                 throw new Exception('Invalid user ID');
             }
 
+            
+
             // Check if usernames is an array
-            if (!isset($data['usernames']) || !is_array($data['usernames'])) {
+            if (empty($data['usernames']) || !is_array($data['usernames'])) {
                 throw new Exception('Usernames must be an array');
             }
 
@@ -61,6 +72,8 @@ class DmService extends BaseService
             // Remove usernames from data
             unset($data['usernames']);
 
+            
+
             // Initialize result variable
             $result = null;
 
@@ -68,22 +81,32 @@ class DmService extends BaseService
             foreach ($usernames as $username) {
                 // Check existence in instagram_accounts table
                 $count = $this->dao->checkExistence($username);
+                
+                
                 if ($count['status'] !== 200) {
                     throw new Exception('Error checking username existence');
                 }
 
                 // Add username if it does not exist
                 if ($count['message'] == 0) {
-                    Flight::instaAccService()->addIndividually($username);
+                    $addedUser = Flight::instaAccService()->addIndividually($username);
                 }
 
+                
                 // Get recipient ID by username
                 $recipientIDResponse = $this->dao->getRecipientIDByUsername($username);
+                
+                
+                
+               
                 if ($recipientIDResponse['status'] !== 200 || !isset($recipientIDResponse['message'])) {
                     throw new Exception('Error retrieving recipient ID');
                 }
 
                 $existingRecipientsID = $recipientIDResponse['message'];
+                
+
+
                 if (!is_numeric($existingRecipientsID)) {
                     throw new Exception('Invalid recipient ID');
                 }
@@ -91,6 +114,7 @@ class DmService extends BaseService
                 // Create new DM entry
                 $status = "Scheduled";
                 $result = $this->dao->createNewDM($userID, $data, $existingRecipientsID, $status);
+                
                 if ($result['status'] != 200) {
                     throw new Exception('Error creating new DM');
                 }

@@ -558,7 +558,7 @@ class UserService extends BaseService
 
             $userEmail = $decoded[0];
 
-            if (!isset($data['password']) || !isset($data['new_password']) || !isset($data['repeat_password'])) {
+            if (empty($data['password']) || empty($data['new_password']) || empty($data['repeat_password'])) {
                 return array("status" => 500, "message" => "Fields cannot be empty");
             }
 

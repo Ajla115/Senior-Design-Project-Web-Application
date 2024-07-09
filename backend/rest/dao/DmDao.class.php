@@ -53,8 +53,10 @@ class DmDao extends BaseDao
   public function checkExistence($username)
   {
     try {
-      $stmt = $this->conn->prepare("SELECT *  FROM instagram_accounts WHERE username = :username ");
+      $activeStatus = 'active';
+      $stmt = $this->conn->prepare("SELECT *  FROM instagram_accounts WHERE username = :username AND activity = :activity");
       $stmt->bindParam(':username', $username);
+      $stmt->bindParam(':activity', $activeStatus);
       $stmt->execute();
       $count = $stmt->rowCount();
       return array("status" => 200, "message" => $count); //return $count; 
@@ -86,15 +88,17 @@ class DmDao extends BaseDao
   public function getRecipientIDByUsername($username)
   {
     try {
-      $stmt = $this->conn->prepare("SELECT id FROM instagram_accounts WHERE username = :username");
+      $stmt = $this->conn->prepare("SELECT id FROM instagram_accounts WHERE username = :username AND activity= :activity");
+      $activeStatus = 'active';
       $stmt->bindParam(':username', $username);
+      $stmt->bindParam(':activity', $activeStatus);
       $stmt->execute();
       $row = $stmt->fetch(PDO::FETCH_ASSOC);
-      return $row['id'];
+      return array("status"=>200, "message"=> $row['id']);
     } catch (PDOException $e) {
       //return array("status" => 500, "message" => $e->getMessage());
       error_log($e->getMessage());
-      return -1;
+      return array("status"=>500, "message"=> "Internal Server Error. Check logs.");
     }
   }
 

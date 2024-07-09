@@ -19,27 +19,17 @@ const OpenPromptToAddNewHashtag = ({ closeButton, refetchHashtags }) => {
   const [hashtag, setHashtag] = useState("");
   const [show, setShow] = useState(true);
 
+  // State to handle the error message for the hashtag field
+  const [hashtagError, setHashtagError] = useState("");
+
   const onChange = (event) => {
     const newHashtag = event.target.value;
     setHashtag(newHashtag);
+    if (newHashtag.trim() !== "") {
+      setHashtagError("");
+    }
   };
 
-  // const mutation = useMutation({
-  //   mutationFn: async () => {
-  //     const response = await InstagramService.addHashtag(hashtag);
-  //     alert(response.message);
-  //     refetchHashtags();
-  //     closeButton(false); //to close the modal
-  //   },
-  //   onSuccess: () => {
-  //     setIsSearched(true);
-  //     //console.log("bravo");
-  //   },
-  //   onError: (error) => {
-  //     alert("There was a problem while adding a hashtag. Please check your server.");
-  //     console.error("Error adding Instagram hashtag:", error);
-  //   },
-  // });
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -62,6 +52,10 @@ const OpenPromptToAddNewHashtag = ({ closeButton, refetchHashtags }) => {
   });
 
   const handleSearch = async () => {
+    if (hashtag.trim() === "") {
+      setHashtagError("Hashtag cannot be empty");
+      return;
+    }
     console.log("Searching");
     try {
       await mutation.mutateAsync();
@@ -79,7 +73,7 @@ const OpenPromptToAddNewHashtag = ({ closeButton, refetchHashtags }) => {
         />
         <Divider />
         <CardContent>
-          <Stack spacing={3} sx={{ maxWidth: 1200 }}>
+          <Stack spacing={3} sx={{ maxWidth: 1500 }}>
             <TextField
               required
               fullWidth
@@ -87,6 +81,8 @@ const OpenPromptToAddNewHashtag = ({ closeButton, refetchHashtags }) => {
               name="hashtag"
               onChange={onChange}
               value={hashtag}
+              error={!!hashtagError} // Apply error styling if hashtagError is not empty
+              helperText={hashtagError} // Display the error message
             />
           </Stack>
 

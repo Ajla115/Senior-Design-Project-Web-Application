@@ -24,6 +24,9 @@ class InstaHashService extends BaseService
     }
 
     function customAdd($hashtag){
+        if(empty($hashtag)){
+            return array("status"=>500, "message"=>"Hashtag field cannot be empty.");
+        }
         return $this->dao->customAdd($hashtag);
     }
 

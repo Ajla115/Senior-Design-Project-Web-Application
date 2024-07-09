@@ -468,7 +468,7 @@ class UserService extends BaseService
 
             $senderEmail = $decoded[0];
 
-            if (!isset($title) || !isset($description)) {
+            if (empty($title) || empty($description)) {
                 return array("status" => 500, "message" => "Fields cannot be empty.");
             }
 

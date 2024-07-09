@@ -67,7 +67,7 @@ const OpenPromptToAddNewAccount = ({ closeButton, refetchAccounts }) => {
         />
         <Divider />
         <CardContent>
-          <Stack spacing={3} sx={{ maxWidth: 1200 }}>
+          <Stack spacing={3} sx={{ maxWidth: 1500 }}>
             <TextField
               required
               fullWidth

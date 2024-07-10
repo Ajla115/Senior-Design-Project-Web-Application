@@ -34,19 +34,16 @@ const OpenPromptToAddNewHashtag = ({ closeButton, refetchHashtags }) => {
   const mutation = useMutation({
     mutationFn: async () => {
       const response = await InstagramService.addHashtag(hashtag);
-      if (response.status === 200) {
-        refetchHashtags();
-        closeButton(false); 
-        alert(response.message);    
-      } else {
-        alert("Failed to add hashtag. Go to server for more information.");
-        throw new Error(response.message || 'Failed to add hashtag');
-      }
+      return response;
     },
-    onSuccess: () => {
+    onSuccess: (response) => {
       setIsSearched(true);
+      alert(response.message);
+      refetchHashtags();
+      closeButton(false);
     },
     onError: (error) => {
+      alert("Error adding a new hashtag. Check your server for more information.");
       console.error("Error adding Instagram hashtag:", error);
     },
   });

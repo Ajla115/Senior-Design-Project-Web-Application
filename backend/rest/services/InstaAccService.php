@@ -5,7 +5,6 @@ require_once __DIR__ . "/../dao/InstaAccDao.class.php";
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
-
 class InstaAccService extends BaseService
 {
 

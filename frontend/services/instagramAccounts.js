@@ -36,20 +36,6 @@ const getAccountDataPerHashtag = async (hashtagId) => {
     });
 };
 
-const deleteAccount2 = async (customerId) => {
-  //console.log(customerId);
-  return axios
-    .delete(
-      `http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/accounts/${customerId}`
-    )
-    .then((response) => {
-      return response.data;
-    })
-    .catch((error) => {
-      console.error("Error deleting resource:", error);
-    });
-};
-
 const deleteAccount = async (customerId) => {
   const token = localStorage.getItem("token");
 
@@ -127,31 +113,36 @@ const addAccount = async (username) => {
 };
 
 
-
 const addHashtag = async (hashtag) => {
-  try {
-    const response = await axios.post(`http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/hashtags/${hashtag}`);
-    console.log("Raja: ", response);
-    if (response.status !== 200) {
-      throw new Error(response.data.message || "Unknown error");
-    }
-    return response.data;
-  } catch (error) {
-    console.error("Error adding a hashtag to the database: ", error);
-    throw error;
+  
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    console.error("No token found in local storage");
+    return;
   }
+
+  return axios
+    .post(
+      `http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/hashtags/${hashtag}`, {},
+      
+      {
+        headers: {
+          Authorization: `${token}`,
+        },
+      }
+    )
+    .then((response) => {
+      if (response.data.status !== 200 && response.data.status !== 400  ) {
+        throw new Error(response.data.message || "Unknown error");
+      }
+      return response.data;
+    })
+    .catch((error) => {
+      console.error("Error adding an account: ", error);
+      throw error;
+    });
 };
-
-
-// const addHashtag = async (hashtag) => {
-//   try {
-//     const response = await axios.post(`http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/hashtags/${hashtag}`);
-//     return response;
-//   } catch (error) {
-//     console.error("Error adding a hashtag to the database:", error);
-//     throw error;
-//   }
-// };
 
 const getTotalAccounts = async () => {
   return axios

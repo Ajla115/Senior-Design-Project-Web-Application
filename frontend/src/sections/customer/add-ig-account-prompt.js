@@ -33,9 +33,7 @@ const OpenPromptToAddNewAccount = ({ closeButton, refetchAccounts }) => {
     mutationFn: async () => {
       const response = await InstagramService.addAccount(username);
       return response;
-      //console.log(response);
-      refetchAccounts();
-      closeButton(false);
+      
     },
     onSuccess: (response) => {
       setIsSearched(true);

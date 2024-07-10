@@ -29,19 +29,32 @@ class InstaAccDao extends BaseDao
     }
   }
 
-  function addIndividually($username)
+  function addIndividually($username, $userID)
   {
-    // return $this->query("
-    // INSERT INTO " . $this->table_name . " (username, stats) VALUES (:value1, :value2)", ["value1" => $username, "value2" => 0]);
     try {
+
       $stmt = $this->conn->prepare("INSERT INTO " . $this->table_name . " (username, stats, activity) VALUES (:username, 0, 'active')");
       $stmt->bindParam(':username', $username);
       $stmt->execute();
+
+      $stmt2 = $this->conn->prepare("SELECT id FROM " . $this->table_name . " WHERE username = :username AND activity = 'active' AND stats = 0");
+      $stmt2->bindParam(':username', $username);
+      $stmt2->execute();
+
+      $accountID = $stmt2->fetchColumn();
+
+      $stmt3 = $this->conn->prepare("INSERT INTO users_accounts (users_id, accounts_id) VALUES (:users_id, :accounts_id)");
+      $stmt3->bindParam(':users_id', $userID);
+      $stmt3->bindParam(':accounts_id', $accountID);
+      $stmt3->execute();
+
       return array("status" => 200, "message" => "Inserted successfully");
+
     } catch (PDOException $e) {
-      //return array("status" => 500, "message" => $e->getMessage());
+
       error_log($e->getMessage());
       return array("status" => 500, "message" => "Internal Server Error");
+
     }
   }
 
@@ -80,17 +93,17 @@ class InstaAccDao extends BaseDao
   }
 
   public function getTotalInstagramAccounts()
-    {
-        try {
-            $stmt = $this->conn->prepare("SELECT COUNT(*) as total_accounts FROM instagram_accounts WHERE activity = 'active' ");
-            $stmt->execute();
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-            return $row ? $row['total_accounts'] : 0;
-        } catch (PDOException $e) {
-            error_log($e->getMessage());
-            return null;
-        }
+  {
+    try {
+      $stmt = $this->conn->prepare("SELECT COUNT(*) as total_accounts FROM instagram_accounts WHERE activity = 'active' ");
+      $stmt->execute();
+      $row = $stmt->fetch(PDO::FETCH_ASSOC);
+      return $row ? $row['total_accounts'] : 0;
+    } catch (PDOException $e) {
+      error_log($e->getMessage());
+      return null;
     }
+  }
 
 
 }

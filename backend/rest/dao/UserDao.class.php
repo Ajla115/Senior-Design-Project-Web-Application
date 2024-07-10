@@ -223,6 +223,22 @@ class UserDao extends BaseDao
             return null;
         }
     }
+
+    public function retrieveIDBasedOnTheEmail($email_address)
+  {
+    try {
+      $stmt = $this->conn->prepare("SELECT id FROM users WHERE email_address = :email_address AND status = 'verified'");
+      $stmt->bindParam(':email_address', $email_address);
+      $stmt->execute();
+      $user = $stmt->fetch(PDO::FETCH_ASSOC);
+      return $user['id']; //returns id
+    } catch (PDOException $e) {
+      //return $e->getMessage();
+      error_log($e->getMessage());
+      return ;
+    }
+  }
+
 }
 
 

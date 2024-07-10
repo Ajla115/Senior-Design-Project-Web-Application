@@ -1,7 +1,6 @@
 import axios from "axios";
 
 const getAccountData = async () => {
-  //console.log("Beton");
   return axios
     .get("http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/accounts/")
     .then((response) => {
@@ -65,18 +64,51 @@ const deleteHashtag = async (hashtagId) => {
     });
 };
 
+// const addAccount2 = async (username) => {
+//   return axios
+//     .post(
+//       `http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/accounts/${username}`
+//     )
+//     .then((response) => {
+//       return response.data;
+//     })
+//     .catch((error) => {
+//       console.error("Error adding an username to the database:", error);
+//     });
+// };
+
 const addAccount = async (username) => {
+  
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    console.error("No token found in local storage");
+    return;
+  }
+
   return axios
     .post(
-      `http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/accounts/${username}`
+      `http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/accounts/${username}`, {},
+      
+      {
+        headers: {
+          Authorization: `${token}`,
+        },
+      }
     )
     .then((response) => {
+      if (response.data.status !== 200 && response.data.status !== 400  ) {
+        throw new Error(response.data.message || "Unknown error");
+      }
       return response.data;
     })
     .catch((error) => {
-      console.error("Error adding an username to the database:", error);
+      console.error("Error adding an account: ", error);
+      throw error;
     });
 };
+
+
 
 const addHashtag = async (hashtag) => {
   try {

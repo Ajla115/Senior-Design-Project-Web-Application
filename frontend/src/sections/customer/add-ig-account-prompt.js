@@ -31,16 +31,20 @@ const OpenPromptToAddNewAccount = ({ closeButton, refetchAccounts }) => {
 
   const mutation = useMutation({
     mutationFn: async () => {
-      await InstagramService.addAccount(username);
+      const response = await InstagramService.addAccount(username);
+      return response;
+      //console.log(response);
       refetchAccounts();
-      closeButton(false); //to close the modal
+      closeButton(false);
     },
-    onSuccess: () => {
+    onSuccess: (response) => {
       setIsSearched(true);
-
-      //console.log("bravo");
+      alert(response.message);
+      refetchAccounts();
+      closeButton(false);
     },
     onError: (error) => {
+      alert("Error adding a new username. Check your server for more information.");
       console.error("Error adding Instagram account:", error);
     },
   });
@@ -79,20 +83,8 @@ const OpenPromptToAddNewAccount = ({ closeButton, refetchAccounts }) => {
               helperText={usernameError} // Display the error message
             />
           </Stack>
-
-          {/* <FormControl defaultValue="" required className={styles.containerr}>
-                <FormLabel >Username</FormLabel >
-                <Input placeholder="Write Instagram username here" onChange={onChange} /> 
-
-                {/* <HelperText /> */}
           <CardActions sx={{ justifyContent: "flex-end", marginRight: 0 }}>
-            <Stack
-              spacing={1}
-              sx={{ maxWidth: 300, marginTop: 2 }}
-              direction="row"
-              //justifyContent="left"
-              // alignItems="center"
-            >
+            <Stack spacing={1} sx={{ maxWidth: 300, marginTop: 2 }} direction="row">
               <Button
                 variant="contained"
                 color="error"
@@ -116,8 +108,6 @@ const OpenPromptToAddNewAccount = ({ closeButton, refetchAccounts }) => {
           </CardActions>
         </CardContent>
       </Card>
-      {/* {!show} */}
-      {/* </FormControl>   */}
     </div>
   );
 };

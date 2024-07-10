@@ -2,6 +2,9 @@
 require_once 'BaseService.php';
 require_once __DIR__ . "/../dao/InstaAccDao.class.php";
 
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+
 
 class InstaAccService extends BaseService
 {
@@ -17,11 +20,41 @@ class InstaAccService extends BaseService
     }
 
     function addIndividually($username){
-        if(empty($username)){
-            return array("status"=>500, "message" => "Username cannot be empty");
+        try {
 
+
+            $all_headers = getallheaders();
+
+            if (!isset($all_headers['Authorization'])) {
+                throw new Exception('Authorization token not provided');
+            }
+
+            $token = $all_headers['Authorization'];
+
+            $decoded = (array) JWT::decode($token, new Key(Config::JWT_SECRET(), 'HS256'));
+
+            $userEmail = $decoded[0];
+            
+
+            if(empty($username)){
+                return array("status"=>500, "message" => "Username cannot be empty");
+    
+            }
+
+            $userID = Flight::userDao()->retrieveIDBasedOnTheEmail($userEmail);
+           
+            if(!isset($userID)){
+                return array("status"=> 500, "message"=> "The ID has not been extracted.");
+            }
+
+           $result = $this->dao->addIndividually($username, $userID);
+
+           return $result;
+           
+        } catch (Exception $e) {
+            return array("status" => 500, "message" => $e->getMessage());
         }
-      return $this->dao->addIndividually($username);
+        
     }
 
     function customDelete($id){

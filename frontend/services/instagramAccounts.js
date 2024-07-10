@@ -66,20 +66,49 @@ const deleteAccount = async (customerId) => {
   }
 };
 
-
 const deleteHashtag = async (hashtagId) => {
-  //console.log(customerId);
-  return axios
-    .delete(
-      `http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/hashtags/${hashtagId}`
-    )
-    .then((response) => {
-      return response.data;
-    })
-    .catch((error) => {
-      console.error("Error deleting resource:", error);
-    });
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    console.error("No token found in local storage");
+    throw new Error("No token found in local storage");
+  }
+
+  try {
+    const response = await axios.delete(
+      `http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/hashtags/${hashtagId}`, 
+      {
+        headers: {
+          Authorization: `${token}`,
+        },
+      }
+    );
+
+    console.log(response);
+
+    if (response.data.status !== 200) {
+      throw new Error(response.data.message || "Unknown error");
+    }
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting an account: ", error);
+    throw error;
+  }
 };
+
+// const deleteHashtag2 = async (hashtagId) => {
+//   //console.log(customerId);
+//   return axios
+//     .delete(
+//       `http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/hashtags/${hashtagId}`
+//     )
+//     .then((response) => {
+//       return response.data;
+//     })
+//     .catch((error) => {
+//       console.error("Error deleting resource:", error);
+//     });
+// };
 
 const addAccount = async (username) => {
   

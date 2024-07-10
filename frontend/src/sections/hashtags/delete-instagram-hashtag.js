@@ -15,15 +15,18 @@ const DeleteModal = ({ isOpen, onClose, hashtagId, refetch }) => {
 
   const mutation = useMutation({
     mutationFn: async () => {
-      await InstagramService.deleteHashtag(hashtagId);
+      const response  = await InstagramService.deleteHashtag(hashtagId);
+      return response;
     },
-    onSuccess: () => {
+    onSuccess: (response) => {
       setIsDeleted(true);
       refetch();
       onClose();
+      alert(response.message);
     },
     onError: (error) => {
-      alert("Error deleting Instagram hashtag. Check server for more information.");
+      onClose();
+      alert(`Error: ${error.response?.data?.message || error.message}`);
       console.error("Error deleting Instagram hashtag:", error);
     },
   });

@@ -15,14 +15,18 @@ const DeleteModal = ({ isOpen, onClose, customerId, refetch }) => {
 
   const mutation = useMutation({
     mutationFn: async () => {
-      await InstagramService.deleteAccount(customerId);
+       const response = await InstagramService.deleteAccount(customerId);
+       return response;
     },
-    onSuccess: () => {
+    onSuccess: (response) => {
       setIsDeleted(true);
       refetch();
       onClose();
+      alert(response.message)
     },
     onError: (error) => {
+      onClose();
+      alert(`Error: ${error.response?.data?.message || error.message}`);
       console.error("Error deleting Instagram account:", error);
     },
   });

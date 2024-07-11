@@ -49,6 +49,7 @@ export const HashtagsTable = (props) => {
                 <TableCell>Number of Accounts</TableCell>
                 <TableCell>Show Accounts</TableCell>
                 <TableCell>Other</TableCell>
+                <TableCell>User</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -130,6 +131,7 @@ function InstagramHashtagsData(props) {
           <TableCell>
             <DeleteOutlineIcon onClick={() => handleOpenDeleteModal(hashtag.id)} />
           </TableCell>
+          <TableCell>{hashtag.user_name}</TableCell>
         </TableRow>
       ))}
       <ShowAccountsDataModal open={isAccountsModalOpen} onClose={handleCloseAccountsModal} hashtagId={selectedHashtagId} />

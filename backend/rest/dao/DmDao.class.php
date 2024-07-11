@@ -102,27 +102,6 @@ class DmDao extends BaseDao
     }
   }
 
-  //this will create a new dm if we add a new username while already updating an existing DM
-//RADI
-  // public function createNewDM($data, $existingRecipientsID)
-  // {
-
-  //   return $this->query("
-  // INSERT INTO " . $this->table_name . " (users_id, users_email, users_password, recipients_id, message, date_and_time, status) 
-  // VALUES (:value1, :value2, :value3, :value4, :value5, :value6, :value7)",
-  //     [
-  //       "value1" => $data['users_id'],
-  //       "value2" => $data['users_email'],
-  //       "value3" => $data['users_password'],
-  //       "value4" => $existingRecipientsID,
-  //       "value5" => $data['message'],
-  //       "value6" => $data['date_and_time'],
-  //       "value7" => $data['status']
-  //     ]
-  //   );
-
-  // }
-
   public function createNewDM($userID, $data, $existingRecipientsID, $status)
   {
     try {
@@ -148,24 +127,6 @@ class DmDao extends BaseDao
     }
   }
 
-  // //Update existing route
-  // public function updateExistingDM($data, $existingRecipientsID, $current_dm_id)
-  // {
-  //   return $this->query("
-  // UPDATE " . $this->table_name . " SET users_id = :value1, users_email= :value2, users_password = :value3, recipients_id = :value4, message = :value5,
-  // date_and_time = :value6, status = :value7 WHERE id = :id;",
-  //     [
-  //       "value1" => $data['users_id'],
-  //       "value2" => $data['users_email'],
-  //       "value3" => $data['users_password'],
-  //       "value4" => $existingRecipientsID,
-  //       "value5" => $data['message'],
-  //       "value6" => $data['date_and_time'],
-  //       "value7" => $data['status'],
-  //       "id" => $current_dm_id
-  //     ]
-  //   );
-  // }
 
 
 public function updateExistingDM($data, $current_dm_id)
@@ -210,6 +171,23 @@ public function updateExistingDM($data, $current_dm_id)
   }
 }
 
+public function getSentDMS()
+{
+  try {
+    $stmt = $this->conn->prepare("SELECT d.id, d.users_email, ia.username AS recipient_username, d.message, d.date_and_time 
+                                  FROM " . $this->table_name . " d
+                                  JOIN instagram_accounts ia ON d.recipients_id = ia.id
+                                  WHERE  d.status = :status");
+    $sent= "Sent";
+    $stmt->bindParam(':status', $sent);
+    $stmt->execute();
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    return array("status" => 200, "message" => $rows);
+  } catch (PDOException $e) {
+    error_log($e->getMessage());
+    return array("status" => 500, "message" => "Internal Server Error");
+  }
+}
 
 public function getPasswordForUsername($email){
   try {

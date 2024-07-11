@@ -49,14 +49,19 @@ class InstaHashDao extends BaseDao
 
   function getActiveHashtags()
   {
-
     try {
-      $stmt = $this->conn->prepare("
-      SELECT h.id, h.hashtag_name, COUNT(ah.hashtag_id) AS number_of_followers FROM " . $this->table_name . " AS h LEFT JOIN accounts_with_hashtag ah ON h.id = ah.hashtag_id WHERE h.activity = 'active' GROUP BY h.id, h.hashtag_name ORDER BY h.id DESC");
+      //$stmt = $this->conn->prepare("SELECT h.id, h.hashtag_name, COUNT(ah.hashtag_id) AS number_of_followers FROM " . $this->table_name . " AS h LEFT JOIN accounts_with_hashtag ah ON h.id = ah.hashtag_id WHERE h.activity = 'active' GROUP BY h.id, h.hashtag_name ORDER BY h.id DESC");
+      $stmt = $this->conn->prepare("SELECT ih.id, ih.hashtag_name, COUNT(ah.hashtag_id) AS number_of_followers, concat(u.first_name, ' ', u.last_name) AS user_name
+      FROM instagram_hashtags ih
+      LEFT JOIN  accounts_with_hashtag ah ON ih.id = ah.hashtag_id 
+      JOIN users_hashtags us ON ih.id = us.hashtags_id
+      JOIN users u ON u.id = us.users_id
+      WHERE ih.activity = 'active' 
+      GROUP BY ih.id, ih.hashtag_name 
+      ORDER BY ih.id DESC");
       $stmt->execute();
       return array("status" => 200, "message" => $stmt->fetchAll(PDO::FETCH_ASSOC));
     } catch (PDOException $e) {
-      //return array("status" => 500, "message" => $e->getMessage());
       error_log($e->getMessage());
       return array("status" => 500, "message" => "Internal Server Error");
     }

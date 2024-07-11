@@ -271,20 +271,16 @@ class DmService extends BaseService
     public function getAllDMS($data)
     {
         try {
-            // Get all headers
             $all_headers = getallheaders();
 
-            // Check for Authorization token
             if (!isset($all_headers['Authorization'])) {
                 throw new Exception('Authorization token not provided');
             }
 
-            // Decode the JWT token to get user email
             $token = $all_headers['Authorization'];
             $decoded = (array) JWT::decode($token, new Key(Config::JWT_SECRET(), 'HS256'));
             $userEmail = $decoded[0];
 
-            // Get user ID based on email
             $whole_user = $this->retrieveIDbasedOnEmail($userEmail);
             if ($whole_user['status'] !== 200 || !isset($whole_user['message'])) {
                 throw new Exception('Error retrieving user ID');
@@ -303,7 +299,60 @@ class DmService extends BaseService
                 $dms = $response['message'];
                 $result = [];
 
-                // Process the DMs and store them in an array
+                
+                foreach ($dms as $dm) {
+                    $result[] = [
+                        "id" => $dm['id'],
+                        "username" => $dm['users_email'],
+                        "recipient" => $dm['recipient_username'],
+                        "message" => $dm['message'],
+                        "dateAndTime" => $dm['date_and_time']
+                    ];
+                }
+
+                return array("status" => 200, "message" => $result);
+            } else {
+                return array("status" => 500, "message" => $response['message']);
+            }
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            return array("status" => 500, "message" => "Internal Server Error: " . $e->getMessage());
+        }
+    }
+
+    
+    public function getSentDMS($data)
+    {
+        try {
+            $all_headers = getallheaders();
+
+            if (!isset($all_headers['Authorization'])) {
+                throw new Exception('Authorization token not provided');
+            }
+
+            $token = $all_headers['Authorization'];
+            $decoded = (array) JWT::decode($token, new Key(Config::JWT_SECRET(), 'HS256'));
+            $userEmail = $decoded[0];
+
+            $whole_user = $this->retrieveIDbasedOnEmail($userEmail);
+            if ($whole_user['status'] !== 200 || !isset($whole_user['message'])) {
+                throw new Exception('Error retrieving user ID');
+            }
+
+            $userID = $whole_user['message'][0]["id"];
+
+            if (!is_numeric($userID)) {
+                throw new Exception('Invalid user ID');
+            }
+
+            $response = Flight::dmDao()->getSentDMS();
+
+
+            if ($response['status'] === 200) {
+                $dms = $response['message'];
+                $result = [];
+
+                
                 foreach ($dms as $dm) {
                     $result[] = [
                         "id" => $dm['id'],
@@ -326,7 +375,6 @@ class DmService extends BaseService
             return array("status" => 500, "message" => "Internal Server Error: " . $e->getMessage());
         }
     }
-
     public function getPercentageOfScheduledDMs()
     {
         $counts = $this->dao->getCountOfScheduledAndSentDMs();

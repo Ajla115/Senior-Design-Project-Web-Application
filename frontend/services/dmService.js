@@ -59,19 +59,36 @@ export const getAllDMS = async () => {
   }
 };
 
-// const deleteDM = async (customerId) => {
-//   //console.log(customerId);
-//   return axios
-//     .delete(
-//       `http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/dm/${customerId}`
-//     )
-//     .then((response) => {
-//       return response.data;
-//     })
-//     .catch((error) => {
-//       console.error("Error deleting DM:", error);
-//     });
-// };
+export const getSentDMS = async () => {
+  try {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      console.error("No token found in local storage");
+      return;
+    }
+
+    const response = await axios.get(
+      `http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/sent_dms/`,
+      {
+        headers: {
+          Authorization: `${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (response.data.status !== 200) {
+      throw new Error(response.data.message || "Unknown error");
+    }
+    return response.data.message;
+  } catch (error) {
+    console.error("Error fetching sent DMs: ", error);
+    throw error;
+  }
+};
+
+
 
 const deleteDM = async (customerId) => {
   try {
@@ -123,4 +140,5 @@ export default {
   deleteDM,
   editDM,
   getPercentageOfScheduledDMs,
+  getSentDMS
 };

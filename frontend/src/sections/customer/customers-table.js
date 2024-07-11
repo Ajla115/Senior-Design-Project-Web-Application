@@ -81,6 +81,7 @@ export const CustomersTable = (props) => {
                 <TableCell>Date & Time</TableCell>
                 <TableCell>Stats</TableCell>
                 <TableCell>Other</TableCell>
+                <TableCell>User</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -89,7 +90,7 @@ export const CustomersTable = (props) => {
                 const createdAt = format(customer.createdAt, "dd/MM/yyyy"); */}
 
               <QueryClientProvider client={client}>
-                <InstagramAccountsData accountList={props.accountList} refetch={refetch}/>
+                <InstagramAccountsData accountList={props.accountList} refetch={refetch} />
               </QueryClientProvider>
               {/* })} */}
             </TableBody>
@@ -126,7 +127,7 @@ CustomersTable.propTypes = {
 };
 
 function InstagramAccountsData(props) {
-  const { accountList, refetch } = props; 
+  const { accountList, refetch } = props;
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [selectedCustomerId, setSelectedCustomerId] = React.useState(null);
 
@@ -158,11 +159,17 @@ function InstagramAccountsData(props) {
             <TableCell>
               <DeleteOutlineIcon onClick={() => handleOpen(customer.id)} />
             </TableCell>
+            <TableCell>{customer.user_name}</TableCell>
           </TableRow>
         );
       })}
 
-      <DeleteModal isOpen={isModalOpen} onClose={handleClose} customerId={selectedCustomerId} refetch={refetch} />
+      <DeleteModal
+        isOpen={isModalOpen}
+        onClose={handleClose}
+        customerId={selectedCustomerId}
+        refetch={refetch}
+      />
     </>
   );
 }

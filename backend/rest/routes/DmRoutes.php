@@ -288,6 +288,11 @@ Flight::route("GET /dms/", function () {
     Flight::json(Flight::dmService()->getAllDMS($data));
 });
 
+Flight::route("GET /sent_dms/", function () {
+    $data = Flight::request()->data->getData();
+    Flight::json(Flight::dmService()->getSentDMS($data));
+});
+
 
 
 Flight::route('GET /percentage_scheduled_dms/', function () {

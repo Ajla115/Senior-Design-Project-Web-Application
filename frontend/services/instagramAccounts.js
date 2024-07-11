@@ -96,19 +96,6 @@ const deleteHashtag = async (hashtagId) => {
   }
 };
 
-// const deleteHashtag2 = async (hashtagId) => {
-//   //console.log(customerId);
-//   return axios
-//     .delete(
-//       `http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/hashtags/${hashtagId}`
-//     )
-//     .then((response) => {
-//       return response.data;
-//     })
-//     .catch((error) => {
-//       console.error("Error deleting resource:", error);
-//     });
-// };
 
 const addAccount = async (username) => {
   

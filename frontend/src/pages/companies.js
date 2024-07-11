@@ -16,6 +16,8 @@ import WriteDMForm from "src/sections/companies/add-a-new-dm";
 import { DMTable } from "src/sections/companies/dm-table";
 import { DMService } from "services";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
+import SentDMTable from "src/sections/companies/sent-dm-table"; // New import
+
 
 const Page = () => {
   const [showDMPrompt, setDMPrompt] = useState(false); //dm prompt is not seen at the beginning
@@ -80,23 +82,36 @@ const Page = () => {
                 <Divider sx={{ borderBottomWidth: 2, borderColor: "grey" }} />
               </div>
             </Stack>
-            {showDMPrompt && <WriteDMForm closeButton={setDMPrompt} refetchDMs = {refetch}/>}
+            {showDMPrompt && <WriteDMForm closeButton={setDMPrompt} refetchDMs={refetch} />}
             {accountList && (
-              <DMTable
-                count={accountList.length}
-                //items={customers}
-                //onDeselectAll={customersSelection.handleDeselectAll}
-                //onDeselectOne={customersSelection.handleDeselectOne}
-                onPageChange={handlePageChange}
-                onRowsPerPageChange={handleRowsPerPageChange}
-                //onSelectAll={customersSelection.handleSelectAll}
-                //onSelectOne={customersSelection.handleSelectOne}
-                page={page}
-                rowsPerPage={rowsPerPage}
-                //selected={customersSelection.selected}
-                accountList={accountList}
-                refetch={refetch}
-              />
+              <>
+              <Divider sx={{ my: 2 }} /> 
+              <Typography variant="h5">Edit Your Scheduled Direct Messages</Typography> 
+                <DMTable
+                  count={accountList.length}
+                  //items={customers}
+                  //onDeselectAll={customersSelection.handleDeselectAll}
+                  //onDeselectOne={customersSelection.handleDeselectOne}
+                  onPageChange={handlePageChange}
+                  onRowsPerPageChange={handleRowsPerPageChange}
+                  //onSelectAll={customersSelection.handleSelectAll}
+                  //onSelectOne={customersSelection.handleSelectOne}
+                  page={page}
+                  rowsPerPage={rowsPerPage}
+                  //selected={customersSelection.selected}
+                  accountList={accountList}
+                  refetch={refetch}
+                />
+                <Divider sx={{ my: 2 }} /> 
+                <Typography variant="h5">View Sent Direct Messages</Typography> 
+                <SentDMTable 
+                  count={accountList.length}
+                  onPageChange={handlePageChange}
+                  onRowsPerPageChange={handleRowsPerPageChange}
+                  page={page}
+                  rowsPerPage={rowsPerPage}
+                />
+              </>
             )}
 
             {/* <Grid

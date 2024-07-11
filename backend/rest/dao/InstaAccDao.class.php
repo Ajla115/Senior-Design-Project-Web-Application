@@ -93,18 +93,19 @@ class InstaAccDao extends BaseDao
 
   function getActiveAccounts()
   {
-    //   return $this->query("
-    //     SELECT *
-    //     FROM " . $this->table_name . "
-    //     WHERE activity = 'active'
-    // ");
     try {
-      $stmt = $this->conn->prepare("SELECT * FROM " . $this->table_name . " WHERE activity = 'active' ORDER BY id DESC");
+      //$stmt = $this->conn->prepare("SELECT * FROM " . $this->table_name . " WHERE activity = 'active' ORDER BY id DESC");
+      $stmt = $this->conn->prepare("SELECT ia.id, ia.username, ia.post_number, ia.followers_number, ia.followings_number, ia.date_and_time, ia.stats, concat(u.first_name,  ' ', u.last_name) AS user_name
+      FROM instagram_accounts ia
+      JOIN users_accounts ua ON ia.id = ua.accounts_id
+      JOIN users u ON ua.users_id = u.id
+      WHERE ia.activity = 'active'
+      ORDER BY ia.id DESC;");
       $stmt->execute();
       return array("status" => 200, "message" => $stmt->fetchAll(PDO::FETCH_ASSOC));
 
     } catch (PDOException $e) {
-      //return array("status" => 500, "message" => $e->getMessage());
+
       error_log($e->getMessage());
       return array("status" => 500, "message" => "Internal Server Error");
     }

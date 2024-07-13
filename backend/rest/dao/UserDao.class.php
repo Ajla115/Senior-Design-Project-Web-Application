@@ -239,6 +239,87 @@ class UserDao extends BaseDao
     }
   }
 
+  public function checkVerificationStatus($email)
+  {
+    try {
+      $stmt = $this->conn->prepare("SELECT status FROM users WHERE email_address = :email_address");
+      $stmt->bindParam(':email_address', $email);
+      $stmt->execute();
+      $user = $stmt->fetch(PDO::FETCH_ASSOC);
+      if ($user) {
+
+        if ($user['status'] === 'verified') {
+          return array("status" => 200, "message" => "User is verified.");
+
+        } else {
+          return array("status" => 500, "message" => "User is  not verified.");
+
+        }
+      } else {
+        return array("status" => 404, "message" => "User is not found.");
+
+      }
+    } catch (PDOException $e) {
+      error_log($e->getMessage());
+      return array("status" => 401, "message" => "Backend error.");
+    }
+  }
+
+  public function checkTimeForRequests($email)
+  {
+    try {
+      $stmt = $this->conn->prepare("SELECT timestamps FROM logs WHERE email_address = :email_address");
+      $stmt->bindParam(':email_address', $email);
+      $stmt->execute();
+      $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+      if ($result && $result['timestamps']) {
+        $timestamps = json_decode($result['timestamps'], true);
+        $currentTime = time();
+        $validTimestamps = [];
+
+        foreach ($timestamps as $timestamp) {
+          $timeDifference = ($currentTime - $timestamp) / 60; //here, I calculate difference in minutes
+          if ($timeDifference <= 10) {
+            $validTimestamps[] = $timestamp;
+          }
+        }
+
+        // Check if two requests have been made in the last 10 minutes
+        if (count($validTimestamps) >= 2) {
+          return true;
+        }
+      }
+
+      return false;
+    } catch (PDOException $e) {
+      error_log($e->getMessage());
+      return false;
+    }
+  }
+
+  public function saveExpirationTokenAndCount($expirationJWT, $email)
+  {
+    try {
+      $stmt = $this->conn->prepare("
+          UPDATE users
+          SET activation_token = :activation_token, activation_token_count = 0
+          WHERE email_address = :email_address
+      ");
+      $stmt->bindParam(':activation_token', $expirationJWT);
+      $stmt->bindParam(':email_address', $email);
+      $stmt->execute();
+      return true;
+
+      //return array("status" => 200, "message" => "Activation token saved successfully.");
+    } catch (PDOException $e) {
+      error_log($e->getMessage());
+      return false;
+      //return array("status" => 500, "message" => "An error occurred while saving the activation token.");
+    }
+  }
+
+
 }
 
 

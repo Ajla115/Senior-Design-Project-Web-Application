@@ -272,6 +272,11 @@ Flight::route('GET /totalUsers/', function () {
   Flight::json(Flight::userService()->totalUsers());
 });
 
+Flight::route('POST /forgetpassword/', function () {
+  $data = Flight::request()->data->getData();
+  Flight::json(Flight::userService()->forgetPassword($data));
+});
+
 
 
 

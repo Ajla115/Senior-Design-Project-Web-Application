@@ -17,6 +17,7 @@ import {
   Typography,
   IconButton,
   InputAdornment,
+  Divider
 } from "@mui/material";
 import { useAuth } from "src/hooks/use-auth";
 import { Layout as AuthLayout } from "src/layouts/auth/layout";
@@ -183,6 +184,20 @@ const Page = () => {
                     }}
                   />
                 </Stack>
+                <Box>
+                <Divider sx={{ borderBottomWidth: 15, borderColor: 'white' }} />
+                </Box>
+                <Typography color="text.secondary" variant="body2">
+                Forgot your password? &nbsp;
+                <Link
+                  component={NextLink}
+                  href="/forgetPassword"
+                  underline="hover"
+                  variant="subtitle2"
+                >
+                  Change password
+                </Link>
+              </Typography>
                 {/* <FormHelperText sx={{ mt: 1 }}>Optionally you can skip.</FormHelperText> */}
                 {formik.errors.submit && (
                   <Typography color="error" sx={{ mt: 3 }} variant="body2">

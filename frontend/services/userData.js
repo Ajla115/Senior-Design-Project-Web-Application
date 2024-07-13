@@ -221,10 +221,29 @@ const getTotalUsers = async () => {
     })
     .catch((error) => {
       console.error("Error fetching total users:", error);
-      return 0; // Return 0 if there's an error
+      return 0; 
     });
 };
 
+const forgetPassword = async (email) => {
+  const user = {
+    email
+  }
+  return axios
+    .post(
+      "http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/forgetpassword/",
+      user, )
+    .then((response) => {
+      if (response.data.status !== 200) {
+        throw new Error(response.data.message || "Unknown error");
+      }
+      return response.data;
+    })
+    .catch((error) => {
+      console.error("Error sending an email to reset account: ", error);
+      throw error;
+    });
+};
 
 export default {
   getUserData,
@@ -235,5 +254,6 @@ export default {
   markUserAsDeleted,
   verifyAccount,
   changePassword,
-  getTotalUsers
+  getTotalUsers,
+  forgetPassword
 };

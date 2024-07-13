@@ -277,6 +277,11 @@ Flight::route('POST /forgetpassword/', function () {
   Flight::json(Flight::userService()->forgetPassword($data));
 });
 
+Flight::route('POST /resetpassword/', function () {
+  $data = Flight::request()->data->getData();
+  Flight::json(Flight::userService()->resetPassword($data));
+});
+
 
 
 

@@ -285,9 +285,9 @@ class UserService extends BaseService
             //change the value of the JSON object that contains password
             $data["password"] = $hashedPassword;
 
-            
 
-            
+
+
 
             //until the user clicks on the confirmation link, it will be unverified
             $data["status"] = "unverified";
@@ -552,7 +552,7 @@ class UserService extends BaseService
             }
 
             $token = $all_headers['Authorization'];
-            
+
 
             $decoded = (array) JWT::decode($token, new Key(Config::JWT_SECRET(), 'HS256'));
 
@@ -605,38 +605,43 @@ class UserService extends BaseService
         }
     }
 
-    public function totalUsers(){
+    public function totalUsers()
+    {
         $rows = $this->dao->getTotalUsers();
-        return array("status"=>200, "message"=> $rows);
+        return array("status" => 200, "message" => $rows);
     }
 
     public function forgetPassword($data)
     {
 
+        if (empty($data['email'])) {
+            return array("status" => 500, "message" => "Email field is empty");
+        }
+
         //first check if email is in the correct form
         if (!($this->checkEmail($data["email"]))) {
-            return array("status" => 500, "message"=>"Invalid email format.");
+            return array("status" => 500, "message" => "Invalid email format.");
         }
 
         //now check if user with this email exists
         if (!($this->checkExistenceForEmail($data["email"]))) {
-            return array("status" => 500, "message"=>"Email does not exist.");
+            return array("status" => 500, "message" => "Email does not exist.");
         }
 
         $verificationResult = Flight::userDao()->checkVerificationStatus($data["email"]);
 
         if ($verificationResult["status"] !== 200) {
-            return array("status" => $verificationResult["status"], "message"=>$verificationResult["message"]);
+            return array("status" => $verificationResult["status"], "message" => $verificationResult["message"]);
         }
 
         $recipient = Flight::userDao()->get_user_by_email($data["email"]);
-        
+
         $recipientName = $recipient["message"][0]["first_name"] . " " . $recipient["message"][0]["last_name"];
 
 
         //ovo je da bude samo 2 pokusaja u 10 minuta
         if (Flight::userDao()->checkTimeForRequests($data["email"])) {
-            return array("status" => 500, "message"=>"You can only make two requests within 10 minutes. Please try again later.");
+            return array("status" => 500, "message" => "You can only make two requests within 10 minutes. Please try again later.");
         }
 
         //When, all requirements have been satisified, then create a JWT token with expiration
@@ -651,10 +656,10 @@ class UserService extends BaseService
 
         $expirationJWT = JWT::encode($userData, CONFIG::JWT_SECRET(), 'HS256');
 
-        if(!Flight::userDao()->saveExpirationTokenAndCount($expirationJWT, $data["email"])){
-            return array("status" =>500, "message" => "Saving of token to the database failed.");
-        } 
-        
+        if (!Flight::userDao()->saveExpirationTokenAndCount($expirationJWT, $data["email"])) {
+            return array("status" => 500, "message" => "Saving of token to the database failed.");
+        }
+
         if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
             $url = "https://";
         } else {
@@ -666,7 +671,7 @@ class UserService extends BaseService
         }
 
         // Define the verification path directly
-        $verificationPath = '/enterNewPassword';
+        $verificationPath = '/resetPassword';
 
         // Combine URL with verification path and token
         $verificationLink = $url . $verificationPath . '?activation_token=' . $expirationJWT;
@@ -676,9 +681,100 @@ class UserService extends BaseService
 
         $this->send_email(Config::EMAIL1(), $subject, $data['email'], $recipientName, $body);
 
-        return array("status" =>200, "message" => "Check your email");
-        
+        return array("status" => 200, "message" => "Check your email");
+
     }
+
+    public function resetPassword($data)
+    {
+        try {
+            //first, I need to check if the token is valid AKA can it be related to any of the tokens in database
+            $result = Flight::userDao()->checkTokenExistence($data["activation_token"]);
+
+            //if the token does not exist, stop action
+            if ($result["status"] !== 200) {
+                return array("status" => 500, "message" => $result["message"]);
+            }
+
+            //ako je vrijednost 1, znaci da je vec koristeno, ali ako je nula onda se moze nastaviti koristiti
+            $result2 = Flight::userDao()->checkTokenCount($data["activation_token"]);
+
+            if (isset($result2) && $result2["status"] !== 200) {
+                return array("status" => 500, "message" => $result2["message"]);
+            }
+
+            // if (isset($result3) && $result3["status"] !== 200) {
+            //     Flight::halt($result2["status"], $result2["message"]);
+            // }
+            $decoded = (array) JWT::decode($data["activation_token"], new Key(Config::JWT_SECRET(), 'HS256'));
+            
+            $userEmail = $decoded['email'];
+            
+            //$decoded["email"]
+
+            //trebalo bi po defaultu da tokena izbaci
+            //if token exists, check if it has expired
+            // $current_time = time();
+            // if($decoded["exp"] < $current_time){
+            //     Flight::halt(500, "Session has expired.");
+            // }
+
+            if (empty($data['new_password']) || empty($data['repeat_password'])) {
+                return array("status" => 500, "message" => "Fields cannot be empty.");
+            }
+
+            //check if the new and repeated password are the same
+            if (!hash_equals($data["new_password"], $data["repeat_password"])) {
+                return array("status" => 500, "message" => "New and repeated password are not the same.");
+            }
+
+            //now check if the new password  fits the criteria
+            if (mb_strlen($data["new_password"]) < 8) {
+                return array("status" => 500, "message" => "The password should be at least 8 characters long.");
+            }
+
+            $pawned = $this->checkPassword($data["new_password"]);
+
+            if ($pawned) {
+                return array("status" => 500, "message" => "Password is pawned. Use another password.");
+            } else {
+
+                $hashedPassword = $this->hashPassword($data["new_password"]);
+
+                $recipient = Flight::userDao()->get_user_by_email($userEmail);
+
+                $recipientName = $recipient["message"][0]["first_name"] . " " . $recipient["message"][0]["last_name"];
+
+
+                //this decodedUser[2] is the email so I am sending it as a verification to know whose user's password I am updating because emails are unique
+                $daoResult = Flight::userDao()->updatePassword($hashedPassword, $userEmail);
+                if ($daoResult["status"] == 500) {
+                    return array("status" => 500, "message" => $daoResult["message"]);
+                    //for successul password change, send an email
+                } else if ($daoResult["status"] == 200) {
+                    $subject = "Successul password change.";
+                    $body = "Your password has been successfully updated.";
+                    $this->send_email(Config::EMAIL1(), $subject, $userEmail, $recipientName, $body);
+
+                }
+                $result3 = Flight::userDao()->updateTokenCount($data["activation_token"]);
+                if ($result3["status"] !== 200) {
+                    return array("status" => 500, "message" => $result3["message"]);
+                }
+                return array("status" => 200, "message" => "Password successfully updated");
+
+            }
+
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            Flight::halt(500, json_encode([
+                'error' => true,
+                'message' => 'Token has expired.'
+            ]));
+        }
+    }
+
+
 
 
 

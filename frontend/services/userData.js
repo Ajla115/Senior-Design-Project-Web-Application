@@ -245,6 +245,30 @@ const forgetPassword = async (email) => {
     });
 };
 
+const resetPassword = async (new_password, repeat_password, activation_token) => {
+  const user = {
+    new_password,
+    repeat_password,
+    activation_token
+  }
+  console.log(user);
+  return axios
+    .post(
+      "http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/resetpassword/",
+      user, )
+    .then((response) => {
+      if (response.data.status !== 200) {
+        throw new Error(response.data.message || "Unknown error");
+      }
+      return response.data;
+    })
+    .catch((error) => {
+      console.error("Error sending an email to reset account: ", error);
+      throw error;
+    });
+};
+
+
 export default {
   getUserData,
   register,
@@ -255,5 +279,6 @@ export default {
   verifyAccount,
   changePassword,
   getTotalUsers,
-  forgetPassword
+  forgetPassword,
+  resetPassword
 };

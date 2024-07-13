@@ -27,7 +27,7 @@ class UserDao extends BaseDao
     }
   }
 
-  
+
   //  Ovu funkciju nisam jos mijenjala, ali msm da mi nece trebati
 /*function getUserByFirstNameAndLastName($customer_name, $customer_surname){
         return $this->query_unique("SELECT * FROM customers WHERE customer_name = :customer_name AND customer_surname = :customer_surname", ["customer_name" => $customer_name, "customer_surname" => $customer_surname]);
@@ -206,25 +206,25 @@ class UserDao extends BaseDao
       }
     } catch (PDOException $e) {
       error_log($e->getMessage());
-      return array("status" => 400, "message" => "Backend error");
+      return array("status" => 500, "message" => "Backend error");
     }
 
   }
 
   public function getTotalUsers()
-    {
-        try {
-            $stmt = $this->conn->prepare("SELECT COUNT(*) as total_users FROM users WHERE status = 'verified'");
-            $stmt->execute();
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-            return $row['total_users'];
-        } catch (PDOException $e) {
-            error_log($e->getMessage());
-            return null;
-        }
+  {
+    try {
+      $stmt = $this->conn->prepare("SELECT COUNT(*) as total_users FROM users WHERE status = 'verified'");
+      $stmt->execute();
+      $row = $stmt->fetch(PDO::FETCH_ASSOC);
+      return $row['total_users'];
+    } catch (PDOException $e) {
+      error_log($e->getMessage());
+      return null;
     }
+  }
 
-    public function retrieveIDBasedOnTheEmail($email_address)
+  public function retrieveIDBasedOnTheEmail($email_address)
   {
     try {
       $stmt = $this->conn->prepare("SELECT id FROM users WHERE email_address = :email_address AND status = 'verified'");
@@ -235,7 +235,7 @@ class UserDao extends BaseDao
     } catch (PDOException $e) {
       //return $e->getMessage();
       error_log($e->getMessage());
-      return ;
+      return;
     }
   }
 
@@ -266,58 +266,170 @@ class UserDao extends BaseDao
   }
 
   public function checkTimeForRequests($email)
-  {
+{
     try {
-      $stmt = $this->conn->prepare("SELECT timestamps FROM logs WHERE email_address = :email_address");
-      $stmt->bindParam(':email_address', $email);
-      $stmt->execute();
-      $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt = $this->conn->prepare("
+            SELECT forget_password_count, last_request
+            FROM users
+            WHERE email_address = :email
+        ");
+        $stmt->bindParam(':email', $email);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-      if ($result && $result['timestamps']) {
-        $timestamps = json_decode($result['timestamps'], true);
-        $currentTime = time();
-        $validTimestamps = [];
+        if ($result) {
+            $current_time = new DateTime();
+            if (!empty($result['last_request'])) {
+                $last_request_time = new DateTime($result['last_request']);
+                $interval = $current_time->diff($last_request_time);
 
-        foreach ($timestamps as $timestamp) {
-          $timeDifference = ($currentTime - $timestamp) / 60; //here, I calculate difference in minutes
-          if ($timeDifference <= 10) {
-            $validTimestamps[] = $timestamp;
-          }
+                if ($interval->i < 10) {
+                    if ($result['forget_password_count'] >= 2) {
+                        return true;
+                    } else {
+                        $stmt = $this->conn->prepare("
+                            UPDATE users
+                            SET forget_password_count = forget_password_count + 1, last_request = :current_time
+                            WHERE email_address = :email
+                        ");
+                        $current_time_string = $current_time->format('Y-m-d H:i:s');
+                        $stmt->bindParam(':current_time', $current_time_string);
+                        $stmt->bindParam(':email', $email);
+                        $stmt->execute();
+                    }
+                } else {
+                    $stmt = $this->conn->prepare("
+                        UPDATE users
+                        SET forget_password_count = 1, last_request = :current_time
+                        WHERE email_address = :email
+                    ");
+                    $current_time_string = $current_time->format('Y-m-d H:i:s');
+                    $stmt->bindParam(':current_time', $current_time_string);
+                    $stmt->bindParam(':email', $email);
+                    $stmt->execute();
+                }
+            } else {
+                $stmt = $this->conn->prepare("
+                    UPDATE users
+                    SET forget_password_count = 1, last_request = :current_time
+                    WHERE email_address = :email
+                ");
+                $current_time_string = $current_time->format('Y-m-d H:i:s');
+                $stmt->bindParam(':current_time', $current_time_string);
+                $stmt->bindParam(':email', $email);
+                $stmt->execute();
+            }
+        } else {
+            return array("status" => 500, "message" => "Email does not exist.");
         }
 
-        // Check if two requests have been made in the last 10 minutes
-        if (count($validTimestamps) >= 2) {
-          return true;
-        }
-      }
-
-      return false;
+        return false;
     } catch (PDOException $e) {
-      error_log($e->getMessage());
-      return false;
+        error_log($e->getMessage());
+        return array("status" => 500, "message" => "Backend error.");
     }
-  }
+}
 
-  public function saveExpirationTokenAndCount($expirationJWT, $email)
+  
+  public function saveExpirationTokenAndCount($token, $email)
+  {
+      try {
+          $current_time = (new DateTime())->format('Y-m-d H:i:s');
+          $stmt = $this->conn->prepare("
+              UPDATE users
+              SET activation_token = :token, forget_password_count = forget_password_count + 1, last_request = :current_time
+              WHERE email_address = :email
+          ");
+          $stmt->bindParam(':token', $token);
+          $stmt->bindParam(':current_time', $current_time);
+          $stmt->bindParam(':email', $email);
+          $stmt->execute();
+          return true;
+      } catch (PDOException $e) {
+          error_log($e->getMessage());
+          return false;
+      }
+  }
+  
+
+  public function checkTokenExistence($activationToken)
   {
     try {
       $stmt = $this->conn->prepare("
-          UPDATE users
-          SET activation_token = :activation_token, activation_token_count = 0
-          WHERE email_address = :email_address
-      ");
-      $stmt->bindParam(':activation_token', $expirationJWT);
-      $stmt->bindParam(':email_address', $email);
-      $stmt->execute();
-      return true;
+              SELECT COUNT(*) as count
+              FROM users
+              WHERE activation_token = :activation_token
+          ");
 
-      //return array("status" => 200, "message" => "Activation token saved successfully.");
+      $stmt->bindParam(':activation_token', $activationToken);
+
+      $stmt->execute();
+
+      $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+      if ($result['count'] > 0) {
+        return array("status" => 200, "message" => "Token exists.");
+      } else {
+        return array("status" => 404, "message" => "Token does not exist.");
+      }
     } catch (PDOException $e) {
       error_log($e->getMessage());
-      return false;
-      //return array("status" => 500, "message" => "An error occurred while saving the activation token.");
+      return array("status" => 400, "message" => "An error occurred while checking the token.");
     }
   }
+
+  public function checkTokenCount($activationToken)
+  {
+    try {
+      $stmt = $this->conn->prepare("
+              SELECT activation_token_count
+              FROM users
+              WHERE activation_token = :activation_token
+          ");
+
+      $stmt->bindParam(':activation_token', $activationToken);
+
+      $stmt->execute();
+
+      $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+      if ($result) {
+        if ($result['activation_token_count'] == 1) {
+          return array("status" => 500, "message" => "Token was already used.");
+        } else {
+          return array("status" => 200, "message" => "Token was not yet used.");
+        }
+      } else {
+        return array("status" => 500, "message" => "Token does not exist.");
+      }
+    } catch (PDOException $e) {
+      error_log($e->getMessage());
+      return array("status" => 500, "message" => "Backend error.");
+    }
+  }
+
+
+  public function updateTokenCount($activationToken)
+  {
+
+    try {
+      $stmt = $this->conn->prepare("UPDATE users SET activation_token_count = 1 WHERE activation_token = :activation_token");
+      $stmt->bindParam(':activation_token', $activationToken);
+      $stmt->execute();
+      if ($stmt->rowCount() > 0) {
+        return array("status" => 200, "message" => "Count has been successfully updated.");
+      } else {
+        return array("status" => 500, "message" => "Count update has failed.");
+      }
+    } catch (PDOException $e) {
+      error_log($e->getMessage());
+      return array("status" => 500, "message" => "Backend error.");
+    }
+
+  }
+
+
+
 
 
 }

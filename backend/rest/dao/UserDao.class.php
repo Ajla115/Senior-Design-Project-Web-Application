@@ -266,6 +266,46 @@ class UserDao extends BaseDao
   }
 
   public function checkTimeForRequests($email)
+  {
+      try {
+          $stmt = $this->conn->prepare("
+              SELECT forget_password_count, last_request
+              FROM users
+              WHERE email_address = :email
+          ");
+          $stmt->bindParam(':email', $email);
+          $stmt->execute();
+          $result = $stmt->fetch(PDO::FETCH_ASSOC);
+  
+          if ($result) {
+              $current_time = new DateTime();
+              if (!empty($result['last_request'])) {
+                  $last_request_time = new DateTime($result['last_request']);
+                  $interval = $current_time->diff($last_request_time);
+  
+                  if ($interval->i < 10) {
+                      if ($result['forget_password_count'] >= 2) {
+                          return true; // Restrict the third request
+                      } else {
+                          return false; // Allow the request
+                      }
+                  } else {
+                      return false; // Allow the request and reset the count in saveExpirationTokenAndCount
+                  }
+              } else {
+                  return false; // Allow the request
+              }
+          } else {
+              error_log("Email does not exist.");
+              return array("status" => 500, "message" => "Email does not exist.");
+          }
+      } catch (PDOException $e) {
+          error_log("PDOException: " . $e->getMessage());
+          return array("status" => 500, "message" => "Backend error.");
+      }
+  }
+
+  public function saveExpirationTokenAndCount($token, $email)
 {
     try {
         $stmt = $this->conn->prepare("
@@ -277,79 +317,57 @@ class UserDao extends BaseDao
         $stmt->execute();
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
+        $current_time = new DateTime();
+        $current_time_string = $current_time->format('Y-m-d H:i:s');
+        
         if ($result) {
-            $current_time = new DateTime();
             if (!empty($result['last_request'])) {
                 $last_request_time = new DateTime($result['last_request']);
                 $interval = $current_time->diff($last_request_time);
 
                 if ($interval->i < 10) {
-                    if ($result['forget_password_count'] >= 2) {
-                        return true;
-                    } else {
+                    // Within 10 minutes
+                    if ($result['forget_password_count'] < 2) {
                         $stmt = $this->conn->prepare("
                             UPDATE users
-                            SET forget_password_count = forget_password_count + 1, last_request = :current_time
+                            SET activation_token = :token, forget_password_count = forget_password_count + 1, last_request = :current_time
                             WHERE email_address = :email
                         ");
-                        $current_time_string = $current_time->format('Y-m-d H:i:s');
-                        $stmt->bindParam(':current_time', $current_time_string);
-                        $stmt->bindParam(':email', $email);
-                        $stmt->execute();
+                    } else {
+                        error_log("Should not reach here: third request should be blocked.");
+                        return false; // This path should not be hit due to the check in checkTimeForRequests
                     }
                 } else {
+                    // More than 10 minutes passed, reset the count
                     $stmt = $this->conn->prepare("
                         UPDATE users
-                        SET forget_password_count = 1, last_request = :current_time
+                        SET activation_token = :token, forget_password_count = 1, last_request = :current_time
                         WHERE email_address = :email
                     ");
-                    $current_time_string = $current_time->format('Y-m-d H:i:s');
-                    $stmt->bindParam(':current_time', $current_time_string);
-                    $stmt->bindParam(':email', $email);
-                    $stmt->execute();
                 }
             } else {
+                // No previous request, initialize the count
                 $stmt = $this->conn->prepare("
                     UPDATE users
-                    SET forget_password_count = 1, last_request = :current_time
+                    SET activation_token = :token, forget_password_count = 1, last_request = :current_time
                     WHERE email_address = :email
                 ");
-                $current_time_string = $current_time->format('Y-m-d H:i:s');
-                $stmt->bindParam(':current_time', $current_time_string);
-                $stmt->bindParam(':email', $email);
-                $stmt->execute();
             }
         } else {
             return array("status" => 500, "message" => "Email does not exist.");
         }
 
-        return false;
+        $stmt->bindParam(':token', $token);
+        $stmt->bindParam(':current_time', $current_time_string);
+        $stmt->bindParam(':email', $email);
+        $stmt->execute();
+        return true;
     } catch (PDOException $e) {
         error_log($e->getMessage());
-        return array("status" => 500, "message" => "Backend error.");
+        return false;
     }
 }
 
-  
-  public function saveExpirationTokenAndCount($token, $email)
-  {
-      try {
-          $current_time = (new DateTime())->format('Y-m-d H:i:s');
-          $stmt = $this->conn->prepare("
-              UPDATE users
-              SET activation_token = :token, forget_password_count = forget_password_count + 1, last_request = :current_time
-              WHERE email_address = :email
-          ");
-          $stmt->bindParam(':token', $token);
-          $stmt->bindParam(':current_time', $current_time);
-          $stmt->bindParam(':email', $email);
-          $stmt->execute();
-          return true;
-      } catch (PDOException $e) {
-          error_log($e->getMessage());
-          return false;
-      }
-  }
   
 
   public function checkTokenExistence($activationToken)

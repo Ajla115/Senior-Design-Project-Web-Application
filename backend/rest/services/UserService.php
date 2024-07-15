@@ -612,78 +612,59 @@ class UserService extends BaseService
     }
 
     public function forgetPassword($data)
-    {
-
-        if (empty($data['email'])) {
-            return array("status" => 500, "message" => "Email field is empty");
-        }
-
-        //first check if email is in the correct form
-        if (!($this->checkEmail($data["email"]))) {
-            return array("status" => 500, "message" => "Invalid email format.");
-        }
-
-        //now check if user with this email exists
-        if (!($this->checkExistenceForEmail($data["email"]))) {
-            return array("status" => 500, "message" => "Email does not exist.");
-        }
-
-        $verificationResult = Flight::userDao()->checkVerificationStatus($data["email"]);
-
-        if ($verificationResult["status"] !== 200) {
-            return array("status" => $verificationResult["status"], "message" => $verificationResult["message"]);
-        }
-
-        $recipient = Flight::userDao()->get_user_by_email($data["email"]);
-
-        $recipientName = $recipient["message"][0]["first_name"] . " " . $recipient["message"][0]["last_name"];
-
-
-        //ovo je da bude samo 2 pokusaja u 10 minuta
-        if (Flight::userDao()->checkTimeForRequests($data["email"])) {
-            return array("status" => 500, "message" => "You can only make two requests within 10 minutes. Please try again later.");
-        }
-
-        //When, all requirements have been satisified, then create a JWT token with expiration
-
-        $issue_time = time(); //issued at
-        $expiration_time = $issue_time + 300;  //300 seconds are 5 minutes
-        $userData = [
-            'email' => $data['email'],
-            'exp' => $expiration_time,
-            'iat' => $issue_time  //I also added issued at claim
-        ];
-
-        $expirationJWT = JWT::encode($userData, CONFIG::JWT_SECRET(), 'HS256');
-
-        if (!Flight::userDao()->saveExpirationTokenAndCount($expirationJWT, $data["email"])) {
-            return array("status" => 500, "message" => "Saving of token to the database failed.");
-        }
-
-        if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
-            $url = "https://";
-        } else {
-            $url = "http://";
-        }
-
-        if ($_SERVER['HTTP_HOST'] === '127.0.0.1') {
-            $url .= 'localhost:3000';
-        }
-
-        // Define the verification path directly
-        $verificationPath = '/resetPassword';
-
-        // Combine URL with verification path and token
-        $verificationLink = $url . $verificationPath . '?activation_token=' . $expirationJWT;
-
-        $subject = "Reset Your Password";
-        $body = "Please click the following link to reset your password:<br><a href='$verificationLink'>Reset Your Password By Clicking Here</a>";
-
-        $this->send_email(Config::EMAIL1(), $subject, $data['email'], $recipientName, $body);
-
-        return array("status" => 200, "message" => "Check your email");
-
+{
+    if (empty($data['email'])) {
+        return array("status" => 500, "message" => "Email field is empty");
     }
+
+    if (!($this->checkEmail($data["email"]))) {
+        return array("status" => 500, "message" => "Invalid email format.");
+    }
+
+    if (!($this->checkExistenceForEmail($data["email"]))) {
+        return array("status" => 500, "message" => "Email does not exist.");
+    }
+
+    $verificationResult = Flight::userDao()->checkVerificationStatus($data["email"]);
+
+    if ($verificationResult["status"] !== 200) {
+        return array("status" => $verificationResult["status"], "message" => $verificationResult["message"]);
+    }
+
+    $recipient = Flight::userDao()->get_user_by_email($data["email"]);
+    $recipientName = $recipient["message"][0]["first_name"] . " " . $recipient["message"][0]["last_name"];
+
+    if (Flight::userDao()->checkTimeForRequests($data["email"])) {
+        return array("status" => 500, "message" => "You can only make two requests within 10 minutes. Please try again later.");
+    }
+
+    $issue_time = time();
+    $expiration_time = $issue_time + 300;
+    $userData = [
+        'email' => $data['email'],
+        'exp' => $expiration_time,
+        'iat' => $issue_time
+    ];
+
+    $expirationJWT = JWT::encode($userData, CONFIG::JWT_SECRET(), 'HS256');
+
+    if (!Flight::userDao()->saveExpirationTokenAndCount($expirationJWT, $data["email"])) {
+        return array("status" => 500, "message" => "Saving of token to the database failed.");
+    }
+
+    $url = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https://" : "http://";
+    $url .= $_SERVER['HTTP_HOST'] === '127.0.0.1' ? 'localhost:3000' : $_SERVER['HTTP_HOST'];
+    $verificationPath = '/resetPassword';
+    $verificationLink = $url . $verificationPath . '?activation_token=' . $expirationJWT;
+
+    $subject = "Reset Your Password";
+    $body = "Please click the following link to reset your password:<br><a href='$verificationLink'>Reset Your Password By Clicking Here</a>";
+
+    $this->send_email(Config::EMAIL1(), $subject, $data['email'], $recipientName, $body);
+
+    return array("status" => 200, "message" => "Check your email");
+}
+
 
     public function resetPassword($data)
     {

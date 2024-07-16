@@ -11,23 +11,40 @@ class DmDao extends BaseDao
   }
 
 
-  public function deleteScheduled($id)
-  {
+  public function deleteScheduled($dmID, $userID)
+{
     try {
-      $stmt = $this->conn->prepare("DELETE FROM " . $this->table_name . " WHERE id = :id AND status = :status ");
-      $scheduled = StatusEnum::SCHEDULED;
-      $stmt->bindParam(':id', $id);
-      
-      $stmt->bindParam(':status', $scheduled);
-      $stmt->execute();
-      $count = $stmt->rowCount();
-      return $count;
-      //return array("status" => 200, "message" => $count); 
+        // Step 1: Verify that the userID matches the users_id for the given dmID
+        $checkStmt = $this->conn->prepare("SELECT users_id FROM " . $this->table_name . " WHERE id = :dmID AND status = :status");
+        $scheduled = StatusEnum::SCHEDULED;
+        $checkStmt->bindParam(':dmID', $dmID);
+        $checkStmt->bindParam(':status', $scheduled);
+        $checkStmt->execute();
+        $result = $checkStmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($result && $result['users_id'] == $userID) {
+            // Step 2: Update the status to 'deleted'
+            $deleteStmt = $this->conn->prepare("UPDATE " . $this->table_name . " SET status = :deletedStatus WHERE id = :dmID AND users_id = :userID");
+            $deletedStatus = 'Deleted';
+            $deleteStmt->bindParam(':deletedStatus', $deletedStatus);
+            $deleteStmt->bindParam(':dmID', $dmID);
+            $deleteStmt->bindParam(':userID', $userID);
+            $deleteStmt->execute();
+            $count = $deleteStmt->rowCount();
+
+            if ($count > 0) {
+                return array("status" => 200, "message" => "Scheduled DM successfully deleted.");
+            } else {
+                return array("status" => 500, "message" => "Failed to delete scheduled DM.");
+            }
+        } else {
+            return array("status" => 500, "message" => "Only the person who created the scheduled DM can delete it.");
+        }
     } catch (PDOException $e) {
-      error_log($e->getMessage());
-      //return array("status" => 500, "message" => "Internal Server Error");
+        error_log($e->getMessage());
+        return array("status" => 500, "message" => "Internal Server Error");
     }
-  }
+}
 
   public function checkStatus($id)
   {
@@ -94,11 +111,11 @@ class DmDao extends BaseDao
       $stmt->bindParam(':activity', $activeStatus);
       $stmt->execute();
       $row = $stmt->fetch(PDO::FETCH_ASSOC);
-      return array("status"=>200, "message"=> $row['id']);
+      return array("status" => 200, "message" => $row['id']);
     } catch (PDOException $e) {
       //return array("status" => 500, "message" => $e->getMessage());
       error_log($e->getMessage());
-      return array("status"=>500, "message"=> "Internal Server Error. Check logs.");
+      return array("status" => 500, "message" => "Internal Server Error. Check logs.");
     }
   }
 
@@ -129,103 +146,119 @@ class DmDao extends BaseDao
 
 
 
-public function updateExistingDM($data, $current_dm_id)
-{
+  public function updateExistingDM($data, $current_dm_id, $userID)
+  {
+      try {
+  
+          $checkStmt = $this->conn->prepare("SELECT users_id FROM " . $this->table_name . " WHERE id = :dmID");
+          $checkStmt->bindParam(':dmID', $current_dm_id);
+          $checkStmt->execute();
+          $result = $checkStmt->fetch(PDO::FETCH_ASSOC);
+  
+          if ($result && $result['users_id'] == $userID) {
+              // Step 2: Proceed with the update
+              $stmt = $this->conn->prepare("
+                  UPDATE " . $this->table_name . " 
+                  SET 
+                      message = :message,
+                      date_and_time = :date_and_time
+                  WHERE id = :id
+              ");
+              $stmt->bindParam(':message', $data['message']);
+              $stmt->bindParam(':date_and_time', $data['date_and_time']);
+              $stmt->bindParam(':id', $current_dm_id);
+  
+              $stmt->execute();
+              return array("status" => 200, "message" => "Update was successful.");
+          } else {
+              return array("status" => 500, "message" => "Only the person who created the message can edit it.");
+          }
+      } catch (PDOException $e) {
+          error_log($e->getMessage());
+          return array("status" => 500, "message" => "Internal Server Error");
+      }
+  }
+  
+
+  public function getAllDMS()
+  {
     try {
-        $stmt = $this->conn->prepare("
-            UPDATE " . $this->table_name . " 
-            SET 
-                message = :message,
-                date_and_time = :date_and_time
-            WHERE id = :id
-        ");
-        $stmt->bindParam(':message', $data['message']);
-        $stmt->bindParam(':date_and_time', $data['date_and_time']);
-        $stmt->bindParam(':id', $current_dm_id);
-
-        $stmt->execute();
-        return array("status" => 200, "message" => "Update was successful.");
+      $stmt = $this->conn->prepare("SELECT ud.id, ud.users_email, ia.username AS recipient_username, ud.message, ud.date_and_time, 	concat(u.first_name, ' ', u.last_name) AS user_name
+					FROM users_dms  ud
+					JOIN instagram_accounts ia ON ud.recipients_id = ia.id
+					JOIN users u ON u.id = ud.users_id
+					WHERE  ud.status = :status");
+      $scheduled = "Scheduled";
+      //$stmt->bindParam(':users_id', $userID);
+      $stmt->bindParam(':status', $scheduled);
+      $stmt->execute();
+      $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+      return array("status" => 200, "message" => $rows);
     } catch (PDOException $e) {
-        error_log($e->getMessage());
-        return array("status" => 500, "message" => "Internal Server Error");
+      error_log($e->getMessage());
+      return array("status" => 500, "message" => "Internal Server Error");
     }
-}
-
-
-  public function getAllDMS($userID)
-{
-  try {
-    $stmt = $this->conn->prepare("SELECT d.id, d.users_email, ia.username AS recipient_username, d.message, d.date_and_time 
-                                  FROM " . $this->table_name . " d
-                                  JOIN instagram_accounts ia ON d.recipients_id = ia.id
-                                  WHERE d.users_id = :users_id AND d.status = :status");
-    $scheduled = "Scheduled";
-    $stmt->bindParam(':users_id', $userID);
-    $stmt->bindParam(':status', $scheduled);
-    $stmt->execute();
-    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    return array("status" => 200, "message" => $rows);
-  } catch (PDOException $e) {
-    error_log($e->getMessage());
-    return array("status" => 500, "message" => "Internal Server Error");
   }
-}
 
-public function getSentDMS()
-{
-  try {
-    $stmt = $this->conn->prepare("SELECT d.id, d.users_email, ia.username AS recipient_username, d.message, d.date_and_time 
-                                  FROM " . $this->table_name . " d
-                                  JOIN instagram_accounts ia ON d.recipients_id = ia.id
-                                  WHERE  d.status = :status");
-    $sent= "Sent";
-    $stmt->bindParam(':status', $sent);
-    $stmt->execute();
-    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    return array("status" => 200, "message" => $rows);
-  } catch (PDOException $e) {
-    error_log($e->getMessage());
-    return array("status" => 500, "message" => "Internal Server Error");
-  }
-}
 
-public function getPasswordForUsername($email){
-  try {
-    $stmt = $this->conn->prepare("SELECT users_password FROM users_dms WHERE users_email = :email");
-    $stmt->bindParam(':email', $email);
-    $stmt->execute();
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    return $row['users_password'];
-  } catch (PDOException $e) {
-    error_log($e->getMessage());
-    return null;
-  }
-}
 
-public function getCountOfScheduledAndSentDMs()
-    {
-        try {
-            // Count scheduled DMs
-            $stmt = $this->conn->prepare("SELECT COUNT(*) as count_scheduled FROM users_dms WHERE status = 'Scheduled'");
-            $stmt->execute();
-            $rowScheduled = $stmt->fetch(PDO::FETCH_ASSOC);
-            $countScheduled = $rowScheduled['count_scheduled'];
-
-            // Count sent DMs
-            $stmt = $this->conn->prepare("SELECT COUNT(*) as count_sent FROM users_dms WHERE status = 'Sent'");
-            $stmt->execute();
-            $rowSent = $stmt->fetch(PDO::FETCH_ASSOC);
-            $countSent = $rowSent['count_sent'];
-
-            return [
-                'count_scheduled' => $countScheduled,
-                'count_sent' => $countSent
-            ];
-        } catch (PDOException $e) {
-            error_log($e->getMessage());
-            return null;
-        }
+  public function getSentDMS()
+  {
+    try {
+      $stmt = $this->conn->prepare("SELECT ud.id, ud.users_email, ia.username AS recipient_username, ud.message, ud.date_and_time, 	concat(u.first_name, ' ', u.last_name) AS user_name
+                                      FROM users_dms  ud
+                                      JOIN instagram_accounts ia ON ud.recipients_id = ia.id
+                                      JOIN users u ON u.id = ud.users_id
+                                      WHERE ud.status = :status");
+      $sent = "Sent";
+      $stmt->bindParam(':status', $sent);
+      $stmt->execute();
+      $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+      return array("status" => 200, "message" => $rows);
+    } catch (PDOException $e) {
+      error_log($e->getMessage());
+      return array("status" => 500, "message" => "Internal Server Error");
     }
+  }
+
+  public function getPasswordForUsername($email)
+  {
+    try {
+      $stmt = $this->conn->prepare("SELECT users_password FROM users_dms WHERE users_email = :email");
+      $stmt->bindParam(':email', $email);
+      $stmt->execute();
+      $row = $stmt->fetch(PDO::FETCH_ASSOC);
+      return $row['users_password'];
+    } catch (PDOException $e) {
+      error_log($e->getMessage());
+      return null;
+    }
+  }
+
+  public function getCountOfScheduledAndSentDMs()
+  {
+    try {
+      // Count scheduled DMs
+      $stmt = $this->conn->prepare("SELECT COUNT(*) as count_scheduled FROM users_dms WHERE status = 'Scheduled'");
+      $stmt->execute();
+      $rowScheduled = $stmt->fetch(PDO::FETCH_ASSOC);
+      $countScheduled = $rowScheduled['count_scheduled'];
+
+      // Count sent DMs
+      $stmt = $this->conn->prepare("SELECT COUNT(*) as count_sent FROM users_dms WHERE status = 'Sent'");
+      $stmt->execute();
+      $rowSent = $stmt->fetch(PDO::FETCH_ASSOC);
+      $countSent = $rowSent['count_sent'];
+
+      return [
+        'count_scheduled' => $countScheduled,
+        'count_sent' => $countSent
+      ];
+    } catch (PDOException $e) {
+      error_log($e->getMessage());
+      return null;
+    }
+  }
 
 
 

@@ -67,15 +67,19 @@ const EditDMModal = ({ isOpen, onClose, customerId, initialValues, refetch }) =>
         message: formValues.message,
         date_and_time: formValues.scheduledDateTime,
       };
-      await DMService.editDM(customerId, dmData);
+      const response = await DMService.editDM(customerId, dmData);
+      return response;
     },
-    onSuccess: () => {
-      alert("DM edited successfully");
+    onSuccess: (data) => {
       refetch();
-      onClose(); 
+      onClose();
+      alert(data.message);
     },
     onError: (error) => {
-      alert(error.message || "Error editing a DM");
+      onClose();
+      alert(`Error: ${error.response?.data?.message || error.message}`);
+      console.error("Error deleting Instagram account:", error);
+      
     },
   });
 

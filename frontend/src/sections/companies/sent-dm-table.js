@@ -54,6 +54,7 @@ const SentDMTable = ({ count, onPageChange, onRowsPerPageChange, page, rowsPerPa
                 <TableCell>Recipient</TableCell>
                 <TableCell>Message</TableCell>
                 <TableCell>Date & Time</TableCell>
+                <TableCell>User</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -67,6 +68,7 @@ const SentDMTable = ({ count, onPageChange, onRowsPerPageChange, page, rowsPerPa
                     <TableCell>{dm.recipient}</TableCell>
                     <TableCell>{dm.message}</TableCell>
                     <TableCell>{dm.dateAndTime}</TableCell>
+                    <TableCell>{dm.user_name}</TableCell>
                   </TableRow>
                 ))}
               </QueryClientProvider>

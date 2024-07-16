@@ -88,36 +88,74 @@ export const getSentDMS = async () => {
   }
 };
 
-
-
 const deleteDM = async (customerId) => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    console.error("No token found in local storage");
+    throw new Error("No token found in local storage");
+  }
+
   try {
     const response = await axios.delete(
-      `http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/dm/${customerId}`
+      `http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/dm/${customerId}`,
+      {
+        headers: {
+          Authorization: `${token}`,
+        },
+      }
     );
 
-    if (response.status !== 200) {
+    console.log(response);
+
+    if (response.data.status !== 200) {
       throw new Error(response.data.message || "Unknown error");
     }
     return response.data;
   } catch (error) {
-    console.error("Error deleting a DM: ", error);
-    throw error;
+    // Attach response data to the error
+    if (error.response) {
+      throw error.response;
+    } else {
+      console.error("Error deleting an account: ", error);
+      throw error;
+    }
   }
 };
 
 const editDM = async (customerId, dmData) => {
-  return axios
-    .put(
-      `http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/dm/${customerId}`,
-      dmData
-    )
-    .then((response) => {
-      return response.data;
-    })
-    .catch((error) => {
-      console.error("Error editing DM:", error);
-    });
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    console.error("No token found in local storage");
+    throw new Error("No token found in local storage");
+  }
+
+  try {
+    const response = await axios.put(
+      `http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/dm/${customerId}`, dmData, 
+      {
+        headers: {
+          Authorization: `${token}`,
+        },
+      }
+    );
+
+    //console.log(response);
+
+    if (response.data.status !== 200) {
+      throw new Error(response.data.message || "Unknown error");
+    }
+    return response.data;
+  } catch (error) {
+    // Attach response data to the error
+    if (error.response) {
+      throw error.response;
+    } else {
+      console.error("Error deleting an account: ", error);
+      throw error;
+    }
+  }
 };
 
 const getPercentageOfScheduledDMs = async () => {
@@ -140,5 +178,5 @@ export default {
   deleteDM,
   editDM,
   getPercentageOfScheduledDMs,
-  getSentDMS
+  getSentDMS,
 };

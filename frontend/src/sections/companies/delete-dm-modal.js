@@ -19,12 +19,13 @@ const DeleteDMModal = ({ isOpen, onClose, customerId, refetch }) => {
     onSuccess: (data) => {
       setIsDeleted(true);
       refetch();
-      alert(data.message);
       onClose();
+      alert(data.message);
     },
     onError: (error) => {
-      console.error("Error deleting DM:", error);
-      alert("Problem while deleting a DM. Please check your server for more information.");
+      onClose();
+      alert(`Error: ${error.response?.data?.message || error.message}`);
+      console.error("Error deleting Instagram account:", error);
     },
   });
 

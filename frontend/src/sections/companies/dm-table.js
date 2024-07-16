@@ -63,6 +63,7 @@ export const DMTable = (props) => {
                 <TableCell>Date & Time</TableCell>
                 <TableCell>Edit</TableCell>
                 <TableCell>Other</TableCell>
+                <TableCell>User</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -149,6 +150,9 @@ function DMAccountsData(props) {
           </TableCell>
           <TableCell>
             <DeleteOutlineIcon onClick={() => handleOpenDeleteModal(customer.id)} />
+          </TableCell>
+          <TableCell>
+          {customer.user_name}
           </TableCell>
         </TableRow>
       ))}

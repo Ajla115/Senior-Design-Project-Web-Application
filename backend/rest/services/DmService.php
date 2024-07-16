@@ -28,7 +28,7 @@ class DmService extends BaseService
         try {
             // Get all headers
             $all_headers = getallheaders();
-            
+
 
             // Check for Authorization token
             if (!isset($all_headers['Authorization'])) {
@@ -37,30 +37,30 @@ class DmService extends BaseService
 
             // Decode the JWT token to get user email
             $token = $all_headers['Authorization'];
-            
-            
-            $decoded = (array) JWT::decode($token, new Key(Config::JWT_SECRET(), 'HS256'));
-            
-            $userEmail = $decoded[0];
-            
 
-            
+
+            $decoded = (array) JWT::decode($token, new Key(Config::JWT_SECRET(), 'HS256'));
+
+            $userEmail = $decoded[0];
+
+
+
             // Get user ID based on email
             $whole_user = $this->retrieveIDbasedOnEmail($userEmail);
-            
-            
+
+
             if ($whole_user['status'] !== 200 || !isset($whole_user['message'])) {
                 throw new Exception('Error retrieving user based on the email');
             }
 
             $userID = $whole_user['message'][0]["id"];
-            
-            
+
+
             if (!is_numeric($userID)) {
                 throw new Exception('Invalid user ID');
             }
 
-            
+
 
             // Check if usernames is an array
             if (empty($data['usernames']) || !is_array($data['usernames'])) {
@@ -72,7 +72,7 @@ class DmService extends BaseService
             // Remove usernames from data
             unset($data['usernames']);
 
-            
+
 
             // Initialize result variable
             $result = null;
@@ -81,8 +81,8 @@ class DmService extends BaseService
             foreach ($usernames as $username) {
                 // Check existence in instagram_accounts table
                 $count = $this->dao->checkExistence($username);
-                
-                
+
+
                 if ($count['status'] !== 200) {
                     throw new Exception('Error checking username existence');
                 }
@@ -92,19 +92,19 @@ class DmService extends BaseService
                     $addedUser = Flight::instaAccService()->addIndividually($username);
                 }
 
-                
+
                 // Get recipient ID by username
                 $recipientIDResponse = $this->dao->getRecipientIDByUsername($username);
-                
-                
-                
-               
+
+
+
+
                 if ($recipientIDResponse['status'] !== 200 || !isset($recipientIDResponse['message'])) {
                     throw new Exception('Error retrieving recipient ID');
                 }
 
                 $existingRecipientsID = $recipientIDResponse['message'];
-                
+
 
 
                 if (!is_numeric($existingRecipientsID)) {
@@ -114,7 +114,7 @@ class DmService extends BaseService
                 // Create new DM entry
                 $status = "Scheduled";
                 $result = $this->dao->createNewDM($userID, $data, $existingRecipientsID, $status);
-                
+
                 if ($result['status'] != 200) {
                     throw new Exception('Error creating new DM');
                 }
@@ -155,22 +155,40 @@ class DmService extends BaseService
 
 
 
-    //this is to delete only one DM
-    function deleteScheduled($id)
+    function deleteScheduled($dmID)
     {
         try {
-            $count = $this->dao->deleteScheduled($id);
-            if ($count == 0) { //it checks if the status is scheduled or not, because if the status is not scheduled, it wont delete
+            $all_headers = getallheaders();
 
-                return array("status" => 500, "message" => "Deletion failed");
-            } else if ($count == 1) {
-                return array("status" => 200, "message" => "Deletion was success!");
+            if (!isset($all_headers['Authorization'])) {
+                throw new Exception('Authorization token not provided');
             }
+
+            $token = $all_headers['Authorization'];
+
+            $decoded = (array) JWT::decode($token, new Key(Config::JWT_SECRET(), 'HS256'));
+
+            $userEmail = $decoded[0];
+
+            if (empty($dmID)) {
+                return array("status" => 500, "message" => "The DM ID has not been found.");
+            }
+
+            $userID = Flight::userDao()->retrieveIDBasedOnTheEmail($userEmail);
+
+            if (!isset($userID)) {
+                return array("status" => 500, "message" => "The ID has not been extracted.");
+            }
+
+            return $this->dao->deleteScheduled($dmID, $userID);
+
         } catch (Exception $e) {
             error_log($e->getMessage());
             return array("status" => 500, "message" => "Internal Server Error");
         }
     }
+
+
 
 
     //Bulk Update
@@ -242,20 +260,38 @@ class DmService extends BaseService
         }
     }
 
-    function checkRecipientsAndUpdateDMIndividually($data, $id)
+    function checkRecipientsAndUpdateDMIndividually($data, $dmID)
     {
         try {
+            $all_headers = getallheaders();
 
-            if(empty($data['message'])){
+            if (!isset($all_headers['Authorization'])) {
+                throw new Exception('Authorization token not provided');
+            }
+
+            $token = $all_headers['Authorization'];
+
+            $decoded = (array) JWT::decode($token, new Key(Config::JWT_SECRET(), 'HS256'));
+
+            $userEmail = $decoded[0];
+
+            if (empty($dmID)) {
+                return array("status" => 500, "message" => "The DM ID has not been found.");
+            }
+
+            $userID = Flight::userDao()->retrieveIDBasedOnTheEmail($userEmail);
+
+            if (!isset($userID)) {
+                return array("status" => 500, "message" => "The ID has not been extracted.");
+            }
+
+            if (empty($data['message'])) {
                 return array("status" => 500, "message" => "Message field cannot be empty.");
             }
 
-            $result = $this->dao->updateExistingDM($data, $id);
-            if ($result["status"] != 200) {
-                throw new Exception('Failed to update DM');
-            }
-
-            return array("status" => 200, "message" => "Update was successful.");
+            $result = $this->dao->updateExistingDM($data, $dmID, $userID);
+            return $result;
+            
         } catch (Exception $e) {
             return array("status" => 500, "message" => "Update failed.");
         }
@@ -263,9 +299,9 @@ class DmService extends BaseService
 
 
 
-    private function getDMS($id)
+    private function getDMS()
     {
-        return Flight::dmDao()->getAllDMS($id);
+        return Flight::dmDao()->getAllDMS();
     }
 
     public function getAllDMS($data)
@@ -292,21 +328,22 @@ class DmService extends BaseService
                 throw new Exception('Invalid user ID');
             }
 
-            $response = $this->getDMS($userID);
+            $response = $this->getDMS();
 
 
             if ($response['status'] === 200) {
                 $dms = $response['message'];
                 $result = [];
 
-                
+
                 foreach ($dms as $dm) {
                     $result[] = [
                         "id" => $dm['id'],
                         "username" => $dm['users_email'],
                         "recipient" => $dm['recipient_username'],
                         "message" => $dm['message'],
-                        "dateAndTime" => $dm['date_and_time']
+                        "dateAndTime" => $dm['date_and_time'],
+                        "user_name" => $dm['user_name']
                     ];
                 }
 
@@ -320,7 +357,7 @@ class DmService extends BaseService
         }
     }
 
-    
+
     public function getSentDMS($data)
     {
         try {
@@ -352,14 +389,15 @@ class DmService extends BaseService
                 $dms = $response['message'];
                 $result = [];
 
-                
+
                 foreach ($dms as $dm) {
                     $result[] = [
                         "id" => $dm['id'],
                         "username" => $dm['users_email'],
                         "recipient" => $dm['recipient_username'],
                         "message" => $dm['message'],
-                        "dateAndTime" => $dm['date_and_time']
+                        "dateAndTime" => $dm['date_and_time'],
+                        "user_name" => $dm['user_name']
                     ];
                 }
 

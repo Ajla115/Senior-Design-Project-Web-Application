@@ -131,6 +131,7 @@ export const AuthProvider = (props) => {
         var firstName = payload.first_name;
         var lastName = payload.last_name;
         var phone = payload.phone
+        var is_admin = payload.is_admin
 
         const user = {
           //avatar: "/assets/avatars/avatar-anika-visser.png",
@@ -139,6 +140,7 @@ export const AuthProvider = (props) => {
           last_name: lastName,
           email: email,
           phone: phone,
+          is_admin: is_admin
         };
       }
 
@@ -188,30 +190,13 @@ export const AuthProvider = (props) => {
 
     let token = userResponse.token;
 
-    // axios
-    //   .post("http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/userdata/", {
-    //     headers: {
-    //       authorization: token,
-    //       Accept: "application/json",
-    //       "Content-Type": "application/json",
-    //     },
-    //   })
-    //   .then((response) => {
-    //     console.log(response.data);
-    //     return response.data;
-    //   })
-    //   .catch((error) => {
-    //     console.error("Error deleting resource:", error);
-    //   });
-
     const user = {
-      //id: "5e86809283e28b96d2d38537",
-      // avatar: "/assets/avatars/avatar-anika-visser.png",
       name: userResponse.first_name + " " + userResponse.last_name,
       first_name: userResponse.first_name,
       last_name: userResponse.last_name,
       email: userResponse.email,
-      phone: userResponse.phone
+      phone: userResponse.phone,
+      is_admin: userResponse.is_admin
     };
 
     dispatch({

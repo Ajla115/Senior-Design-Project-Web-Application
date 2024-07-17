@@ -251,7 +251,7 @@ const resetPassword = async (new_password, repeat_password, activation_token) =>
     repeat_password,
     activation_token
   }
-  console.log(user);
+
   return axios
     .post(
       "http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/resetpassword/",
@@ -268,7 +268,142 @@ const resetPassword = async (new_password, repeat_password, activation_token) =>
     });
 };
 
+const registerAdmin = async (first_name, last_name,  password, email, phone) => {
+  const user = {
+    first_name,
+    last_name,
+    password,
+    email,
+    phone
+  };
+  user.email_address = user.email;
+  delete user.email;
 
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    console.error("No token found in local storage");
+    return;
+  }
+
+  return axios
+    .post(
+      "http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/registeradmin/",
+      user, 
+      {
+        headers: {
+          Authorization: `${token}`,
+        },
+      }
+    )
+    .then((response) => {
+      if (response.data.status !== 200) {
+        throw new Error(response.data.message || "Unknown error");
+      }
+      return response.data;
+    })
+    .catch((error) => {
+      console.error("Error adding an admin: ", error);
+      throw error;
+    });
+};
+  
+const getAllAdmins = async () => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    console.error("No token found in local storage");
+    return;
+  }
+
+  return axios
+    .get(
+      "http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/alladmins/",
+
+      {
+        headers: {
+          Authorization: `${token}`,
+        },
+      }
+    )
+    .then((response) => {
+      if (response.data.status !== 200) {
+        throw new Error(response.data.message || "Unknown error");
+      }
+      return response.data;
+    })
+    .catch((error) => {
+      console.error("Error getting all admin accounts: ", error);
+      throw error;
+    });
+};
+  
+const deleteAdmin = async (id) => {
+  const user = {
+    id
+  }
+
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    console.error("No token found in local storage");
+    return;
+  }
+
+  return axios
+    .post(
+      "http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/deleteadmin/",
+      user, 
+      {
+        headers: {
+          Authorization: `${token}`,
+          "Content-Type": "application/json",
+
+        },
+      }
+    )
+    .then((response) => {
+      if (response.data.status !== 200) {
+        throw new Error(response.data.message || "Unknown error");
+      }
+      return response.data;
+    })
+    .catch((error) => {
+      console.error("Error deleting an admin: ", error);
+      throw error;
+    });
+};
+
+const getActiveUsers = async () => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    console.error("No token found in local storage");
+    return;
+  }
+
+  return axios
+    .get(
+      "http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/activeusers/",
+
+      {
+        headers: {
+          Authorization: `${token}`,
+        },
+      }
+    )
+    .then((response) => {
+      if (response.data.status !== 200) {
+        throw new Error(response.data.message || "Unknown error");
+      }
+      return response.data;
+    })
+    .catch((error) => {
+      console.error("Error getting all user accounts: ", error);
+      throw error;
+    });
+};
+  
 export default {
   getUserData,
   register,
@@ -280,5 +415,9 @@ export default {
   changePassword,
   getTotalUsers,
   forgetPassword,
-  resetPassword
+  resetPassword,
+  registerAdmin,
+  getAllAdmins,
+  deleteAdmin,
+  getActiveUsers
 };

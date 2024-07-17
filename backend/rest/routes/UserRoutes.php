@@ -282,7 +282,24 @@ Flight::route('POST /resetpassword/', function () {
   Flight::json(Flight::userService()->resetPassword($data));
 });
 
+Flight::route('POST /registeradmin/', function () {
+  $data = Flight::request()->data->getData();
+  Flight::json(Flight::userService()->registerAdmin($data));
+});
+
+Flight::route('GET /alladmins/', function () {
+  Flight::json(Flight::userService()->getAllAdmins());
+});
+
+
+Flight::route('POST /deleteadmin/', function () {
+  $data = Flight::request()->data->getData();
+  Flight::json(Flight::userService()->deleteAdmin($data));
+});
+
+Flight::route('GET /activeusers/', function () {
+  Flight::json(Flight::userService()->getActiveUsers());
+});
 
 
 
-?>

@@ -296,6 +296,7 @@ class UserService extends BaseService
             //Plus I added user_ and true parameter for more entropy to increase uniqnuess
             $register_token = uniqid('user_', true);
             $data["register_token"] = $register_token;
+            $data["is_admin"] = 0;
 
 
             //if the compiler has reached this point, it means that all requirements are satisified, and user can be added to the database
@@ -336,6 +337,193 @@ class UserService extends BaseService
         }
     }
 
+    public function registerAdmin($data)
+    {
+        try {
+
+            $all_headers = getallheaders();
+
+            if (!isset($all_headers['Authorization'])) {
+                throw new Exception('Authorization token not provided');
+            }
+
+            $token = $all_headers['Authorization'];
+
+            $decoded = (array) JWT::decode($token, new Key(Config::JWT_SECRET(), 'HS256'));
+
+            $is_admin_status = $decoded[4];
+
+            if ($is_admin_status != 1) {
+                return array("status" => 500, "message" => "Only admin can register a new admin.");
+            }
+
+            //extract individual attributes from JSON object
+            $first_name = $data['first_name'];
+            $last_name = $data['last_name'];
+            $phone = $data["phone"];
+            $email_address = $data['email_address'];
+            $password = $data['password'];
+
+            $full_name = $first_name . " " . $last_name;
+
+
+            if (empty($first_name) || empty($last_name) || empty($phone) || empty($email_address) || empty($password)) {
+                return array("status" => 500, "message" => "All fields have to be filled in.");
+            }
+
+            if (!ctype_alpha($first_name)) {
+                return array("status" => 500, "message" => "First name can only contain letters, no numbers, special characters and spaces.");
+            }
+
+            if (!ctype_alpha($last_name)) {
+                return array("status" => 500, "message" => "Last name can only contain letters, no numbers, special characters and spaces.");
+            }
+
+            $emailResult = $this->checkEmail($email_address);
+
+            if (!$emailResult) {
+                return array("status" => 500, "message" => "Invalid email format");
+            }
+
+            //If result of phone check is true, then continue doing further
+            $result = $this->checkPhoneNumber($phone);
+            if (!$result) {
+                //Flight::halt(500, "Phone number input invalid");
+                return array("status" => 500, "message" => "Phone number input invalid");
+
+            }
+
+            //now, when we have checked that the phone number is in correct Bosnian form
+            //I will check if the phone has that + sign in front of it.
+
+            if (!($this->checkPlusSign($phone))) {
+                //Flight::halt(500, "Please put a + sign in front of the phone number.");
+                return array("status" => 500, "message" => "Please put a + sign in front of the phone number.");
+            }
+
+            if (mb_strlen($password) < 8) {
+                return array("status" => 500, "message" => "The password should be at least 8 characters long");
+            }
+
+            $pawned = $this->checkPassword($password);
+            //if the result is true, notify the user that the password is pawned and abort the mission
+            //if the password is not pawned, hash it and store into database
+
+            if ($pawned) {
+                return (["status" => 500, "message" => "Password is pawned. Use another password."]);
+            } else {
+
+                $hashedPassword = $this->hashPassword($password);
+
+                //change the value of the JSON object that contains password
+                $data["password"] = $hashedPassword;
+
+                //until the user clicks on the confirmation link, it will be unverified
+                $data["status"] = "verified";
+                $data["is_admin"] = 1;
+
+
+                //if the compiler has reached this point, it means that all requirements are satisified, and user can be added to the database
+                // Add the user to the database via the parent class's add method
+                $result = parent::add($data);
+
+                if ($result['status'] === 500) {
+                    return array("status" => 500, "message" => $result["message"]);
+                } else if ($result['status'] === 200) {
+                    return array("status" => 200, "message" => $result["message"]);
+                }
+            }
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return array("status" => 500, "message" => "Internal Server Error.");
+        }
+    }
+
+    public function getAllAdmins()
+    {
+        try {
+            $all_headers = getallheaders();
+
+            if (!isset($all_headers['Authorization'])) {
+                throw new Exception('Authorization token not provided');
+            }
+
+            $token = $all_headers['Authorization'];
+
+            $decoded = (array) JWT::decode($token, new Key(Config::JWT_SECRET(), 'HS256'));
+
+            $is_admin_status = $decoded[4];
+            $current_admin_email = $decoded[0];
+
+            if ($is_admin_status != 1) {
+                return array("status" => 500, "message" => "Only admin can view other admins.");
+            }
+
+            return Flight::userDao()->getAllAdmins($current_admin_email);
+
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return array("status" => 500, "message" => "Internal Server Error.");
+        }
+    }
+
+    
+    public function getActiveUsers()
+    {
+        try {
+            $all_headers = getallheaders();
+
+            if (!isset($all_headers['Authorization'])) {
+                throw new Exception('Authorization token not provided');
+            }
+
+            $token = $all_headers['Authorization'];
+
+            $decoded = (array) JWT::decode($token, new Key(Config::JWT_SECRET(), 'HS256'));
+
+            $is_admin_status = $decoded[4];
+
+            if ($is_admin_status != 1) {
+                return array("status" => 500, "message" => "Only admin can view users.");
+            }
+
+            return Flight::userDao()->getActiveUsers();
+
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return array("status" => 500, "message" => "Internal Server Error.");
+        }
+    }
+
+    public function deleteAdmin($data)
+    {
+        try {
+            $all_headers = getallheaders();
+
+            if (!isset($all_headers['Authorization'])) {
+                throw new Exception('Authorization token not provided');
+            }
+
+            $token = $all_headers['Authorization'];
+
+            $decoded = (array) JWT::decode($token, new Key(Config::JWT_SECRET(), 'HS256'));
+
+            $is_admin_status = $decoded[4];
+
+            if ($is_admin_status != 1) {
+                return array("status" => 500, "message" => "Only admin can delete another admin.");
+            }
+
+            return Flight::userDao()->deleteAdmin($data['id']);
+
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return array("status" => 500, "message" => "Internal Server Error.");
+        }
+    }
+
+
+
     private function getStatusByEmail($email)
     {
         return $this->dao->getStatusByEmail($email);
@@ -375,16 +563,11 @@ class UserService extends BaseService
                 //encode only email address
                 $data = $this->dao->get_user_by_email($email_address);
 
-                $data2 = array($data["message"][0]["email_address"], $data["message"][0]["first_name"], $data["message"][0]["last_name"], $data["message"][0]["phone"]);
+                $data2 = array($data["message"][0]["email_address"], $data["message"][0]["first_name"], $data["message"][0]["last_name"], $data["message"][0]["phone"], $data["message"][0]["is_admin"]);
 
                 $jwt = JWT::encode($data2, Config::JWT_SECRET(), 'HS256');
 
-                // print_r($data["message"][0]["first_name"]);
-                //die();
-
-                return array("status" => 200, "token" => $jwt, "first_name" => $data["message"][0]["first_name"], "last_name" => $data["message"][0]["last_name"], "email" => $data["message"][0]["email_address"], "phone" => $data["message"][0]["phone"]);
-
-                //return array("status" => 200, "message" => "Correct password! Logging in...");
+                return array("status" => 200, "token" => $jwt, "first_name" => $data["message"][0]["first_name"], "last_name" => $data["message"][0]["last_name"], "email" => $data["message"][0]["email_address"], "phone" => $data["message"][0]["phone"], "is_admin" => $data["message"][0]["is_admin"]);
             } else {
                 return array("status" => 500, "message" => "Invalid password");
             }
@@ -612,58 +795,58 @@ class UserService extends BaseService
     }
 
     public function forgetPassword($data)
-{
-    if (empty($data['email'])) {
-        return array("status" => 500, "message" => "Email field is empty");
+    {
+        if (empty($data['email'])) {
+            return array("status" => 500, "message" => "Email field is empty");
+        }
+
+        if (!($this->checkEmail($data["email"]))) {
+            return array("status" => 500, "message" => "Invalid email format.");
+        }
+
+        if (!($this->checkExistenceForEmail($data["email"]))) {
+            return array("status" => 500, "message" => "Email does not exist.");
+        }
+
+        $verificationResult = Flight::userDao()->checkVerificationStatus($data["email"]);
+
+        if ($verificationResult["status"] !== 200) {
+            return array("status" => $verificationResult["status"], "message" => $verificationResult["message"]);
+        }
+
+        $recipient = Flight::userDao()->get_user_by_email($data["email"]);
+        $recipientName = $recipient["message"][0]["first_name"] . " " . $recipient["message"][0]["last_name"];
+
+        if (Flight::userDao()->checkTimeForRequests($data["email"])) {
+            return array("status" => 500, "message" => "You can only make two requests within 10 minutes. Please try again later.");
+        }
+
+        $issue_time = time();
+        $expiration_time = $issue_time + 300;
+        $userData = [
+            'email' => $data['email'],
+            'exp' => $expiration_time,
+            'iat' => $issue_time
+        ];
+
+        $expirationJWT = JWT::encode($userData, CONFIG::JWT_SECRET(), 'HS256');
+
+        if (!Flight::userDao()->saveExpirationTokenAndCount($expirationJWT, $data["email"])) {
+            return array("status" => 500, "message" => "Saving of token to the database failed.");
+        }
+
+        $url = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https://" : "http://";
+        $url .= $_SERVER['HTTP_HOST'] === '127.0.0.1' ? 'localhost:3000' : $_SERVER['HTTP_HOST'];
+        $verificationPath = '/resetPassword';
+        $verificationLink = $url . $verificationPath . '?activation_token=' . $expirationJWT;
+
+        $subject = "Reset Your Password";
+        $body = "Please click the following link to reset your password:<br><a href='$verificationLink'>Reset Your Password By Clicking Here</a>";
+
+        $this->send_email(Config::EMAIL1(), $subject, $data['email'], $recipientName, $body);
+
+        return array("status" => 200, "message" => "Check your email");
     }
-
-    if (!($this->checkEmail($data["email"]))) {
-        return array("status" => 500, "message" => "Invalid email format.");
-    }
-
-    if (!($this->checkExistenceForEmail($data["email"]))) {
-        return array("status" => 500, "message" => "Email does not exist.");
-    }
-
-    $verificationResult = Flight::userDao()->checkVerificationStatus($data["email"]);
-
-    if ($verificationResult["status"] !== 200) {
-        return array("status" => $verificationResult["status"], "message" => $verificationResult["message"]);
-    }
-
-    $recipient = Flight::userDao()->get_user_by_email($data["email"]);
-    $recipientName = $recipient["message"][0]["first_name"] . " " . $recipient["message"][0]["last_name"];
-
-    if (Flight::userDao()->checkTimeForRequests($data["email"])) {
-        return array("status" => 500, "message" => "You can only make two requests within 10 minutes. Please try again later.");
-    }
-
-    $issue_time = time();
-    $expiration_time = $issue_time + 300;
-    $userData = [
-        'email' => $data['email'],
-        'exp' => $expiration_time,
-        'iat' => $issue_time
-    ];
-
-    $expirationJWT = JWT::encode($userData, CONFIG::JWT_SECRET(), 'HS256');
-
-    if (!Flight::userDao()->saveExpirationTokenAndCount($expirationJWT, $data["email"])) {
-        return array("status" => 500, "message" => "Saving of token to the database failed.");
-    }
-
-    $url = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https://" : "http://";
-    $url .= $_SERVER['HTTP_HOST'] === '127.0.0.1' ? 'localhost:3000' : $_SERVER['HTTP_HOST'];
-    $verificationPath = '/resetPassword';
-    $verificationLink = $url . $verificationPath . '?activation_token=' . $expirationJWT;
-
-    $subject = "Reset Your Password";
-    $body = "Please click the following link to reset your password:<br><a href='$verificationLink'>Reset Your Password By Clicking Here</a>";
-
-    $this->send_email(Config::EMAIL1(), $subject, $data['email'], $recipientName, $body);
-
-    return array("status" => 200, "message" => "Check your email");
-}
 
 
     public function resetPassword($data)
@@ -688,9 +871,9 @@ class UserService extends BaseService
             //     Flight::halt($result2["status"], $result2["message"]);
             // }
             $decoded = (array) JWT::decode($data["activation_token"], new Key(Config::JWT_SECRET(), 'HS256'));
-            
+
             $userEmail = $decoded['email'];
-            
+
             //$decoded["email"]
 
             //trebalo bi po defaultu da tokena izbaci

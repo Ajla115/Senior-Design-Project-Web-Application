@@ -18,10 +18,15 @@ import { useAuthContext } from "src/contexts/auth-context";
 import { UserService } from "services";
 import { useRouter } from "next/router";
 import DeleteAccountModal from "./deactive-account-modal";
+import AddANewAdminModal from "./add-a-new-admin-modal";
+import AdminTableModal from "./admin-table-modal";
+import UserTableModal from "./user-table-modal";
 
 export const AccountProfileDetails = () => {
   const router = useRouter();
   const { user } = useAuthContext();
+
+  //console.log("User values are: ", user.is_admin);
 
   const [initialValues, setInitialValues] = useState(user);
   const [showPassword, setShowPassword] = useState({
@@ -32,9 +37,9 @@ export const AccountProfileDetails = () => {
   const [isChanged, setIsChanged] = useState(false);
   const [values, setValues] = useState(initialValues);
 
-  const [password, setPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [repeatPassword, setRepeatPassword] = useState('');
+  const [password, setPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [repeatPassword, setRepeatPassword] = useState("");
 
   useEffect(() => {
     setInitialValues(values); // keeps track of the initial values in the fields
@@ -68,13 +73,18 @@ export const AccountProfileDetails = () => {
 
   const handleSaveDetails = async (values) => {
     try {
-      await UserService.userDataUpdate(values.first_name, values.last_name, values.email, values.phone);
-      alert('User details updated successfully');
-      router.push('/auth/login');
+      await UserService.userDataUpdate(
+        values.first_name,
+        values.last_name,
+        values.email,
+        values.phone
+      );
+      alert("User details updated successfully");
+      router.push("/auth/login");
       setIsChanged(false);
     } catch (error) {
-      console.error('Error updating user details:', error);
-      alert(error.message || 'Failed to update user details'); // shows error message to the user
+      console.error("Error updating user details:", error);
+      alert(error.message || "Failed to update user details"); // shows error message to the user
     }
   };
 
@@ -96,9 +106,86 @@ export const AccountProfileDetails = () => {
     }));
   };
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAdminTableModalOpen, setIsAdminTableModalOpen] = useState(false);
+  const [isUserTableModalOpen, setIsUserTableModalOpen] = useState(false);
+  
+  const handleOpenAdminTableModal = () => {
+    setIsAdminTableModalOpen(true);
+  };
+
+  const handleCloseAdminTableModal = () => {
+    setIsAdminTableModalOpen(false);
+  };
+
+  const handleOpenUserTableModal = () => {
+    setIsUserTableModalOpen(true);
+  };
+
+  const handleCloseUserTableModal = () => {
+    setIsUserTableModalOpen(false);
+  };
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
   return (
     <form autoComplete="off" noValidate onSubmit={handleSubmit}>
       <Card>
+        <Box sx={{ mt: 5 }}>
+          {/* Admin Buttons */}
+          {user.is_admin === 1 && ( // Conditionally render admin buttons if user is admin
+            <Box mb={3} ml={5} mr={5}>
+              <Grid container spacing={2} justifyContent="space-around">
+                <Grid item xs={12} sm={4} md={3}>
+                  <Button fullWidth variant="contained" color="primary" onClick={handleOpenModal}>
+                    Add New Admin
+                  </Button>
+                </Grid>
+                <AddANewAdminModal
+                  isOpen={isModalOpen}
+                  onClose={handleCloseModal}
+                />
+                <Grid item xs={12} sm={4} md={3}>
+                <Button
+                    fullWidth
+                    variant="contained"
+                    color="secondary"
+                    onClick={handleOpenAdminTableModal}
+                  >
+                    Delete Admin
+                  </Button>
+                </Grid>
+                <AdminTableModal
+                  isOpen={isAdminTableModalOpen}
+                  onClose={handleCloseAdminTableModal}
+                  refetch={() => {}}
+                />
+                <Grid item xs={12} sm={4} md={3}>
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    color="warning"
+                    onClick={handleOpenUserTableModal}
+                  >
+                    Manage All Users
+                  </Button>
+                </Grid>
+                <UserTableModal
+                  isOpen={isUserTableModalOpen}
+                  onClose={handleCloseUserTableModal}
+                  refetch={() => {}}
+                />
+              </Grid>
+            </Box>
+          )}
+          {/* End of Admin Buttons */}
+        </Box>
         <CardHeader
           title="Profile"
           subheader="The information can be edited"
@@ -151,13 +238,17 @@ export const AccountProfileDetails = () => {
           </Box>
         </CardContent>
         <CardActions sx={{ justifyContent: "flex-end" }}>
-          <Button variant="contained" disabled={!isChanged} onClick={() => handleSaveDetails(values)}>
+          <Button
+            variant="contained"
+            disabled={!isChanged}
+            onClick={() => handleSaveDetails(values)}
+          >
             Save details
           </Button>
         </CardActions>
       </Card>
       <Box my={3}>
-        <Divider sx={{ borderBottomWidth: 2, borderColor: 'white' }} />
+        <Divider sx={{ borderBottomWidth: 2, borderColor: "white" }} />
       </Box>
       <Card>
         <CardHeader subheader="Change Your Password here" title="Change Password" />
@@ -178,10 +269,11 @@ export const AccountProfileDetails = () => {
                       <InputAdornment position="end">
                         <IconButton
                           color="primary"
-                          onClick={() => togglePasswordVisibility('current')} // Toggle visibility for current password
+                          onClick={() => togglePasswordVisibility("current")} // Toggle visibility for current password
                           edge="end"
                         >
-                          {showPassword.current ? <VisibilityOff /> : <Visibility />} {/* Use showPassword.current */}
+                          {showPassword.current ? <VisibilityOff /> : <Visibility />}{" "}
+                          {/* Use showPassword.current */}
                         </IconButton>
                       </InputAdornment>
                     ),
@@ -202,10 +294,11 @@ export const AccountProfileDetails = () => {
                       <InputAdornment position="end">
                         <IconButton
                           color="primary"
-                          onClick={() => togglePasswordVisibility('new')} // Toggle visibility for new password
+                          onClick={() => togglePasswordVisibility("new")} // Toggle visibility for new password
                           edge="end"
                         >
-                          {showPassword.new ? <VisibilityOff /> : <Visibility />} {/* Use showPassword.new */}
+                          {showPassword.new ? <VisibilityOff /> : <Visibility />}{" "}
+                          {/* Use showPassword.new */}
                         </IconButton>
                       </InputAdornment>
                     ),
@@ -226,10 +319,11 @@ export const AccountProfileDetails = () => {
                       <InputAdornment position="end">
                         <IconButton
                           color="primary"
-                          onClick={() => togglePasswordVisibility('repeat')} // Toggle visibility for repeat password
+                          onClick={() => togglePasswordVisibility("repeat")} // Toggle visibility for repeat password
                           edge="end"
                         >
-                          {showPassword.repeat ? <VisibilityOff /> : <Visibility />} {/* Use showPassword.repeat */}
+                          {showPassword.repeat ? <VisibilityOff /> : <Visibility />}{" "}
+                          {/* Use showPassword.repeat */}
                         </IconButton>
                       </InputAdornment>
                     ),
@@ -239,7 +333,7 @@ export const AccountProfileDetails = () => {
             </Grid>
           </Box>
         </CardContent>
-        <Divider sx={{ borderBottomWidth: 2, borderColor: 'grey' }} />
+        <Divider sx={{ borderBottomWidth: 2, borderColor: "grey" }} />
         <CardActions sx={{ justifyContent: "flex-end" }}>
           <Button variant="contained" onClick={handleChangePassword}>
             Change Password

@@ -11,40 +11,45 @@ class DmDao extends BaseDao
   }
 
 
-  public function deleteScheduled($dmID, $userID)
-{
+  public function deleteScheduled($dmID, $userID, $is_admin_status)
+  {
     try {
-        // Step 1: Verify that the userID matches the users_id for the given dmID
-        $checkStmt = $this->conn->prepare("SELECT users_id FROM " . $this->table_name . " WHERE id = :dmID AND status = :status");
-        $scheduled = StatusEnum::SCHEDULED;
-        $checkStmt->bindParam(':dmID', $dmID);
-        $checkStmt->bindParam(':status', $scheduled);
-        $checkStmt->execute();
-        $result = $checkStmt->fetch(PDO::FETCH_ASSOC);
+      // Step 1: Verify that the userID matches the users_id for the given dmID
+      $checkStmt = $this->conn->prepare("SELECT users_id FROM " . $this->table_name . " WHERE id = :dmID AND status = :status");
+      $scheduled = StatusEnum::SCHEDULED;
+      $checkStmt->bindParam(':dmID', $dmID);
+      $checkStmt->bindParam(':status', $scheduled);
+      $checkStmt->execute();
+      $result = $checkStmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($result && $result['users_id'] == $userID) {
-            // Step 2: Update the status to 'deleted'
-            $deleteStmt = $this->conn->prepare("UPDATE " . $this->table_name . " SET status = :deletedStatus WHERE id = :dmID AND users_id = :userID");
-            $deletedStatus = 'Deleted';
-            $deleteStmt->bindParam(':deletedStatus', $deletedStatus);
-            $deleteStmt->bindParam(':dmID', $dmID);
-            $deleteStmt->bindParam(':userID', $userID);
-            $deleteStmt->execute();
-            $count = $deleteStmt->rowCount();
+      if ($result) {
+        // Step 2: Check if the user is either the creator or an admin
+        if ($result['users_id'] == $userID || $is_admin_status == 1) {
+          // Update the status to 'deleted'
+          $deleteStmt = $this->conn->prepare("UPDATE " . $this->table_name . " SET status = :deletedStatus WHERE id = :dmID");
+          $deletedStatus = 'Deleted';
+          $deleteStmt->bindParam(':deletedStatus', $deletedStatus);
+          $deleteStmt->bindParam(':dmID', $dmID);
+          $deleteStmt->execute();
+          $count = $deleteStmt->rowCount();
 
-            if ($count > 0) {
-                return array("status" => 200, "message" => "Scheduled DM successfully deleted.");
-            } else {
-                return array("status" => 500, "message" => "Failed to delete scheduled DM.");
-            }
+          if ($count > 0) {
+            return array("status" => 200, "message" => "Scheduled DM successfully deleted.");
+          } else {
+            return array("status" => 500, "message" => "Failed to delete scheduled DM.");
+          }
         } else {
-            return array("status" => 500, "message" => "Only the person who created the scheduled DM can delete it.");
+          return array("status" => 403, "message" => "Only the person who created the scheduled DM or an admin can delete it.");
         }
+      } else {
+        return array("status" => 404, "message" => "Scheduled DM not found.");
+      }
     } catch (PDOException $e) {
-        error_log($e->getMessage());
-        return array("status" => 500, "message" => "Internal Server Error");
+      error_log($e->getMessage());
+      return array("status" => 500, "message" => "Internal Server Error");
     }
-}
+  }
+
 
   public function checkStatus($id)
   {
@@ -146,39 +151,41 @@ class DmDao extends BaseDao
 
 
 
-  public function updateExistingDM($data, $current_dm_id, $userID)
+  public function updateExistingDM($data, $current_dm_id, $userID, $is_admin_status)
   {
-      try {
-  
-          $checkStmt = $this->conn->prepare("SELECT users_id FROM " . $this->table_name . " WHERE id = :dmID");
-          $checkStmt->bindParam(':dmID', $current_dm_id);
-          $checkStmt->execute();
-          $result = $checkStmt->fetch(PDO::FETCH_ASSOC);
-  
-          if ($result && $result['users_id'] == $userID) {
-              // Step 2: Proceed with the update
-              $stmt = $this->conn->prepare("
+    try {
+
+      $checkStmt = $this->conn->prepare("SELECT users_id FROM " . $this->table_name . " WHERE id = :dmID");
+      $checkStmt->bindParam(':dmID', $current_dm_id);
+      $checkStmt->execute();
+      $result = $checkStmt->fetch(PDO::FETCH_ASSOC);
+
+      if ($result) {
+        if ($result['users_id'] == $userID || $is_admin_status == 1) {
+          // Step 2: Proceed with the update
+          $stmt = $this->conn->prepare("
                   UPDATE " . $this->table_name . " 
                   SET 
                       message = :message,
                       date_and_time = :date_and_time
                   WHERE id = :id
               ");
-              $stmt->bindParam(':message', $data['message']);
-              $stmt->bindParam(':date_and_time', $data['date_and_time']);
-              $stmt->bindParam(':id', $current_dm_id);
-  
-              $stmt->execute();
-              return array("status" => 200, "message" => "Update was successful.");
-          } else {
-              return array("status" => 500, "message" => "Only the person who created the message can edit it.");
-          }
-      } catch (PDOException $e) {
-          error_log($e->getMessage());
-          return array("status" => 500, "message" => "Internal Server Error");
+          $stmt->bindParam(':message', $data['message']);
+          $stmt->bindParam(':date_and_time', $data['date_and_time']);
+          $stmt->bindParam(':id', $current_dm_id);
+
+          $stmt->execute();
+          return array("status" => 200, "message" => "Update was successful.");
+        } else {
+          return array("status" => 500, "message" => "Only the person who created the message or the admin can edit it.");
+        }
       }
+    } catch (PDOException $e) {
+      error_log($e->getMessage());
+      return array("status" => 500, "message" => "Internal Server Error");
+    }
   }
-  
+
 
   public function getAllDMS()
   {

@@ -71,6 +71,7 @@ class InstaAccService extends BaseService
             $decoded = (array) JWT::decode($token, new Key(Config::JWT_SECRET(), 'HS256'));
 
             $userEmail = $decoded[0];
+            $is_admin = $decoded[4];
 
 
             if (empty($accountID)) {
@@ -85,7 +86,7 @@ class InstaAccService extends BaseService
             }
 
 
-            $result = $this->dao->customDelete($accountID, $userID);
+            $result = $this->dao->customDelete($accountID, $userID, $is_admin);
 
             return array("status"=>$result["status"], "message"=>$result["message"]);
 

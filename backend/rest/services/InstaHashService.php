@@ -27,6 +27,7 @@ class InstaHashService extends BaseService
             $decoded = (array) JWT::decode($token, new Key(Config::JWT_SECRET(), 'HS256'));
 
             $userEmail = $decoded[0];
+            $is_admin_status = $decoded[4];
 
 
             if (empty($hashtagID)) {
@@ -41,7 +42,7 @@ class InstaHashService extends BaseService
             }
 
 
-            $result = $this->dao->customDelete($hashtagID, $userID);
+            $result = $this->dao->customDelete($hashtagID, $userID, $is_admin_status);
 
             return array("status" => $result["status"], "message" => $result["message"]);
 

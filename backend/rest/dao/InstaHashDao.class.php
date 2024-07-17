@@ -15,7 +15,7 @@ class InstaHashDao extends BaseDao
 
 
 
-  function customDelete($hashtagID, $userID)
+  function customDelete($hashtagID, $userID, $is_admin_status)
   {
     try {
       $stmt = $this->conn->prepare("SELECT users_id FROM users_hashtags WHERE hashtags_id = :hashtags_id");
@@ -24,11 +24,11 @@ class InstaHashDao extends BaseDao
       $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
       if (!$result) {
-        return array("status" => 404, "message" => "User and hashtag connection is not found");
+        return array("status" => 500, "message" => "User and hashtag connection is not found");
       }
 
-      if ($result['users_id'] != $userID) {
-        return array("status" => 403, "message" => "Only person who added the hashtag can delete it.");
+      if ($result['users_id'] != $userID  && $is_admin_status != 1) {
+        return array("status" => 500, "message" => "Only person who added the hashtag or the admin can delete it.");
       }
 
       $stmt = $this->conn->prepare("UPDATE users_hashtags SET status = 'deleted' WHERE hashtags_id = :hashtags_id AND users_id = :users_id");

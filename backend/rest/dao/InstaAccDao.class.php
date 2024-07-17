@@ -55,40 +55,38 @@ class InstaAccDao extends BaseDao
   }
 
 
-  function customDelete($accountID, $userID)
-  {
-    try {
-      $stmt = $this->conn->prepare("SELECT users_id FROM users_accounts WHERE accounts_id = :accounts_id");
-      $stmt->bindParam(':accounts_id', $accountID);
-      $stmt->execute();
-      $result = $stmt->fetch(PDO::FETCH_ASSOC);
+  function customDelete($accountID, $userID, $is_admin_status)
+{
+  try {
+    $stmt = $this->conn->prepare("SELECT users_id FROM users_accounts WHERE accounts_id = :accounts_id");
+    $stmt->bindParam(':accounts_id', $accountID);
+    $stmt->execute();
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-      if (!$result) {
-        return array("status" => 404, "message" => "User and account connection is not found");
-      }
-
-      if ($result['users_id'] != $userID) {
-        return array("status" => 403, "message" => "Only person who added the account can delete it.");
-      }
-
-
-      $stmt = $this->conn->prepare("UPDATE users_accounts SET status = 'deleted' WHERE accounts_id = :accounts_id AND users_id = :users_id");
-      $stmt->bindParam(':accounts_id', $accountID);
-      $stmt->bindParam(':users_id', $userID);
-      $stmt->execute();
-
-
-      $stmt = $this->conn->prepare("UPDATE " . $this->table_name . " SET activity = 'deleted' WHERE id = :id");
-      $stmt->bindParam(':id', $accountID);
-      $stmt->execute();
-
-      return array("status" => 200, "message" => "Account deleted successfully");
-
-    } catch (PDOException $e) {
-      error_log($e->getMessage());
-      return array("status" => 500, "message" => "Deletion failed");
+    if (!$result) {
+      return array("status" => 500, "message" => "User and account connection is not found");
     }
+
+    if ($result['users_id'] != $userID && $is_admin_status != 1) {
+      return array("status" => 500, "message" => "Only the person who added the account or an admin can delete it.");
+    }
+
+    $stmt = $this->conn->prepare("UPDATE users_accounts SET status = 'deleted' WHERE accounts_id = :accounts_id AND users_id = :users_id");
+    $stmt->bindParam(':accounts_id', $accountID);
+    $stmt->bindParam(':users_id', $result['users_id']); // Using the result from the first query to ensure consistency
+    $stmt->execute();
+
+    $stmt = $this->conn->prepare("UPDATE " . $this->table_name . " SET activity = 'deleted' WHERE id = :id");
+    $stmt->bindParam(':id', $accountID);
+    $stmt->execute();
+
+    return array("status" => 200, "message" => "Account deleted successfully");
+
+  } catch (PDOException $e) {
+    error_log($e->getMessage());
+    return array("status" => 500, "message" => "Deletion failed");
   }
+}
 
 
   function getActiveAccounts()

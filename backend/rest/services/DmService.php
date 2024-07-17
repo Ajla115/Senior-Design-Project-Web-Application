@@ -169,6 +169,7 @@ class DmService extends BaseService
             $decoded = (array) JWT::decode($token, new Key(Config::JWT_SECRET(), 'HS256'));
 
             $userEmail = $decoded[0];
+            $is_admin_status = $decoded[4];
 
             if (empty($dmID)) {
                 return array("status" => 500, "message" => "The DM ID has not been found.");
@@ -180,7 +181,7 @@ class DmService extends BaseService
                 return array("status" => 500, "message" => "The ID has not been extracted.");
             }
 
-            return $this->dao->deleteScheduled($dmID, $userID);
+            return $this->dao->deleteScheduled($dmID, $userID, $is_admin_status);
 
         } catch (Exception $e) {
             error_log($e->getMessage());
@@ -274,6 +275,7 @@ class DmService extends BaseService
             $decoded = (array) JWT::decode($token, new Key(Config::JWT_SECRET(), 'HS256'));
 
             $userEmail = $decoded[0];
+            $is_admin_status = $decoded[4];
 
             if (empty($dmID)) {
                 return array("status" => 500, "message" => "The DM ID has not been found.");
@@ -289,7 +291,7 @@ class DmService extends BaseService
                 return array("status" => 500, "message" => "Message field cannot be empty.");
             }
 
-            $result = $this->dao->updateExistingDM($data, $dmID, $userID);
+            $result = $this->dao->updateExistingDM($data, $dmID, $userID, $is_admin_status);
             return $result;
             
         } catch (Exception $e) {

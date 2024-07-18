@@ -507,6 +507,83 @@ class UserDao extends BaseDao
 
   }
 
+  public function createEmailRecordForCustomerService($senderEmail, $title, $description)
+  {
+    try {
+
+      $users_id = $this->retrieveIDBasedOnTheEmail($senderEmail);
+      $stmt = $this->conn->prepare("INSERT INTO users_emails (users_id, title, description, status) VALUES (:users_id, :title, :description, :status);");
+      $status = 'Sent';
+      $stmt->bindParam(':users_id', $users_id);
+      $stmt->bindParam(':title', $title);
+      $stmt->bindParam(':description', $description);
+      $stmt->bindParam(':status', $status);
+      $stmt->execute();
+      return array("status" => 200, "message" => "Record successfully created.");
+    } catch (PDOException $e) {
+      error_log($e->getMessage());
+      return array("status" => 500, "message" => "Backend error.");
+    }
+
+  }
+
+  public function solveCustomerServiceIssue($id)
+  {
+    try {
+      $stmt = $this->conn->prepare("UPDATE users_emails SET status = 'Resolved' WHERE id = :id");
+      $stmt->bindParam(':id', $id);
+      if ($stmt->execute()) {
+        if ($stmt->rowCount() > 0) {
+          return array("status" => 200, "message" => "User issue has been resolved.");
+        } else {
+          return array("status" => 500, "message" => "No rows affected. Please check if the user exists.");
+        }
+      } else {
+        return array("status" => 500, "message" => "Failed to execute update statement.");
+      }
+    } catch (PDOException $e) {
+      error_log($e->getMessage());
+      return array("status" => 500, "message" => "Internal Server Error: " . $e->getMessage());
+    }
+  }
+
+  public function retrieveUserBasedOnID($id)
+  {
+    try {
+      $stmt = $this->conn->prepare("SELECT * FROM users WHERE id = :id");
+      $stmt->bindParam(':id', $id);
+      $stmt->execute();
+      return array("status" => 200, "message" => $stmt->fetchAll(PDO::FETCH_ASSOC));
+    } catch (PDOException $e) {
+      error_log($e->getMessage());
+      return array("status" => 500, "message" => "Internal Server Error");
+    }
+  }
+
+  public function getEmailForCustomerServiceResponse($id){
+    try{
+      $stmt = $this->conn->prepare("SELECT users_id FROM users_emails WHERE id = :id");
+      $stmt->bindParam(':id', $id);
+      $stmt->execute();
+
+      $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+      $stmt2 = $this->conn->prepare("SELECT * FROM users WHERE id = :id");
+      $stmt2->bindParam(':id', $result['users_id']);
+      $stmt2->execute();
+
+      return array("status" => 200, "message" => $stmt2->fetchAll(PDO::FETCH_ASSOC));
+
+    } catch (PDOException $e) {
+      error_log($e->getMessage());
+      return array("status" => 500, "message" => "Internal Server Error");
+    }
+  
+    }
+  
+
+
+
 
 
 

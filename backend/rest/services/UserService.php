@@ -655,9 +655,15 @@ class UserService extends BaseService
                 return array("status" => 500, "message" => "Fields cannot be empty.");
             }
 
-            $result = $this->send_email($senderEmail, $title, $recipientEmail, "Customer Service Center", $description);
+            $result = Flight::userDao()->createEmailRecordForCustomerService($senderEmail, $title, $description);
+            
+            if($result['status'] === 500){
+                return array("status" => 500, "message" => $result['message']);
+            }
 
-            if ($result) {
+            $result1 = $this->send_email($senderEmail, $title, $recipientEmail, "Customer Service Center", $description);
+
+            if ($result1) {
                 return array("status" => 200, "message" => "Success! Email is sent.");
             } else {
                 return array("status" => 500, "message" => "Error! Email was not sent.");
@@ -666,9 +672,50 @@ class UserService extends BaseService
             error_log($e->getMessage());
             return array("status" => 500, "message" => $e->getMessage());
         }
+    }
 
+    public function solveCustomerServiceIssue($data){
+        try {
 
+            $all_headers = getallheaders();
 
+            if (!isset($all_headers['Authorization'])) {
+                throw new Exception('Authorization token not provided');
+            }
+
+            $token = $all_headers['Authorization'];
+
+            $decoded = (array) JWT::decode($token, new Key(Config::JWT_SECRET(), 'HS256'));
+
+            $is_admin_status = $decoded[4];
+
+            if ($is_admin_status != 1) {
+                return array("status" => 500, "message" => "Only admin can solve customer service issues.");
+            }
+
+            $result = Flight::userDao()->solveCustomerServiceIssue($data['id']);
+           
+            if($result['status'] !== 200){ 
+                return array("status" => 500, "message" => "Failed to resolve customer issue.");
+            }
+
+            $user = Flight::userDao()->getEmailForCustomerServiceResponse($data['id']);
+            
+            $userFullName = $user['message'][0]['first_name'] . " " . $user['message'][0]['last_name'];
+            $userEmail = $user['message'][0]['email_address']; 
+            
+            $subject = "Customer Service Reply";
+            $body = "Your problem has been resolved. Please check and let us know if there are any other issues.";
+
+            if($this->send_email(Config::EMAIL1(), $subject, $userEmail, $userFullName, $body)){
+                return array("status" => 200, "message" => "Response email has been sent.");
+            } else {
+                return array("status" => 500, "message" => "Response email has not been sent.");
+            }
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return array("status" => 500, "message" => "Internal Server Error.");
+        }
     }
 
 

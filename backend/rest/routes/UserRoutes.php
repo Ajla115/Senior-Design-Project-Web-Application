@@ -301,5 +301,10 @@ Flight::route('GET /activeusers/', function () {
   Flight::json(Flight::userService()->getActiveUsers());
 });
 
+Flight::route('POST /solvecustomerserviceissue/', function () {
+  $data = Flight::request()->data->getData();
+  Flight::json(Flight::userService()->solveCustomerServiceIssue($data));
+});
+
 
 

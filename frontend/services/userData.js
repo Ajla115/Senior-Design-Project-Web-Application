@@ -403,6 +403,72 @@ const getActiveUsers = async () => {
       throw error;
     });
 };
+
+const getCustomerServiceTickets = async () => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    console.error("No token found in local storage");
+    return;
+  }
+
+  return axios
+    .get(
+      "http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/sentticketstocustomerservice/",
+
+      {
+        headers: {
+          Authorization: `${token}`,
+        },
+      }
+    )
+    .then((response) => {
+      if (response.data.status !== 200) {
+        throw new Error(response.data.message || "Unknown error");
+      }
+      return response.data;
+    })
+    .catch((error) => {
+      console.error("Error getting all customer service tickets: ", error);
+      throw error;
+    });
+};
+
+const resolveCustomerServiceTicket = async (id) => {
+  const user = {
+    id
+  }
+
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    console.error("No token found in local storage");
+    return;
+  }
+
+  return axios
+    .post(
+      "http://127.0.0.1/Senior-Design-Project-Web-Application/backend/rest/solvecustomerserviceissue/",
+      user, 
+      {
+        headers: {
+          Authorization: `${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    )
+    .then((response) => {
+      if (response.data.status !== 200) {
+        throw new Error(response.data.message || "Unknown error");
+      }
+      return response.data;
+    })
+    .catch((error) => {
+      console.error("Error resolving a ticket: ", error);
+      throw error;
+    });
+};
+
   
 export default {
   getUserData,
@@ -419,5 +485,7 @@ export default {
   registerAdmin,
   getAllAdmins,
   deleteAdmin,
-  getActiveUsers
+  getActiveUsers,
+  getCustomerServiceTickets,
+  resolveCustomerServiceTicket
 };

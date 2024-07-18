@@ -580,6 +580,38 @@ class UserDao extends BaseDao
     }
   
     }
+
+    public function getSentTicketsToCustomerService()
+{
+    try {
+        $stmt = $this->conn->prepare("
+            SELECT 
+                ue.id, 
+                ue.title, 
+                ue.description, 
+                CONCAT(u.first_name, ' ', u.last_name) AS sender_name
+            FROM 
+                users_emails ue
+            JOIN 
+                users u ON ue.users_id = u.id
+            WHERE 
+                ue.status = 'Sent'
+        ");
+
+        $stmt->execute();
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if ($result) {
+            return array("status" => 200, "message" => $result);
+        } else {
+            return array("status" => 404, "message" => "No sent tickets found.");
+        }
+    } catch (PDOException $e) {
+        error_log($e->getMessage());
+        return array("status" => 500, "message" => "Internal Server Error: " . $e->getMessage());
+    }
+}
+
   
 
 

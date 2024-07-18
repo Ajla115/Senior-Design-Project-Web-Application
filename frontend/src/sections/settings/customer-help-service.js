@@ -10,14 +10,17 @@ import {
   TextField,
 } from "@mui/material";
 import { UserService } from "services";
+import { useAuthContext } from "src/contexts/auth-context";
+import CustomerServiceTicketsTable from "./customer-service-ticket-table";
 
 export const CustomerHelpService = () => {
+  const { user } = useAuthContext();
+
   const [values, setValues] = useState({
     title: "",
     description: "",
   });
 
-  // State to handle the error messages for the fields
   const [errors, setErrors] = useState({
     title: "",
     description: "",
@@ -57,55 +60,63 @@ export const CustomerHelpService = () => {
         );
         alert(response.message);
       } catch (error) {
-        alert("Error! Email has been not sent.\nCheck your error_log for more information.");
+        alert("Error! Email has not been sent.\nCheck your error_log for more information.");
       }
     },
     [values]
   );
 
   return (
-    <form onSubmit={handleSubmit}>
-      <Card>
-        <CardHeader
-          title="Describe your problem"
-          subheader="Detailed explanations help us provide a quicker and better solution"
-        />
-        <Divider />
-        <CardContent>
-          <Stack spacing={3} sx={{ maxWidth: 1200 }}>
-            <TextField
-              fullWidth
-              label="Title"
-              name="title"
-              onChange={handleChange}
-              type="title"
-              value={values.title}
-              error={!!errors.title} // Apply error styling if errors.title is not empty
-              helperText={errors.title} // Display the error message
+    <>
+      {user.is_admin === 1 ? (
+        <>
+          <CustomerServiceTicketsTable />
+        </>
+      ) : (
+        <form onSubmit={handleSubmit}>
+          <Card>
+            <CardHeader
+              title="Describe your problem"
+              subheader="Detailed explanations help us provide a quicker and better solution"
             />
-            <TextField
-              fullWidth
-              label="Description"
-              name="description"
-              onChange={handleChange}
-              type="description"
-              value={values.description}
-              multiline
-              error={!!errors.description} // Apply error styling if errors.description is not empty
-              helperText={errors.description} // Display the error message
-            />
-          </Stack>
-        </CardContent>
-        <Divider />
-        <CardActions sx={{ justifyContent: "flex-end", marginRight: 0 }}>
-          <Button type="submit" color="success" variant="contained">
-            Send
-          </Button>
-          <Button color="error" variant="contained">
-            Cancel
-          </Button>
-        </CardActions>
-      </Card>
-    </form>
+            <Divider />
+            <CardContent>
+              <Stack spacing={3} sx={{ maxWidth: 1200 }}>
+                <TextField
+                  fullWidth
+                  label="Title"
+                  name="title"
+                  onChange={handleChange}
+                  type="title"
+                  value={values.title}
+                  error={!!errors.title}
+                  helperText={errors.title}
+                />
+                <TextField
+                  fullWidth
+                  label="Description"
+                  name="description"
+                  onChange={handleChange}
+                  type="description"
+                  value={values.description}
+                  multiline
+                  error={!!errors.description}
+                  helperText={errors.description}
+                />
+              </Stack>
+            </CardContent>
+            <Divider />
+            <CardActions sx={{ justifyContent: "flex-end", marginRight: 0 }}>
+              <Button type="submit" color="success" variant="contained">
+                Send
+              </Button>
+              <Button color="error" variant="contained">
+                Cancel
+              </Button>
+            </CardActions>
+          </Card>
+        </form>
+      )}
+    </>
   );
 };

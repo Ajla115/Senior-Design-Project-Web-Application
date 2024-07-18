@@ -914,21 +914,9 @@ class UserService extends BaseService
                 return array("status" => 500, "message" => $result2["message"]);
             }
 
-            // if (isset($result3) && $result3["status"] !== 200) {
-            //     Flight::halt($result2["status"], $result2["message"]);
-            // }
             $decoded = (array) JWT::decode($data["activation_token"], new Key(Config::JWT_SECRET(), 'HS256'));
 
             $userEmail = $decoded['email'];
-
-            //$decoded["email"]
-
-            //trebalo bi po defaultu da tokena izbaci
-            //if token exists, check if it has expired
-            // $current_time = time();
-            // if($decoded["exp"] < $current_time){
-            //     Flight::halt(500, "Session has expired.");
-            // }
 
             if (empty($data['new_password']) || empty($data['repeat_password'])) {
                 return array("status" => 500, "message" => "Fields cannot be empty.");
@@ -984,6 +972,33 @@ class UserService extends BaseService
             ]));
         }
     }
+
+    public function getSentTicketsToCustomerService(){
+        try {
+
+            $all_headers = getallheaders();
+
+            if (!isset($all_headers['Authorization'])) {
+                throw new Exception('Authorization token not provided');
+            }
+
+            $token = $all_headers['Authorization'];
+
+            $decoded = (array) JWT::decode($token, new Key(Config::JWT_SECRET(), 'HS256'));
+
+            $is_admin_status = $decoded[4];
+
+            if ($is_admin_status != 1) {
+                return array("status" => 500, "message" => "Only admin can see sent tickets to the customer service");
+            }
+
+            return Flight::userDao()->getSentTicketsToCustomerService();
+
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return array("status"=>500, "message"=>"Internal Server ");
+    }
+}
 
 
 

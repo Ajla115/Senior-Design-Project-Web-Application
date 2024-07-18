@@ -306,5 +306,7 @@ Flight::route('POST /solvecustomerserviceissue/', function () {
   Flight::json(Flight::userService()->solveCustomerServiceIssue($data));
 });
 
-
+Flight::route('GET /sentticketstocustomerservice/', function () {
+  Flight::json(Flight::userService()->getSentTicketsToCustomerService());
+});
 

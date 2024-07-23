@@ -189,6 +189,15 @@ Flight::route("DELETE /accounts/@id", function ($id) {
 });
 
 
+/**
+ * @OA\Get(path="/all_accounts/total/", tags={"accounts"}, security={{"ApiKeyAuth": {}}},
+ *     summary="Return number of all accounts",
+ *     @OA\Response( response=200, description="Accounts are successfully fetched."),
+ *      @OA\Response( response=400, description="Invalid Usernames"),
+ *      @OA\Response( response=404, description="Accounts are not found" )
+ *      )
+ *   )
+ */
 
 
 Flight::route('GET /all_accounts/total/', function () {

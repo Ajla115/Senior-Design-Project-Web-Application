@@ -31,11 +31,12 @@ Flight::route('GET /accountsperhashtag/@id', function ($id) {
     Flight::json(Flight::instaHashService()->getAccountsPerHashtag($id));
 });
 
+
 /**
- * @OA\Get(path="/accountperhashtag/{id}", tags={"hashtags"}, security={{"ApiKeyAuth": {}}},
- *     summary="Return number of accounts for specific hashtag  ID",
+ * @OA\Get(path="/accountsdataperhashtag/{id}", tags={"hashtags"}, security={{"ApiKeyAuth": {}}},
+ *     summary="Return data of account for specific hashtag  ID",
  *     @OA\Parameter(in="path", name="id", example=1, description="Hashtag ID"),
- *     @OA\Response( response=200, description="Number of accounts is successfully fetched."),
+ *     @OA\Response( response=200, description="Data of account is successfully fetched."),
  *      @OA\Response( response=400, description="Invalid ID"),
  *      @OA\Response( response=404, description="Data is not found" )
  *      )
@@ -106,6 +107,16 @@ Flight::route('POST /hashtags/@hashtag', function ($hashtag) {
 
     Flight::json(Flight::instaHashService()->customAdd($hashtag));
 });
+
+/**
+ * @OA\Get(path="/all_hashtags/",  security={{"ApiKeyAuth": {}}},
+ *     summary="Return all hashtags",
+ *     @OA\Response( response=200, description="All hashtags are successfully fetched."),
+ *      @OA\Response( response=400, description="Invalid ID"),
+ *      @OA\Response( response=404, description="Data is not found" )
+ *      )
+ *   )
+ */
 
 
 Flight::route('GET /all_hashtags/', function () {

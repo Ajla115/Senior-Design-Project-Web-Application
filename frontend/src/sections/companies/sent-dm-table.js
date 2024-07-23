@@ -76,7 +76,7 @@ const SentDMTable = ({ count, onPageChange, onRowsPerPageChange, page, rowsPerPa
           </Table>
         </Box>
       </Scrollbar>
-      <TablePagination
+      {/*<TablePagination
         component="div"
         count={count}
         onPageChange={onPageChange}
@@ -84,7 +84,7 @@ const SentDMTable = ({ count, onPageChange, onRowsPerPageChange, page, rowsPerPa
         page={page}
         rowsPerPage={rowsPerPage}
         rowsPerPageOptions={[5, 10, 25]}
-      />
+      />*/}
     </Card>
   );
 };

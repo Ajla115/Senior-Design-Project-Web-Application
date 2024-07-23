@@ -220,30 +220,6 @@ Flight::route("PUT /dm/bulkUpdate", function () {
  *     @OA\RequestBody(description="Direct message data", required=true,
  *       @OA\MediaType(mediaType="application/json",
  *    			@OA\Schema(
- *                  @OA\Property(
- *                     property="users_id",
- *                     type="int",
- *                     example="1",
- *                     description="Users ID"
- *                 ),
- *                @OA\Property(
- *                     property="users_email",
- *                     type="string",
- *                     example="demo@gmail.com",
- *                     description="Users email"
- *                 ),
- *               @OA\Property(
- *                     property="users_password",
- *                     type="string",
- *                     example="abcde",
- *                     description="Users password"
- *                 ),
- *               @OA\Property(
- *                     property="usernames",
- *                     type="string",
- *                     example="['firstname_lastname']",
- *                     description="Recipients Usernames"
- *                 ),
  *                @OA\Property(
  *                     property="message",
  *                     type="string",
@@ -255,12 +231,6 @@ Flight::route("PUT /dm/bulkUpdate", function () {
  *                     type="string",
  *                     example="2024-02-24",
  *                     description="Date and time of message"
- *                 ),
- *                @OA\Property(
- *                     property="status",
- *                     type="string",
- *                     example="[Sent, Scheduled, Canceled]",
- *                     description="Message Status"
  *                 )
  *        )
  *     )),
@@ -281,19 +251,44 @@ Flight::route("PUT /dm/@id", function ($id) {
     Flight::json(Flight::dmService()->checkRecipientsAndUpdateDMIndividually($data, $id));
 });
 
-
+/**
+ * @OA\Get(path="/dms/",  security={{"ApiKeyAuth": {}}}, tags={"dms"},
+ *     summary="Return all dms",
+ *     @OA\Response( response=200, description="All dms are successfully fetched."),
+ *      @OA\Response( response=400, description="Invalid ID"),
+ *      @OA\Response( response=404, description="Data is not found" )
+ *      )
+ *   )
+ */
 
 Flight::route("GET /dms/", function () {
     $data = Flight::request()->data->getData();
     Flight::json(Flight::dmService()->getAllDMS($data));
 });
 
+/**
+ * @OA\Get(path="/sent_dms/",  security={{"ApiKeyAuth": {}}}, tags={"dms"},
+ *     summary="Return all sent dms",
+ *     @OA\Response( response=200, description="All sent dms are successfully fetched."),
+ *      @OA\Response( response=400, description="Invalid ID"),
+ *      @OA\Response( response=404, description="Data is not found" )
+ *      )
+ *   )
+ */
 Flight::route("GET /sent_dms/", function () {
     $data = Flight::request()->data->getData();
     Flight::json(Flight::dmService()->getSentDMS($data));
 });
 
-
+/**
+ * @OA\Get(path="/percentage_scheduled_dms/",  security={{"ApiKeyAuth": {}}}, tags={"dms"},
+ *     summary="Return percentage of scheduled dms",
+ *     @OA\Response( response=200, description="Percentage of scheduled DM is fetched."),
+ *      @OA\Response( response=400, description="Invalid ID"),
+ *      @OA\Response( response=404, description="Data is not found" )
+ *      )
+ *   )
+ */
 
 Flight::route('GET /percentage_scheduled_dms/', function () {
     Flight::json(Flight::dmService()->getPercentageOfScheduledDMs());

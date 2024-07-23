@@ -97,7 +97,7 @@ export const CustomersTable = (props) => {
           </Table>
         </Box>
       </Scrollbar>
-      <TablePagination
+      {/* <TablePagination
         component="div"
         count={count}
         onPageChange={onPageChange}
@@ -105,7 +105,7 @@ export const CustomersTable = (props) => {
         page={page}
         rowsPerPage={rowsPerPage}
         rowsPerPageOptions={[5, 10, 25]}
-      />
+      /> */}
     </Card>
   );
 };

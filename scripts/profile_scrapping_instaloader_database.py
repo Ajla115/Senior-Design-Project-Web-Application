@@ -47,8 +47,7 @@ def scrapeData(username):
         except:
             setInvalidUser(username, current_date)
             print(f"Invalid username: {username}")
-            #in case the profile does not exist any more, or username has changed
-            #set the profile to be invalid
+            #in case the profile does not exist any more, or username has changed, set the profile to be invalid
 
 def setInvalidUser(username, current_date):
     sql_query3 = "UPDATE instagram_accounts SET post_number = 0, followers_number = 0, followings_number = 0, date_and_time = %s, stats = 1, activity = %s WHERE username = %s"
@@ -92,10 +91,8 @@ def main():
 
 
             if stats == 1:
-                # Update the user stats
                 updateUser(username, stats)
             elif stats == 0:
-                # Scrape data for the new user
                 scrapeData(username)
             
             time.sleep(3)

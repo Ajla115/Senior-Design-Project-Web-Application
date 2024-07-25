@@ -67,12 +67,13 @@ def send_message(driver, username, message):
             EC.presence_of_element_located((By.XPATH, "/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[1]/section/main/section/div/div/div/div[1]/div/div[2]/div/div/div/div/div/div/div[2]/div/div/div[2]/div/div/div[2]/div/div[1]/p"))
         )
         send_message_field.send_keys(message)
-        sleep(3)
+        sleep(10)
 
         send_button = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.XPATH, '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[1]/section/main/section/div/div/div/div[1]/div/div[2]/div/div/div/div/div/div/div[2]/div/div/div[2]/div/div/div[3]'))
         )
         send_button.click()
+        sleep(10)
         return True
     except:
         return False

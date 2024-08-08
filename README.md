@@ -18,10 +18,6 @@ This is a repository for my Senior Design Project, web application, as a summary
     PASSWORD = "example"
 Make sure this IG username exists, and password is correct, since it will be needed to log in for the hashtag scrapping and automatic DMs script.
 
-
-https://github.com/user-attachments/assets/ead80ca4-898b-4ba2-8cf8-d5826f7c333f
-
-
 - You will also need to find a command to install composer on your device.
 
 - Also since the second two scripts can fail, here are video examples for them.

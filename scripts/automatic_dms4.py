@@ -51,8 +51,8 @@ def send_message(driver, username, message):
     insta_url = 'https://www.instagram.com/'
     driver.get(insta_url + username)
     try:
-        message_button = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[2]/div/div[1]/section/main/div/header/section[2]/div/div/div[2]/div/div[2]/div'))
+        message_button = WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/div/div/div/div[2]/div/div/div[1]/div[2]/div/div[1]/section/main/div/header/section[2]/div/div/div[2]/div/div[2]/div'))
         )
         message_button.click()
         sleep(3)

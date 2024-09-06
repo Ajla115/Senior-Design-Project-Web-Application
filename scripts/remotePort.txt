@@ -1,0 +1,3 @@
+chrome.exe --remote-debugging-port=9222 --user-data-dir="C:\selenum\ChromeProfile"
+"C:\Users\User\Desktop\Google Chrome.lnk"
+"C:\Program Files\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9222 --user-data-dir="C:\selenum\ChromeProfile"

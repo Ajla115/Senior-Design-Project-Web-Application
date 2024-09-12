@@ -26,6 +26,11 @@ mydb = mysql.connector.connect(
 
 mycursor = mydb.cursor()
 
+def get_scheduled_messages():
+    query = "SELECT ud.users_email, ud.users_password, ia.username, ud.message FROM users_dms ud JOIN instagram_accounts ia ON ud.recipients_id = ia.id WHERE ud.status = 'Scheduled'"
+    mycursor.execute(query)
+    return mycursor.fetchall()
+
 def log_in(driver, ig_username, ig_password):
         # USERNAME = os.environ['IGUSERNAME1']
         # PASSWORD = os.environ['IGPASSWORD1']
@@ -74,7 +79,42 @@ def check_if_logged_in(driver):
     except TimeoutException:
         return True
     
+def send_dm1(driver, username, message):
+    message_button = WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located((By.XPATH, '/html/body/div[2]/div/div/div/div[2]/div/div/div[1]/div[1]/div[1]/section/main/section/div/div/div/div[1]/div/div[2]/div/div/div/div[4]/div')))
+    message_button.click()
 
+    sleep(7)
+
+    enter_name = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.XPATH, '/html/body/div[7]/div[1]/div/div[2]/div/div/div/div/div/div/div[1]/div/div[2]/div/div[2]/input'))
+    )
+    enter_name.click()
+    enter_name.send_keys(username)
+
+    sleep(15)
+
+    choose_name = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.XPATH, '/html/body/div[7]/div[1]/div/div[2]/div/div/div/div/div/div/div[1]/div/div[3]/div/div/div[1]/div[1]/div/div/div[3]/div/label/div/input')))
+    choose_name.click()
+
+    sleep(15)
+
+    chat_button = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.XPATH, '/html/body/div[7]/div[1]/div/div[2]/div/div/div/div/div/div/div[1]/div/div[4]/div')))
+    chat_button.click()
+
+    sleep(7)
+
+    message_field = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.XPATH, '/html/body/div[2]/div/div/div/div[2]/div/div/div[1]/div[1]/div[1]/section/main/section/div/div/div/div[1]/div/div[2]/div/div/div/div/div/div/div[2]/div/div/div[2]/div/div/div[2]/div/div[1]')))
+    message_field.send_keys(message)
+
+    sleep(7)
+
+    send_message_button = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.XPATH, '/html/body/div[2]/div/div/div/div[2]/div/div/div[1]/div[1]/div[1]/section/main/section/div/div/div/div[1]/div/div[2]/div/div/div/div/div/div/div[2]/div/div/div[2]/div/div/div[3]')))
+    send_message_button.click()
 
 def instagram_driver1(driver, username):
    
@@ -106,9 +146,15 @@ def instagram_driver1(driver, username):
     # turn_on_notifications_button.click()
     # sleep(3)
 
+    send_dm1(driver, username, "Automated message")
 
-    message_button = WebDriverWait(driver, 20).until(
-            EC.presence_of_element_located((By.XPATH, '/html/body/div[2]/div/div/div/div[2]/div/div/div[1]/div[1]/div[1]/section/main/section/div/div/div/div[1]/div/div[2]/div/div/div/div[4]/div')))
+    sleep(5)
+
+    driver.quit()
+
+def send_dm2(driver, username, message):
+    message_button = WebDriverWait(driver, 40).until(
+            EC.presence_of_element_located((By.XPATH, '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[1]/section/main/section/div/div/div/div[1]/div/div[1]/div/div[1]/div[2]')))
     message_button.click()
 
     sleep(7)
@@ -134,18 +180,14 @@ def instagram_driver1(driver, username):
     sleep(7)
 
     message_field = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.XPATH, '/html/body/div[2]/div/div/div/div[2]/div/div/div[1]/div[1]/div[1]/section/main/section/div/div/div/div[1]/div/div[2]/div/div/div/div/div/div/div[2]/div/div/div[2]/div/div/div[2]/div/div[1]')))
-    message_field.send_keys("Pozdrav dlugalice. Vec si se navikla na ove automated messages. <3")
+        EC.presence_of_element_located((By.XPATH, '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[1]/section/main/section/div/div/div/div[1]/div/div[2]/div/div/div/div/div/div/div[2]/div/div/div[2]/div/div/div[2]/div/div[1]')))
+    message_field.send_keys(message)
 
     sleep(7)
 
     send_message_button = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.XPATH, '/html/body/div[2]/div/div/div/div[2]/div/div/div[1]/div[1]/div[1]/section/main/section/div/div/div/div[1]/div/div[2]/div/div/div/div/div/div/div[2]/div/div/div[2]/div/div/div[3]')))
+        EC.presence_of_element_located((By.XPATH, '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[1]/section/main/section/div/div/div/div[1]/div/div[2]/div/div/div/div/div/div/div[2]/div/div/div[2]/div/div/div[3]')))
     send_message_button.click()
-
-    sleep(5)
-
-    driver.quit()
 
 
 
@@ -188,43 +230,7 @@ def instagram_driver2(driver, username):
     # turn_on_notifications_button.click()
     # sleep(3)
 
-    
-
-    message_button = WebDriverWait(driver, 40).until(
-            EC.presence_of_element_located((By.XPATH, '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[1]/section/main/section/div/div/div/div[1]/div/div[1]/div/div[1]/div[2]')))
-    message_button.click()
-
-    sleep(7)
-
-    enter_name = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.XPATH, '/html/body/div[7]/div[1]/div/div[2]/div/div/div/div/div/div/div[1]/div/div[2]/div/div[2]/input'))
-    )
-    enter_name.click()
-    enter_name.send_keys(username)
-
-    sleep(15)
-
-    choose_name = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.XPATH, '/html/body/div[7]/div[1]/div/div[2]/div/div/div/div/div/div/div[1]/div/div[3]/div/div/div[1]/div[1]/div/div/div[3]/div/label/div/input')))
-    choose_name.click()
-
-    sleep(15)
-
-    chat_button = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.XPATH, '/html/body/div[7]/div[1]/div/div[2]/div/div/div/div/div/div/div[1]/div/div[4]/div')))
-    chat_button.click()
-
-    sleep(7)
-
-    message_field = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.XPATH, '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[1]/section/main/section/div/div/div/div[1]/div/div[2]/div/div/div/div/div/div/div[2]/div/div/div[2]/div/div/div[2]/div/div[1]')))
-    message_field.send_keys("Pozdrav dlugalice. Vec si se navikla na ove automated messages. <3")
-
-    sleep(7)
-
-    send_message_button = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.XPATH, '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[1]/section/main/section/div/div/div/div[1]/div/div[2]/div/div/div/div/div/div/div[2]/div/div/div[2]/div/div/div[3]')))
-    send_message_button.click()
+    send_dm2(driver, username, "Automated message.")
 
     sleep(5)
 
@@ -232,10 +238,9 @@ def instagram_driver2(driver, username):
 
 def main():
 
-    #usernames = ['korman_ajla', 'sunce123']
+    #messages = get_scheduled_messages()
+    #print(messages)
 
-    instagram_driver1('luisatryphiana')
-    instagram_driver2('asyya.m')
     service = Service(executable_path="C:\\Users\\User\\Downloads\\chromedriver-win64\\chromedriver-win64\\chromedriver.exe")
     options = webdriver.ChromeOptions()
     options.add_argument('--remote-debugging-port=9226')

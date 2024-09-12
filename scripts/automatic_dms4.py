@@ -84,7 +84,7 @@ def update_message_status(message_id, status):
     mydb.commit()
 
 def main():
-    service = Service(executable_path="C:\\Users\\User\\Downloads\\chromedriver-win64\\chromedriver.exe")
+    service = Service(executable_path="C:\\Users\\User\\Downloads\\chromedriver-win64\\chromedriver-win64\\chromedriver.exe")
     options = webdriver.ChromeOptions()
     driver = webdriver.Chrome(service=service, options=options)
     driver.maximize_window()
@@ -94,8 +94,8 @@ def main():
 
     sleep(3)
 
-    USERNAME = os.environ['IGUSERNAME']
-    PASSWORD = os.environ['PASSWORD']
+    USERNAME = os.environ['IGUSERNAME1']
+    PASSWORD = os.environ['IGPASSWORD1']
 
     username_field = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME, 'username')))
     username_field.send_keys(USERNAME)

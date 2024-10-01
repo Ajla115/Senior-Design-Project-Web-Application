@@ -6,15 +6,11 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
 from time import sleep
-from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.keys import Keys  
+from selenium.webdriver.remote.webelement import WebElement
 
 # This will load env variables
 load_dotenv() 
@@ -30,7 +26,7 @@ mydb = mysql.connector.connect(
 mycursor = mydb.cursor()
 
 def get_scheduled_messages():
-    query = "SELECT ud.users_email, ud.users_password, ia.username, ud.message, ud.port_value, ud.id FROM users_dms ud JOIN instagram_accounts ia ON ud.recipients_id = ia.id WHERE ud.status = 'Scheduled'"
+    query = "SELECT fd.users_email, fd.users_password, fa.account_name, fd.message, fd.port_value, fd.id FROM facebook_dms fd JOIN facebook_accounts fa ON fd.recipients_id = fa.id WHERE fd.status = 'Scheduled'"
     mycursor.execute(query)
     results = mycursor.fetchall()
 
@@ -49,11 +45,11 @@ def get_scheduled_messages():
             new_port_value = generate_new_port()
             
             # Update the record with the new unique port value
-            update_query = "UPDATE users_dms SET port_value = %s WHERE users_email = %s"
+            update_query = "UPDATE facebook_dms SET port_value = %s WHERE users_email = %s"
             mycursor.execute(update_query, (new_port_value, user_email))
             mydb.commit()
 
-    query2 = "SELECT ud.users_email, ud.users_password, ia.username, ud.message, ud.port_value, ud.id FROM users_dms ud JOIN instagram_accounts ia ON ud.recipients_id = ia.id WHERE ud.status = 'Scheduled'"
+    query2 = "SELECT fd.users_email, fd.users_password, fa.account_name, fd.message, fd.port_value, fd.id FROM facebook_dms fd JOIN facebook_accounts fa ON fd.recipients_id = fa.id WHERE fd.status = 'Scheduled'"
     mycursor.execute(query2)
     results2 = mycursor.fetchall()
 
@@ -124,80 +120,154 @@ def check_fb_account_existence(driver, fb_username):
             return False
         else:
             print("Username exists. Proceeding with further action.")
+            elements = driver.find_element(By.XPATH, "/html/body/div[1]/div/div[1]/div/div[3]/div/div/div[1]/div[1]/div/div/div[1]/div[2]/div/div/div/div[4]/div/div/div[2]/div/div/div")
+            print(elements.text)
+            
             return True
     except:
         return -1
     
+
 def send_dm(driver, fb_username, message):
+    message_sent = False 
 
-    #go to messenger page
-    driver.get('https://www.messenger.com/')
+    for _ in range(7):
 
-    current_url = driver.current_url  
-    #print(current_url)
-
-    if current_url == "https://www.messenger.com/":
-        continue_button = WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.XPATH, "//span[contains(@class, '_4zls')]"))
+        try:
+            messages_button = WebDriverWait(driver, 10).until(
+                EC.presence_of_all_elements_located((By.XPATH, "//span[contains(@class, 'x1lliihq') and contains(@class, 'x6ikm8r') and contains(@class, 'x10wlt62') and contains(@class, 'x1n2onr6') and contains(@class, 'xlyipyv') and contains(@class, 'xuxw1ft')]"))
             )
-        
-        continue_button.click()
+            print(len(messages_button))
+            for message_button in messages_button:
+                print(message_button.text)
 
-        sleep(10)
+                sleep(10)
+           
 
-    new_message_button = WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.XPATH, "//a[contains(@class, 'x1ejq31n') and contains(@class, 'xd10rxx')]"))
-            )
-    new_message_button.click()
+                if message_button.text == "Poruka" or message_button.text == "Message":
+                    message_button.click()
 
-    enter_name =  WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.XPATH, "//input[contains(@class, 'xjbqb8w') and contains(@class, 'x76ihet')]"))
-            )
-    enter_name.send_keys(fb_username)
+                    sleep(3)  
 
-#ovo ovdje pada
-    choose_name = WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.XPATH, "/html/body/div[1]/div/div/div/div[2]/div/div/div[2]/div/div/div[1]/div[1]/ul/li[2]/ul/div[1]/li/a"))
-            )
-    choose_name.click()
+                    send_message_field = WebDriverWait(driver, 10).until(
+                        EC.presence_of_element_located((By.XPATH, "//div[contains(@class, 'xzsf02u') and contains(@class, 'x1a2a7pz') and contains(@class, 'x1n2onr6') and contains(@class, 'x14wi4xw')]"))
+                    )
 
-    message_field =  WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.XPATH, "//div[contains(@class, 'xzsf02u') and contains(@class, 'x1a2a7pz')]"))
-            )
-    message_field.click()
-    message_field.send_keys(message)
+                    sleep(3)
 
-    send_button =  WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.XPATH, "//div[contains(@class, 'xdj266r') and contains(@class, 'xat24cr') and contains(@class, 'x2lwn1j') and contains(@class, 'xeuugli') and contains(@class, 'x1n2onr6')]"))
-            )
-    
-    send_button.send_keys(Keys.ENTER)
+                    send_message_field.send_keys(message)
+                    send_message_field.send_keys(Keys.ENTER)
 
-    sleep(100)
+                    sleep(3)  
+                    message_sent = True
+                    return 1
 
-def main():
-   
+                else :
+                    print("Poruka button is not found.")
+                    
+
+        except TimeoutException:
+            print(f"Message button or message field not found for {fb_username}.")
+            return -1
+
+def find(lst, key, value):
+    for i, dic in enumerate(lst):
+        if dic[key] == value:
+            return i
+    return -1
+
+def send_bulk_dms(sender):
     service = Service(executable_path="C:\\Users\\User\\Downloads\\chromedriver-win64\\chromedriver-win64\\chromedriver.exe")
     options = webdriver.ChromeOptions()
-    options.add_argument('--remote-debugging-port=' + "9226") 
-    options.add_argument('--user-data-dir=C:\selenum\ChromeProfile' + "9226") 
+    options.add_argument('--remote-debugging-port=' + sender["port"]) 
+    options.add_argument('--user-data-dir=C:\selenum\ChromeProfile' + sender["port"]) 
+    options.add_argument('disable-popup-blocking')
     driver = webdriver.Chrome(service=service, options=options)
     driver.maximize_window()
 
+    
     driver.get("https://www.facebook.com/")
+
+    sleep(3)
+
+    check_login_results = check_if_logged_in(driver)
+
+    if check_login_results == False:
+        log_in(driver, sender["sender"], sender["password"])
+
+    sleep(3)
+
+    for message in sender["messages"]:
+
+        check_fb_account_exists_result = check_fb_account_existence(driver, message[0])
+
+        if  check_fb_account_exists_result == False:
+                exit()
+        #if the username does not exist, just exit
+
+        sleep(3)
+
+        send_dm(driver, message[0], message[1])
+
+    driver.quit()
+
+def change_message_status_to_sent(messages):
+    id_list = []
+    for message in messages:
+        id_list.append(message[5])
+    id_list_str = ','.join(map(str, id_list))
+    query = "UPDATE facebook_dms SET status = 'Sent' WHERE id IN (" + id_list_str + ")"
+    mycursor.execute(query)
+    mydb.commit()
+
+def main():
 
     fb_email = "korman.ajla115@gmail.com"
     fb_password = "lalesuzute115"
     fb_username = "suada.korman"
 
-    if not (check_if_logged_in(driver)):
-        log_in(driver, fb_email, fb_password)
+    messages = get_scheduled_messages()
+    messages = tuple(messages)
 
-    if not (check_fb_account_existence(driver, fb_username)):
-        exit()
+    dms_to_send = []
 
-    send_dm(driver, fb_username, "This is an automated message.")
+    for message in messages:
+        if not any(d['sender'] == message[0] for d in dms_to_send):
+            dms_to_send.append({
+                "sender" : message[0],
+                "password" : message[1],
+                "port" : message[4],
+                "messages" : [(message[2], message[3])]
+            })
+        else:
+            index = find(dms_to_send, "sender", message[0])
+            dms_to_send[index]["messages"].append((message[2], message[3]))
+
+    threads = []
+    counter = 0
+
+    for sender in dms_to_send:
+        threads.append(threading.Thread(target=send_bulk_dms, args=(sender,)))
+        threads[counter].start()
+        counter += 1
+
+    for thread in threads:
+        thread.join()
+
+    change_message_status_to_sent(messages)
+
+    print("Sending of all messages is completely done.")
 
 if __name__ == "__main__":
 
     main()
+
+
+    # if not (check_if_logged_in(driver)):
+    #     log_in(driver, fb_email, fb_password)
+
+    # if not (check_fb_account_existence(driver, fb_username)):
+    #     exit()
+
+    # send_dm(driver, fb_username, "This is an automated message.")
+

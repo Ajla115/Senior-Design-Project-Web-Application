@@ -19,7 +19,7 @@ load_dotenv()
 mydb = mysql.connector.connect(
     host="localhost",
     user="root",
-    password="a1b2c3d4e5",
+    password="",
     database="sdp_project"
 )
 
@@ -177,7 +177,7 @@ def find(lst, key, value):
     return -1
 
 def send_bulk_dms(sender):
-    service = Service(executable_path="C:\\Users\\User\\Downloads\\chromedriver-win64\\chromedriver-win64\\chromedriver.exe")
+    service = Service(executable_path="C:\\Users\\DT User\\Downloads\\chromedriver-win64\\chromedriver.exe")
     options = webdriver.ChromeOptions()
     options.add_argument('--remote-debugging-port=' + sender["port"]) 
     options.add_argument('--user-data-dir=C:\selenum\ChromeProfile' + sender["port"]) 

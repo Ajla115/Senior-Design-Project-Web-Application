@@ -2,3 +2,4 @@ config.php
 vendor
 composer.lock
 env
+./frontend/node_modules

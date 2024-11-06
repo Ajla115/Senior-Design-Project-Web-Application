@@ -1,18 +1,13 @@
 import threading
 import random
 import mysql.connector
-from dotenv import load_dotenv
-from selenium import webdriver
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
 from time import sleep
+from dotenv import load_dotenv
+from selenium.webdriver.support import expected_conditions as EC
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.keys import Keys  
 
@@ -23,9 +18,12 @@ load_dotenv()
 mydb = mysql.connector.connect(
     host="localhost",
     user="root",
-    password="a1b2c3d4e5",
+    password="",
     database="sdp_project"
 )
+
+#Autocommit is set to True, so everything will get autocomitted by default
+mydb.autocommit = True
 
 mycursor = mydb.cursor()
 
@@ -35,7 +33,7 @@ def get_scheduled_messages():
     results = mycursor.fetchall()
 
     if not results:
-        print("No scheduled messages found.")
+        print("No scheduled messages found therefore nothing can be sent to anybody.")
         exit()  
 
     for result in results:
@@ -43,15 +41,37 @@ def get_scheduled_messages():
         user_email = result[0]
 
         if port_value is None or port_value == '':
-            print("Port value is missing, creating a new port first...")
+            print("Port value is missing for certain DM sendings, therefore first that will get solved.")
             
             # Generate a unique new port
-            new_port_value = generate_new_port()
+            # First, check if that user email already has somewhere else a db port in the db
+            # If it has then use the same port, otherwise create a new one port
+
+            query = "SELECT port_value FROM users_dms WHERE users_email = %s"
+            #This %s needs a tuple as a parameter so below where the user_email is the only parameter
+            # comma should be put behind it to mimic the behavior of a tuple
+            mycursor.execute(query, (user_email, ))
+            users_port_value = mycursor.fetchone()
+            #Perhaps, this one port has been previously used multiple times by the user email so it is enough just to extract it once when we reach it
+            if users_port_value:
+                #Extract the exact value from the tuple
+                users_port_value = users_port_value[0]
+                print("This ", user_email, " already has an existing port valu ", users_port_value, ". Therefore this one will be used.")
+            else:
+                #If this user email has never had a port before, a new one will get generated foor the user
+                users_port_value = generate_new_port()
             
-            # Update the record with the new unique port value
+
+            # Clear any unread results
+            # Because above I had mycursor.fetchone() all rows got returned, but only one got read
+            # There are other rows that are stuck inbetween and that are nto read, but the cursor is filled with them so it cannot execute other queries
+            # So, with the statement below, we are reading rows that were left behind, and cčeaning the cursor so we can go on with the query
+            mycursor.fetchall()
+
+            # Update the record with the new unique port value or the one that already existed
             update_query = "UPDATE users_dms SET port_value = %s WHERE users_email = %s"
-            mycursor.execute(update_query, (new_port_value, user_email))
-            mydb.commit()
+            mycursor.execute(update_query, (users_port_value, user_email))
+          
 
     query2 = "SELECT ud.users_email, ud.users_password, ia.username, ud.message, ud.port_value, ud.id FROM users_dms ud JOIN instagram_accounts ia ON ud.recipients_id = ia.id WHERE ud.status = 'Scheduled'"
     mycursor.execute(query2)
@@ -131,19 +151,38 @@ def check_if_logged_in(driver):
     
 def send_dm(driver, username, message):
 
-    message_button = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, "//div[contains(@class, 'x1gjpkn9') and contains(@class, 'x5n08af')]")))
-    message_button.click()
+    try:
 
-    sleep(7)
+        message_button = WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, "//div[contains(@class, 'x1gjpkn9') and contains(@class, 'x5n08af')]")))
+        message_button.click()
 
-    message_input_field = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, "//div[contains(@class, 'xzsf02u') and contains(@class, 'x1a2a7pz')]")))
-    message_input_field.click()
-    message_input_field.send_keys(message)
-    message_input_field.send_keys(Keys.ENTER)
+        sleep(7)
 
-    sleep(3)
+        #Part to turn off notifications if it appears
+        try:
+            turn_off_notifications = WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located((By.XPATH, "//button[contains(@class, '_a9--') and contains(@class, '_ap36') and contains(@class, '_a9_1')]")))
+            
+            turn_off_notifications.click()
+        except :
+            print("There is no notifications prompt so just continue regularly.")
+    
+
+        message_input_field = WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, "//div[contains(@class, 'xzsf02u') and contains(@class, 'x1a2a7pz')]")))
+        
+        message_input_field.click()
+        message_input_field.send_keys(message)
+        message_input_field.send_keys(Keys.ENTER)
+
+        sleep(3)
+        return True 
+    #Flag to indicate that the message has been sent
+    except:
+        print("Failed to sent message ", message, " to ", username)
+        return False
+
 
 def instagram_driver(sender, password, recipient, message,  port_value):
 
@@ -179,7 +218,7 @@ def instagram_driver(sender, password, recipient, message,  port_value):
     driver.quit()
 
 def send_bulk_dms(sender):
-    service = Service(executable_path="C:\\Users\\User\\Downloads\\chromedriver-win64\\chromedriver-win64\\chromedriver.exe")
+    service = Service(executable_path="C:\\Users\\DT User\\Downloads\\chromedriver-win64\\chromedriver.exe")
     options = webdriver.ChromeOptions()
     options.add_argument('--remote-debugging-port=' + sender["port"]) 
     options.add_argument('--user-data-dir=C:\selenum\ChromeProfile' + sender["port"]) 
@@ -198,6 +237,8 @@ def send_bulk_dms(sender):
 
     sleep(3)
 
+    successfully_sent_messages = []
+
     for message in sender["messages"]:
 
         check_username_exists_result = check_username_exists(driver, message[0])
@@ -208,9 +249,12 @@ def send_bulk_dms(sender):
 
         sleep(3)
 
-        send_dm(driver, message[0], message[1])
+        #For all messages that were successfully sent, and where the return value was True, append that whole message to the list
+        if (send_dm(driver, message[0], message[1])) :
+            successfully_sent_messages.append(message)
 
     driver.quit()
+    return successfully_sent_messages
 
 def find(lst, key, value):
     for i, dic in enumerate(lst):
@@ -220,22 +264,19 @@ def find(lst, key, value):
 
 def change_message_status_to_sent(messages):
     id_list = []
+
     for message in messages:
-        id_list.append(message[5])
+        message_id = message[2]  
+        id_list.append(message_id)
+
     id_list_str = ','.join(map(str, id_list))
     query = "UPDATE users_dms SET status = 'Sent' WHERE id IN (" + id_list_str + ")"
     mycursor.execute(query)
-    mydb.commit()
-    #return mycursor.fetchall()
     
 def main():
 
     messages = get_scheduled_messages()
-    #print(tuple(messages))
     messages= tuple(messages)
-
-    #number = no_of_messages_per_user()
-    #print(number)
 
     dms_to_send = []
 
@@ -245,26 +286,40 @@ def main():
                 "sender" : message[0],
                 "password" : message[1],
                 "port" : message[4],
-                "messages" : [(message[2], message[3])]
+                "messages" : [(message[2], message[3], message[5])]
             })
         else:
             index = find(dms_to_send, "sender", message[0])
-            dms_to_send[index]["messages"].append((message[2], message[3]))
+            dms_to_send[index]["messages"].append((message[2], message[3], message[5]))
+        print(message)
 
     threads = []
     counter = 0
 
+    all_successfully_sent_messages = []
+
     for sender in dms_to_send:
-        threads.append(threading.Thread(target=send_bulk_dms, args=(sender,)))
-        threads[counter].start()
-        counter += 1
+        thread = threading.Thread(target=lambda s=sender: all_successfully_sent_messages.extend(send_bulk_dms(s)))
+        threads.append(thread)
+        thread.start()
 
     for thread in threads:
         thread.join()
 
-    change_message_status_to_sent(messages)
+    change_message_status_to_sent(all_successfully_sent_messages)
+    print("All scheduled messages are successfully sent.")
 
-    print("Sending of all messages is completely done.")
+
+    # for sender in dms_to_send:
+    #     threads.append(threading.Thread(target=send_bulk_dms, args=(sender,)))
+    #     threads[counter].start()
+    #     counter += 1
+
+    # for thread in threads:
+    #     thread.join()
+
+
+    
 
 if __name__ == "__main__":
 

@@ -10,7 +10,6 @@ from time import sleep
 from selenium.webdriver.chrome.service import Service
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.keys import Keys  
-from selenium.webdriver.remote.webelement import WebElement
 
 # This will load env variables
 load_dotenv() 
@@ -23,6 +22,8 @@ mydb = mysql.connector.connect(
     database="sdp_project"
 )
 
+#Autocommit is set to True, so everything will get autocomitted by default
+mydb.autocommit = True
 mycursor = mydb.cursor()
 
 def get_scheduled_messages():
@@ -42,36 +43,56 @@ def get_scheduled_messages():
             print("Port value is missing, creating a new port first...")
             
             # Generate a unique new port
-            new_port_value = generate_new_port()
+            # First, check if that user email already has somewhere else a db port in the db
+            # If it has then use the same port, otherwise create a new one port
+            query = "SELECT port_value FROM facebook_dms WHERE users_email = %s"
+            #This %s needs a tuple as a parameter so below where the user_email is the only parameter
+            # comma should be put behind it to mimic the behavior of a tuple
+            mycursor.execute(query, (user_email, ))
+            users_port_value = mycursor.fetchone()
+            #Perhaps, this one port has been previously used multiple times by the user email so it is enough just to extract it once when we reach it
+            if users_port_value:
+                #Extract the exact value from the tuple
+                users_port_value = users_port_value[0]
+                print("This ", user_email, " already has an existing port valu ", users_port_value, ". Therefore this one will be used.")
+            else:
+                #If this user email has never had a port before, a new one will get generated foor the user
+                users_port_value = generate_new_port()
             
-            # Update the record with the new unique port value
-            update_query = "UPDATE facebook_dms SET port_value = %s WHERE users_email = %s"
-            mycursor.execute(update_query, (new_port_value, user_email))
-            mydb.commit()
+            # Clear any unread results
+            # Because above I had mycursor.fetchone() all rows got returned, but only one got read
+            # There are other rows that are stuck inbetween and that are nto read, but the cursor is filled with them so it cannot execute other queries
+            # So, with the statement below, we are reading rows that were left behind, and cčeaning the cursor so we can go on with the query
+            mycursor.fetchall()
 
-    query2 = "SELECT fd.users_email, fd.users_password, fa.account_name, fd.message, fd.port_value, fd.id FROM facebook_dms fd JOIN facebook_accounts fa ON fd.recipients_id = fa.id WHERE fd.status = 'Scheduled'"
+            # Update the record with the new unique port value or the one that already existed
+            update_query = "UPDATE facebook_dms SET port_value = %s WHERE users_email = %s"
+            mycursor.execute(update_query, (users_port_value, user_email))
+          
+
+    query2 ="SELECT fd.users_email, fd.users_password, fa.account_name, fd.message, fd.port_value, fd.id FROM facebook_dms fd JOIN facebook_accounts fa ON fd.recipients_id = fa.id WHERE fd.status = 'Scheduled'"
     mycursor.execute(query2)
     results2 = mycursor.fetchall()
 
-    return results2
+    return results2  
 
 def generate_new_port():
     while True:
         # Generate a new port value
         new_port = random.randint(100, 10000)
         # Check if this port is unique
-        mycursor.execute("SELECT COUNT(*) FROM users_dms WHERE port_value = %s", (new_port,))
+        mycursor.execute("SELECT COUNT(*) FROM facebook_dms WHERE port_value = %s", (new_port,))
         if mycursor.fetchone()[0] == 0:
             # Port is unique, return it
             return new_port
 
 def get_unique_senders():
-    query = "SELECT users_email FROM users_dms WHERE status = 'Scheduled' GROUP BY users_email;"
+    query = "SELECT users_email FROM facebook_dms WHERE status = 'Scheduled' GROUP BY users_email;"
     mycursor.execute(query)
     return mycursor.fetchall()
 
 def no_of_messages_per_user():
-    query = "SELECT users_email, COUNT(message) FROM users_dms WHERE status = 'Scheduled' GROUP BY users_email;"
+    query = "SELECT users_email, COUNT(message) FROM facebook_dms WHERE status = 'Scheduled' GROUP BY users_email;"
     mycursor.execute(query)
     return mycursor.fetchall()
      
@@ -197,6 +218,8 @@ def send_bulk_dms(sender):
 
     sleep(3)
 
+    successfully_sent_messages = []
+
     for message in sender["messages"]:
 
         check_fb_account_exists_result = check_fb_account_existence(driver, message[0])
@@ -206,15 +229,24 @@ def send_bulk_dms(sender):
         #if the username does not exist, just exit
 
         sleep(3)
-
-        send_dm(driver, message[0], message[1])
+        if (send_dm(driver, message[0], message[1])) :
+            successfully_sent_messages.append(message)
 
     driver.quit()
+    return successfully_sent_messages
+
+def find(lst, key, value):
+    for i, dic in enumerate(lst):
+        if dic[key] == value:
+            return i
+    return -1
 
 def change_message_status_to_sent(messages):
     id_list = []
     for message in messages:
-        id_list.append(message[5])
+        message_id = message[2]  
+        id_list.append(message_id)
+        #  
     id_list_str = ','.join(map(str, id_list))
     query = "UPDATE facebook_dms SET status = 'Sent' WHERE id IN (" + id_list_str + ")"
     mycursor.execute(query)
@@ -222,9 +254,9 @@ def change_message_status_to_sent(messages):
 
 def main():
 
-    fb_email = "korman.ajla115@gmail.com"
-    fb_password = "lalesuzute115"
-    fb_username = "suada.korman"
+    # fb_email = "korman.ajla115@gmail.com"
+    # fb_password = "lalesuzute115"
+    # fb_username = "suada.korman"
 
     messages = get_scheduled_messages()
     messages = tuple(messages)
@@ -237,26 +269,36 @@ def main():
                 "sender" : message[0],
                 "password" : message[1],
                 "port" : message[4],
-                "messages" : [(message[2], message[3])]
+                "messages" : [(message[2], message[3], message[5])]
             })
         else:
             index = find(dms_to_send, "sender", message[0])
-            dms_to_send[index]["messages"].append((message[2], message[3]))
+            dms_to_send[index]["messages"].append((message[2], message[3], message[5]))
+        print(message)
 
     threads = []
-    counter = 0
+    all_successfully_sent_messages = []
 
     for sender in dms_to_send:
-        threads.append(threading.Thread(target=send_bulk_dms, args=(sender,)))
-        threads[counter].start()
-        counter += 1
+        thread = threading.Thread(target=lambda s=sender: all_successfully_sent_messages.extend(send_bulk_dms(s)))
+        threads.append(thread)
+        thread.start()
 
     for thread in threads:
         thread.join()
 
-    change_message_status_to_sent(messages)
+    change_message_status_to_sent(all_successfully_sent_messages)
+    print("All scheduled messages are successfully sent.")
 
-    print("Sending of all messages is completely done.")
+
+    # for sender in dms_to_send:
+    #     threads.append(threading.Thread(target=send_bulk_dms, args=(sender,)))
+    #     threads[counter].start()
+    #     counter += 1
+
+    # for thread in threads:
+    #     thread.join()
+
 
 if __name__ == "__main__":
 

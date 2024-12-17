@@ -294,7 +294,6 @@ def main():
         print(message)
 
     threads = []
-    counter = 0
 
     all_successfully_sent_messages = []
 
